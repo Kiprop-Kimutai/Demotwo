@@ -1,0 +1,18 @@
+/*
+ * common_includes.h
+ *
+ *  Created on: Oct 26, 2018
+ *      Author: linux
+ */
+
+#ifndef COMMON_INCLUDES_H_
+#define COMMON_INCLUDES_H_
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "utilities/lcd.h"
+
+
+#endif /* COMMON_INCLUDES_H_ */
