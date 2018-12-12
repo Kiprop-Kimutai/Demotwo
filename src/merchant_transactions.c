@@ -1,5 +1,4 @@
 /*
- *
  * merchant_transactions.c
  *
  *  Created on: Dec 5, 2018

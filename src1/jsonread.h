@@ -8,7 +8,9 @@
 #ifndef JSONREAD_H_
 #define JSONREAD_H_
 /////main menu items
+#include "sgfplib.h"
 #include "json.h"
+#include "../src/utilities/cJSON.h"
 #include "jsonread.h"
 #include <stdio.h>   /* gets */
 #include <stdlib.h>  /* atoi, malloc */
@@ -20,7 +22,6 @@
 #include <directfb.h>
 
 #include "../src/utilities/lcd.h"
-#include "../src/utilities/sgfplib.h"
 #include "../src/utilities/uthash.h"
 #include "../src/utilities/uthash.h"
 
@@ -70,6 +71,7 @@ char currentid[50] , currentPID[50];
 
 char app_number[40];
 int online;
+
 
 char transactionstring[3000];
 char receiptlog[100];
@@ -142,7 +144,7 @@ char recptnum[100];
 void Printer_Fake_receipt(void);
 
 //
-void power_on_modem_device(void );
+void power_on_modem_device1(void );
 int single_biz_permit(void);
 
 void doit(char *text);
@@ -155,16 +157,26 @@ void display_image(void) ;
 	char bid[50];
 	char bcode[50];
 	char bdep[100];
-typedef struct configurations
-{
-	char IpAddress[50];
-	char portNumber[50];
-	char apn_username[50];
-	char apn_password[50];
-	char ppp_timeout[30];
-}
-ConfigFile;
-ConfigFile *myConfigurations;
+	typedef struct posuser
+	{
+		char posusername[50];
+		char posuserpin[50];
+		char posuserlevel[50];
+		int status;
+		char posuserid[30];
+	}
+	PosUserFile;
+	PosUserFile *myPosUser;
+	typedef struct configurations
+	{
+		char IpAddress[50];
+		char portNumber[50];
+		char apn_username[50];
+		char apn_password[50];
+		char ppp_timeout[30];
+	}
+	ConfigFile;
+	ConfigFile *myConfigurations;
 typedef struct bendetails
 {
 	BYTE imageBuffer2[405];
@@ -173,7 +185,7 @@ typedef struct bendetails
 	char dateofbirth[50];
 	char gender[50];
 	char middlename[30];
-	char documenttype[30];
+
 	//uint8_t fpbyte;
 	char fingerprint[500];
 }
@@ -302,8 +314,10 @@ int increament_read;
 /////sqlFunctions
 void sqlite_database_create_table(char *sql , char * Db);
 int sqlite_database_insert_into_table(char *sql ,char *Db) ;
+//int getDataFromServer (char * requestType , cJSON * request ,   int operation ,  char * endpoint);
 void read_database(char * sql,char * type);
 void create_all_table(void );
+
 
 
 //char * z_number_recieved;
@@ -322,14 +336,38 @@ int last_in_path;
 int flag_getting_pwd;
 int flag_new_line;
 int login_successful;
-int flag_online;
+int token_received;
 int flag_offline_login;
 int update_stopped;
 int number_of_z_transactions;
 int set_p;
 
 
+enum curlPostError
+{
+	CURL_FAILED_POST,
+	CURL_SUCCESS,
+	CURL_FAILED_SETUP
+};
 
+enum serverRequest
+{
+	REQUEST_POST
+};
+
+typedef struct
+{
+	char * transaction;
+	char * operators;
+	char * fileinfo;
+	char * getfile;
+	char * login;
+	char * uploadfile;
+	char * adminz;
+	char * landoperations;
+	/*char * ping;*/
+}endPoints ;
+ endPoints * endpoints;
 
 
 

@@ -488,7 +488,7 @@ void screen_header(void){
 
 	main_surface->SetFont(main_surface, font_16);
 	lcd_clean();
-	lcd_printf(ALG_CENTER, "DEMOAPP");
+	lcd_printf(ALG_CENTER, "SAFARICOM APP");
 	current_y = current_y -16;
 	//lcd_show_picture("images.jpg");
 	lcd_printf(ALG_CENTER, "___________________________");

@@ -24,6 +24,7 @@ const char menu[][100] = {
 		"SSL Server",
 		"SSL Client"
 };
+
 const char menu1[][100] = {
 		"Register Beneficiary",
 		"Transaction",
@@ -38,7 +39,7 @@ extern void register_ben(void);
 extern void my_account(void);
 extern void create_all_table();
 extern void Printer_Demo(void);
-extern int read_config();
+
 extern void set_innitial_configuratio();
 extern void ContactSmartCard_Demo(void);
 extern void ContactlessSmartCard_Demo(void);

@@ -3,6 +3,7 @@
 
 #include "../../src/utilities/JSON_checker.h"
 #include "../src/utilities/cJSON.h"
+#include "../src/utilities/send_online_request.h"
 #include "../src/utilities/lcd.h"
 #include "receipt.h"
 #include "main_old.h"

@@ -10,18 +10,18 @@
  *
  *************************************************************/
 
+#include "sgfplib.h"
 #include <stdio.h>
-#include "../src1/general_funtions_and_varaibles.h"
-#include "../src1/services.h"
+#include "general_funtions_and_varaibles.h"
+#include "services.h"
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
 #include "../src/utilities/keyboart.h"
 #include "../src/utilities/lcd.h"
-#include "../src1/jsonread.h"
-#include "../src1/main_old.h"
-#include "utilities/sgfplib.h"
+#include "jsonread.h"
+#include "main_old.h"
 //#include ""
 
 #define FALSE 0

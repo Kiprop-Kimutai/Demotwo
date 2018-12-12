@@ -30,44 +30,17 @@ extern int usleep (__useconds_t __useconds);
 int create_backup_db();
 
 void read_database_receiptlogs();
-/*static int callback(void *NotUsed, int argc, char **argv, char **azColName) {
- int i;
 
- char str[200];
- for (i = 0; i < argc; i++) {
- printf("Arg C :%d\n", argc);
- if(strcmp(azColName[i],"ID")==0)
- {
-
- strcpy(str, argv[i] ? argv[i] : "NULL");
- printf("%s",str);
- serviceCode = realloc(serviceCode, (  i + 1 ) * sizeof( char * ));
- serviceCode[i] = malloc( strlen( str) + 1 );
- strcpy( serviceCode[i], str);
- }
- strcpy(str, argv[i] ? argv[i] : "NULL");
- //if(strcmp(str,"NAME")==0)
- //{
- printf("%s",str);
- serviceName = realloc(serviceName, (  i + 1 ) * sizeof( char * ));
- serviceName[i] = malloc( strlen( str) + 1 );
- strcpy( serviceName[i], str);
- //}
- printf("\n");
- printf("\n");
- printf("%s = %s\n",serviceCode[i]);
-
- }
-
- return 0;
- }*/
 static int callback(void *data, int argc, char **argv, char **azColName) {
 	int i;
 	//fprintf(stderr, "%s: ", (const char*) data);
 	for (i = 0; i < argc; i++) {
-		printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
+		printf(" #######at callback %s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
 	}
+	/*if (strcmp(azColName[i], "login_userid") == 0)
+				CurrentUser.userid = atoi( str);*/
 	printf("\n");
+	increament_read++;
 	return 0;
 }
 static int callback_receiptlogs(void *data, int argc, char **argv, char **azColName) {
@@ -228,14 +201,9 @@ static int callbackServices(void *data, int argc, char **argv, char **azColName)
 
 static int callback1(void *data, int argc, char **argv, char **azColName) {
 	char str[1000];
-//(+billno+:+002282016551-0001+,+transactiontype+:+1+,+transactiondate+:+2014-12-04%2016:26:41+,+serviceid+:+1+,+subserviceid+:+7+,+paymentmethod+:+Cash+,+params+:(+Vehicle%20Reg+:+5+),+total+:+200+,+user+:+6+,+market+:+Nyamira+),(+billno+:+002282016551-0002+,+transactiontype+:+1+,+transactiondate+:+2014-12-04%2016:48:29+,+serviceid+:+1+,+subserviceid+:+7+,+paymentmethod+:+Cash+,+params+:(+Vehicle%20Reg+:+123+),+total+:+200+,+user+:+6+,+market+:+Nyamira+),(+billno+:+002282016551-0003+,+transactiontype+:+1+,+transactiondate+:+2014-12-04%2016:49:16+,+serviceid+:+1+,+subserviceid+:+76+,+paymentmethod+:+Cash+,+params+:(+ID%20NO+:+132+,+Customer%20Name+:+1+,+Customer%20Phone+:+1+,+Vehicle%20Reg+:+1+,+Colour+:+1+,+Animal%20Type+:+1+,+Name%20of%20Buyer+:+1+,+Location%20of%20Seller+:+1+,+Location%20of%20Buyer+:+1+,+:+1+),+total+:+1000+,+user+:+6+,+market+:+Nyamira+),(+billno+:+002282016551-0004+,+transactiontype+:+1+,+transactiondate+:+2014-12-04%2016:50:42+,+serviceid+:+1+,+subserviceid+:+76+,+paymentmethod+:+Cash+,+params+:(+ID%20NO+:+5+,+Customer%20Name+:+6+,+Customer%20Phone+:+6+,+Vehicle%20Reg+:+6+,+Colour+:+6+,+Animal%20Type+:+6+,+Name%20of%20Buyer+:+6+,+Location%20of%20Seller+:+6+,+Location%20of%20Buyer+:+6+,+:+6+),+total+:+1000+,+user+:+6+,+market+:+Nyamira+),(+billno+:+002282016551-0005+,+transactiontype+:+1+,+transactiondate+:+2014-12-04%2016:56:22+,+serviceid+:+2+,+subserviceid+:+26+,+paymentmethod+:+Cash+,+params+:(+ID%20NO+:+2+,+Customer%20Name+:+2+),+total+:+20+,+user+:+6+,+market+:+Nyamira+),(+billno+:+002282016551-0007+,+transactiontype+:+1+,+transactiondate+:+2014-12-04%2021:46:26+,+serviceid+:+1+,+subserviceid+:+7+,+paymentmethod+:+Cash+,+params+:(+Vehicle%20Reg+:+5+),+total+:+200+,+user+:+6+,+market+:+Nyamira+),(+billno+:+002282016551-0013+,+transactiontype+:+1+,+transactiondate+:+2014-12-04%2022:12:52+,+serviceid+:+1+,+subserviceid+:+7+,+paymentmethod+:+Cash+,+params+:(+Vehicle%20Reg+:+555+),+total+:+200+,+user+:+6+,+market+:+Nyamira+),(+billno+:+002282016551-0015+,+transactiontype+:+1+,+transactiondate+:+2014-12-04%2022:13:21+,+serviceid+:+1+,+subserviceid+:+7+,+paymentmethod+:+Cash+,+params+:(+Vehicle%20Reg+:+558+),+total+:+200+,+user+:+6+,+market+:+Nyamira+),(+billno+:+002282016551-0017+,+transactiontype+:+1+,+transactiondate+:+2014-12-04%2022:13:46+,+serviceid+:+1+,+subserviceid+:+7+,+paymentmethod+:+Cash+,+params+:(+Vehicle%20Reg+:+78+),+total+:+200+,+user+:+6+,+market+:+Nyamira+),(+billno+:+002282016551-0018+,+transactiontype+:+1+,+transactiondate+:+2014-12-04%2022:14:29+,+serviceid+:+2+,+subserviceid+:+19+,+paymentmethod+:+Cash+,+params+:(+ID%20NO+:+4+,+Customer%20Name+:+4+),+total+:+500+,+user+:+6+,+market+:+Nyamira+)&$$
-	//[{"id":76,"charge":"1000","param":"ID NO+NUMERIC*Customer Name+ALPHA*Customer Phone+NUMERIC*Vehicle Reg+ALPHA*Colour+ALPHA*Animal Type+ALPHA*Name of Buyer+ALPHA*Location of Seller+ALPHA*Location of Buyer+ALPHA*Location of Customer+ALPHA*ID NO of Seller+ALPHA*Name of Seller+ALPHA*Location+ALPHA*Sub-Location+ALPHA*Picture+ALPHA*qwertyuiop12+NUMERIC*Qwerty+NUMERIC*Port+ALPHA"}]
-
 
 
 	int i;
-	//fprintf(stderr, "%s: ", (const char*) data);
-
 
 
 	if(flag_getting_z  && !reading_params_for_z)
@@ -559,7 +527,9 @@ void  sqlite_database_create_table(char *sql ,char *Db) {
 	else if(strcmp(Db , "transaction")==0)
 		rc = sqlite3_open("vihiga.db", &db);
 	else if(strcmp(Db , "users_config")==0)
-		rc = sqlite3_open("users_config.db", &db);
+		rc = sqlite3_open("users_config.db", &db);//here
+	else if(strcmp(Db , "operator")==0)
+			rc = sqlite3_open("operator.db", &db);
 	else
 		return;
 
@@ -582,6 +552,49 @@ void  sqlite_database_create_table(char *sql ,char *Db) {
 	sqlite3_close(db);
 }
 
+static int callbackop(void *NotUsed, int argc, char **argv, char **azColName) {
+   int i;
+   for(i = 0; i<argc; i++) {
+      printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
+   }
+   printf("\n");
+   return 0;
+}
+
+int sqlite_insert_operator_into_table(char * sql, char *Db){
+
+	 sqlite3 *db;
+	   char *zErrMsg = 0;
+	   int rc;
+
+
+	   /* Open database */
+	   if(strcmp(Db , "operator")==0)
+	   			rc = sqlite3_open("operator.db", &db);
+
+	   if( rc ) {
+	      fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+	      return(0);
+	   } else {
+	      fprintf(stderr, "Opened database successfully\n");
+	   }
+
+	   /* Create SQL statement */
+
+
+	   /* Execute SQL statement */
+	   rc = sqlite3_exec(db, sql, callbackop, 0, &zErrMsg);
+
+	   if( rc != SQLITE_OK ){
+	      fprintf(stderr, "SQL error: %s\n", zErrMsg);
+	      sqlite3_free(zErrMsg);
+	   } else {
+	      fprintf(stdout, "Records created successfully\n");
+	   }
+	   sqlite3_close(db);
+	   return 0;
+}
+
 int sqlite_database_insert_into_table(char *sql ,char *Db)  {
 	sqlite3 *db;
 	char *zErrMsg = 0;
@@ -597,6 +610,8 @@ int sqlite_database_insert_into_table(char *sql ,char *Db)  {
 		rc = sqlite3_open("vihiga.db", &db);
 	else if(strcmp(Db , "users_config")==0)
 		rc = sqlite3_open("users_config.db", &db);
+	else if(strcmp(Db , "operator")==0)
+			rc = sqlite3_open("operator.db", &db);
 	else
 		return 1;
 
@@ -607,6 +622,8 @@ int sqlite_database_insert_into_table(char *sql ,char *Db)  {
 	}
 
 	/* Execute SQL statement */
+	if(strcmp(Db , "operator")==0)
+		rc = sqlite3_exec(db, sql, callback, (void*) data, &zErrMsg);
 	if(strcmp(Db , "transaction")==0)
 	rc = sqlite3_exec(db, sql, callback1, (void*) data, &zErrMsg);
 	if(strcmp(Db , "services")==0 || strcmp(Db , "users_config")==0)
@@ -643,6 +660,8 @@ void read_database(char * sql,char * Db) {
 			rc = sqlite3_open("vihiga.db", &db);
 		else if(strcmp(Db , "users_config")==0)
 			rc = sqlite3_open("users_config.db", &db);
+		else if(strcmp(Db , "operator")==0)
+			rc = sqlite3_open("operator.db", &db);
 
 
 		if (rc) {
@@ -654,7 +673,8 @@ void read_database(char * sql,char * Db) {
 		}
 		clear_arrays();
 		increament_read = 0;
-
+		if(strcmp(Db , "operator")==0)
+		rc = sqlite3_exec(db, sql, callback, (void*) data, &zErrMsg);
 		if(strcmp(Db , "transaction")==0)
 		rc = sqlite3_exec(db, sql, callback1, (void*) data, &zErrMsg);
 		if(strcmp(Db , "services")==0 || strcmp(Db , "users_config")==0)
@@ -721,157 +741,38 @@ void clear_arrays() {
 		serviceCode = 0;
 	}
 }
-/*void create_all_table() {
-	//(mac_address,username,billno,transactiontype,transactiondate,serviceid,paymentmethod,total,market)
+void create_all_table() {
+
 
 	char * transactiontable;
 	char * sbp_table;
 	char * paramtable;
 	char * Z_table;
 
+	//configs
 
+	char * operatortable;
+	char * netconf;
 	//Services
-	char * paramservices;
-	char * table_servicedtls;
-	char * log_path;
-	char * table_services;
-	char * table_subservices;
-	char * users_table;
-	char * voids_count;
 
 
-	transactiontable = "CREATE TABLE TRANSACTIONS("
-			"mac_address  		CHAR(50)    NOT NULL,"
-			"username     		CHAR(50)    NOT NULL,"
-			"billno 			CHAR(50) 	PRIMARY KEY     NOT NULL,"
-			"transactiontype   	INTEGER,"
-			"transactiondate   	TEXT ,"
-			"serviceid		   	TEXT ,"
-			"subserviceid		TEXT ,"
-			"rootservice		TEXT ,"
-			"servicename		TEXT ,"
-			"paymentmethod 	    TEXT,"
-			"paymentCode 	    TEXT," //change to mpesa code
-			"total  			REAL    NOT NULL,"
-			"user_id  			TEXT    NOT NULL,"	//z_data = (char *) malloc(100+1);
-			"market  			TEXT    NOT NULL,"
-			"voided_col  		TEXT    NOT NULL,"
-			"posted     		TEXT    NOT NULL,"
-			"Z_done  			TEXT    NOT NULL,"
-			"receipt_printed	TEXT 	NOT NULL"
-			");";
-	sqlite_database_create_table(transactiontable ,"transaction");
+	operatortable = "CREATE TABLE IF NOT EXISTS operator("
+					"firstname 	TEXT  PRIMARY KEY NOT NULL,"
+					" pin	   TEXT,"
+					"idnumber  TEXT ,"
+					"operaterlevel   TEXT );";
+			sqlite_database_create_table(operatortable,"operator");
 
-	transactiontable = "ALTER TABLE transactions ADD COLUMN z_posted REAL  DEFAULT 0;";
+			netconf = "CREATE TABLE IF NOT EXISTS netconf("
+				"ip 			TEXT   PRIMARY KEY NOT NULL,"
+				"port   	TEXT ,"
+				"protocol   		TEXT ,"
+				"timeout   TEXT ,"
+				"apnname   TEXT ,"
+				"password   TEXT );";
+		sqlite_database_create_table(netconf,"operator");
 
-	sqlite_database_create_table(transactiontable ,"transaction");
-
-	transactiontable = "ALTER TABLE transactions ADD COLUMN reprintCount REAL  DEFAULT 0;";
-
-	sqlite_database_create_table(transactiontable ,"transaction");
-
-	//strcpy(transactiontable,"");
-
-	sbp_table = "CREATE TABLE SBP_TX("
-			"mac_address  		CHAR(50)    NOT NULL,"
-			"username     		CHAR(50)    NOT NULL,"
-			"billno 			CHAR(50) 	PRIMARY KEY     NOT NULL,"
-			"transactiontype   	INTEGER,"
-			"transactiondate   	TEXT ,"
-			"bname		   	TEXT ,"
-			"bcode		TEXT ,"
-			"bid		TEXT ,"
-			"bdep		TEXT ,"
-			"app_number		TEXT ,"
-			"paymentmethod 	    TEXT,"
-			"paymentCode 	    TEXT,"
-			"total  			REAL    NOT NULL,"
-			"user_id  			TEXT    NOT NULL,"	//z_data = (char *) malloc(100+1);
-			"market  			TEXT    NOT NULL,"
-			"voided_col  		TEXT    NOT NULL,"
-			"posted     		TEXT    NOT NULL,"
-			"Z_done  			TEXT    NOT NULL,"
-			"receipt_printed	TEXT 	NOT NULL"
-			");";
-	sqlite_database_create_table(sbp_table ,"transaction");
-
-	voids_count = "CREATE TABLE voids_count("
-			"voidtransactiondate TEXT PRIMARY KEY NOT NULL,"
-			"voids   		REAL ,"
-			"reprintCount   		REAL "
-			");";
-	sqlite_database_create_table(voids_count,"users_config");
-
-	voids_count = "CREATE TABLE reprint_count("
-			"voidtransactiondate TEXT PRIMARY KEY NOT NULL,"
-			"voids   		REAL );";
-	sqlite_database_create_table(voids_count,"users_config");
-
-
-	paramtable = "CREATE TABLE PARAMS("
-			"billno 		CHAR(50)  NOT NULL,"
-			"name   		TEXT ,"
-			"Value		   	TEXT ,"
-			"ID		   	TEXT ,"
-			"PRIMARY KEY (billno,ID));";
-	sqlite_database_create_table(paramtable,"transaction");
-
-
-	Z_table = "CREATE TABLE Z_REPORTS("
-			"billno 		CHAR(50) 	PRIMARY KEY     NOT NULL,"
-			"Z_report   	TEXT ,"
-			"Printed		TEXT ,"
-			"Z_done		   	TEXT );";
-	sqlite_database_create_table(Z_table,"transaction");
-
-	log_path = "CREATE TABLE log_path("
-			"id 			CHAR(50) 	PRIMARY KEY     NOT NULL,"
-			"service_id  REAL); .mode column; .headers on;";
-	sqlite_database_create_table(log_path,"transaction");
-
-
-//[{"id":1,"serviceCode":"PAR","serviceName":"Parking"},{"id":2,"serviceCode":"MAR","serviceName":"Market"},{"id":3,"serviceCode":"EPARK","serviceName":"Entry Park"},{"id":4,"serviceCode":"TEST","serviceName":"Test Folder"},{"id":5,"serviceCode":"TEST2","serviceName":"Test Folder 2"}]
-
-	///Offline
-	paramservices = "CREATE TABLE IF NOT EXISTS PARAMS("
-			"id 			TEXT  PRIMARY KEY NOT NULL,"
-			"name   		TEXT ,"
-			"paramtype		TEXT );";
-	sqlite_database_create_table(paramservices,"services");
-
-	table_services = "CREATE TABLE IF NOT EXISTS SERVICES("
-			"id 				TEXT   PRIMARY KEY NOT NULL,"
-			"serviceCode   		TEXT ,"
-			"serviceName		TEXT );";
-	sqlite_database_create_table(table_services,"services");
-
-
-	////{"id":273,"charge":"50.00","param":"4"
-	table_servicedtls = "CREATE TABLE IF NOT EXISTS SERVICEDTLS("
-			"id 				TEXT   PRIMARY KEY NOT NULL,"
-			"charge 	   		TEXT ,"
-			"params		 		TEXT );";
-	sqlite_database_create_table(table_servicedtls,"services");
-
-	//{"id":7,"parentType":0,"parentId":1,"level":-1,"name":"Truck"}
-	table_subservices = "CREATE TABLE IF NOT EXISTS SUBSERVICES("
-			"id 			TEXT   PRIMARY KEY NOT NULL,"
-			"parentType   	TEXT ,"
-			"parentId   	TEXT ,"
-			"level   		TEXT ,"
-			"name			TEXT );";
-	sqlite_database_create_table(table_subservices,"services");
-
-	table_subservices = "CREATE TABLE IF NOT EXISTS messages("
-			"id 			TEXT   PRIMARY KEY NOT NULL,"
-			"number_from   	TEXT ,"
-			"message   		TEXT ,"
-			"Date_recieved   TEXT ,"
-			"message_read   Real ,"
-			"messsage_rep   Real );";
-	sqlite_database_create_table(table_subservices,"users_config");
-
-	users_table = "CREATE TABLE IF NOT EXISTS users("
+/*	users_table = "CREATE TABLE IF NOT EXISTS users("
 			"benfid  		TEXT  PRIMARY KEY NOT NULL,"
 			"firstname   	TEXT ,"
 			"lastname   	TEXT ,"
@@ -880,144 +781,48 @@ void clear_arrays() {
 			"gender		TEXT ,"
 			"Address			TEXT ,"
 			");";
-	sqlite_database_create_table(users_table,"users_config");
-	*
+	sqlite_database_create_table(users_table,"users_config");*/
+	/*
 	 * chmod is a linux command for change mode
 	 * changes mode in which files are accessed
-	 * below command gives users,group and others permission to read,write and execute all db files
+	 * below command gives users,group and others permission to read,write and execute all db files*/
 
 	system("chmod 777 *.db");
-}*/
-void create_all_table() {
-	//(mac_address,username,billno,transactiontype,transactiondate,serviceid,paymentmethod,total,market)
+}
 
-	char * transactiontable;
-	char * sbp_table;
-	char * paramtable;
-	char * Z_table;
+/*void create_all_table() {
 
 
-	//Services
-	char * parentservices;
-	char * subservices;
-	char * paramservices;
-	char * table_servicedtls;
-	char * log_path;
-	char * table_services;
-	char * table_subservices;
+
+	char * configurations;
 	char * users_table;
-	char * voids_count;
-	char * receipt_logs;
 
 
-	transactiontable = "CREATE TABLE TRANSACTIONS("
-			"mac_address  		CHAR(50)    NOT NULL,"
-			"username     		CHAR(50)    NOT NULL,"
-			"billno 			CHAR(50) 	PRIMARY KEY     NOT NULL,"
-			"transactiontype   	INTEGER,"
-			"transactiondate   	TEXT ,"
-			"serviceid		   	TEXT ,"
-			"subserviceid		TEXT ,"
-			"rootservice		TEXT ,"
-			"servicename		TEXT ,"
-			"paymentmethod 	    TEXT,"
-			"paymentCode 	    TEXT,"
-			"total  			REAL    NOT NULL,"
-			"user_id  			TEXT    NOT NULL,"	//z_data = (char *) malloc(100+1);
-			"market  			TEXT    NOT NULL,"
-			"voided_col  		TEXT    NOT NULL,"
-			"posted     		TEXT    NOT NULL,"
-			"Z_done  			TEXT    NOT NULL,"
-			"receipt_printed	TEXT 	NOT NULL"
-
-			");";
-	sqlite_database_create_table(transactiontable ,"transaction");
-
-	//strcpy(transactiontable,"");
-
-	/*sbp_table = "CREATE TABLE SBP_TX("
-			"mac_address  		CHAR(50)    NOT NULL,"
-			"username     		CHAR(50)    NOT NULL,"
-			"billno 			CHAR(50) 	PRIMARY KEY     NOT NULL,"
-			"transactiontype   	INTEGER,"
-			"transactiondate   	TEXT ,"
-			"bname		   	TEXT ,"
-			"bcode		TEXT ,"
-			"bid		TEXT ,"
-			"bdep		TEXT ,"
-			"app_number		TEXT ,"
-			"paymentmethod 	    TEXT,"
-			"paymentCode 	    TEXT,"
-			"total  			REAL    NOT NULL,"
-			"user_id  			TEXT    NOT NULL,"	//z_data = (char *) malloc(100+1);
-			"market  			TEXT    NOT NULL,"
-			"voided_col  		TEXT    NOT NULL,"
-			"posted     		TEXT    NOT NULL,"
-			"Z_done  			TEXT    NOT NULL,"
-			"receipt_printed	TEXT 	NOT NULL"
-			");";
-	sqlite_database_create_table(sbp_table ,"transaction");*/
-
-	/*voids_count = "CREATE TABLE voids_count("
-			"voidtransactiondate TEXT PRIMARY KEY NOT NULL,"
-			"voids   		REAL );";
-	sqlite_database_create_table(voids_count,"users_config");*/
 
 
-	/*paramtable = "CREATE TABLE PARAMS("
-			"billno 		CHAR(50)  NOT NULL,"
-			"name   		TEXT ,"
-			"Value		   	TEXT ,"
-			"ID		   	TEXT ,"
-			"PRIMARY KEY (billno,ID));";
-	sqlite_database_create_table(paramtable,"transaction");*/
+	configurations = "CREATE TABLE IF NOT EXISTS configurations("
+			"server_ip  		TEXT  PRIMARY KEY NOT NULL,"
+			"server_port   	TEXT ,"
+			"protocol   	TEXT ,"
+			"apn_name   	    TEXT ,"
+			"password	TEXT ,"
+			"timeout    	TEXT);";
+	sqlite_database_create_table(configurations,"device_configs");
 
 
-/*	Z_table = "CREATE TABLE Z_REPORTS("
-			"billno 		CHAR(50) 	PRIMARY KEY     NOT NULL,"
-			"Z_report   	TEXT ,"
-			"Printed		TEXT ,"
-			"Z_done		   	TEXT );";
-	sqlite_database_create_table(Z_table,"transaction");*/
-
-	/*log_path = "CREATE TABLE log_path("
-			"id 			CHAR(50) 	PRIMARY KEY     NOT NULL,"
-			"service_id  REAL); .mode column; .headers on;";
-	sqlite_database_create_table(log_path,"transaction");*/
+	configurations = "CREATE TABLE IF NOT EXISTS configs("
+				"serverip  		TEXT  PRIMARY KEY NOT NULL,"
+				"serverport   	TEXT ,"
+				"protocol   	TEXT ,"
+				"apnname   	TEXT ,"
+				"password			TEXT ,"
+				"timeout		TEXT   );";
+		sqlite_database_create_table(configurations,"device_configs");
 
 
-//[{"id":1,"serviceCode":"PAR","serviceName":"Parking"},{"id":2,"serviceCode":"MAR","serviceName":"Market"},{"id":3,"serviceCode":"EPARK","serviceName":"Entry Park"},{"id":4,"serviceCode":"TEST","serviceName":"Test Folder"},{"id":5,"serviceCode":"TEST2","serviceName":"Test Folder 2"}]
-
-	///Offline
-/*	paramservices = "CREATE TABLE IF NOT EXISTS PARAMS("
-			"id 			TEXT  PRIMARY KEY NOT NULL,"
-			"name   		TEXT ,"
-			"paramtype		TEXT );";
-	sqlite_database_create_table(paramservices,"services");*/
-
-	/*table_services = "CREATE TABLE IF NOT EXISTS SERVICES("
-			"id 				TEXT   PRIMARY KEY NOT NULL,"
-			"serviceCode   		TEXT ,"
-			"serviceName		TEXT );";
-	sqlite_database_create_table(table_services,"services");*/
 
 
-	////{"id":273,"charge":"50.00","param":"4"
-	/*table_servicedtls = "CREATE TABLE IF NOT EXISTS SERVICEDTLS("
-			"id 				TEXT   PRIMARY KEY NOT NULL,"
-			"charge 	   		TEXT ,"
-			"params		 		TEXT );";
-	sqlite_database_create_table(table_servicedtls,"services");*/
 
-	//{"id":7,"parentType":0,"parentId":1,"level":-1,"name":"Truck"}
-/*	table_subservices = "CREATE TABLE IF NOT EXISTS SUBSERVICES("
-			"id 			TEXT   PRIMARY KEY NOT NULL,"
-			"parentType   	TEXT ,"
-			"parentId   	TEXT ,"
-			"level   		TEXT ,"
-			"name			TEXT );";
-	sqlite_database_create_table(table_subservices,"services");*/
-//read_database
 	users_table = "CREATE TABLE IF NOT EXISTS users("
 			"benfid  		TEXT  PRIMARY KEY NOT NULL,"
 			"firstname   	TEXT ,"
@@ -1027,13 +832,8 @@ void create_all_table() {
 			"gender		TEXT   );";
 	sqlite_database_create_table(users_table,"users_config");
 
-	/*receipt_logs = "CREATE TABLE IF NOT EXISTS receipt_logs("
-			"receipt_no 			TEXT   PRIMARY KEY NOT NULL,"
-			"amount  	TEXT ,"
-			"date   	TEXT );";
-	sqlite_database_create_table(receipt_logs,"transaction");*/
 	system("chmod 777 *.db");
-}
+}*/
 
 void x_report() {
 	char * tottal_num =
@@ -1413,3 +1213,5 @@ void reprint_receipt( int type)
 
 
 }
+
+

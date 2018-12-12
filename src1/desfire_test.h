@@ -8,7 +8,7 @@
 #ifndef SRC_DESFIRE_TEST_H_
 #define SRC_DESFIRE_TEST_H_
 #include "../src/utilities/keyboart.h"
-#include "../src/utilities/sgfplib.h"
+#include "sgfplib.h"
 //#include "seos.h"
 
 enum apps{

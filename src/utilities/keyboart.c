@@ -121,6 +121,337 @@ void transaction1(int argc, char *argv[]){
 	}
 	//}
 }
+
+void set_innitial_configuration() {
+	int  ret;
+	int change_made =0;
+
+	char getCharacters[40];
+	char getCharacters1[40];
+	char name1[130];
+	char name[100];
+
+	strcpy(name1, "");
+
+
+//Setting IP address
+		do
+		{
+
+			strcpy(name, "Enter Enter IP address");
+					strcpy(name1, "Current IP address");
+
+					ret = kb_getStringtwo(ALPHA_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"Configurations", 1);
+
+
+		if( isValidIpAddress(getCharacters))
+		{
+			change_made =1;
+			strcpy(myConfigurations->IpAddress, getCharacters);
+		}
+
+		else if(ret==-1 && strlen(myConfigurations->IpAddress)>0 )
+		{
+			break;
+		}
+		else if(ret==-1 && strlen(myConfigurations->IpAddress) == 0 )
+		{
+			message_display_function(1,"","IP Address Config", "Ip address must be set . Please try again", (char *)NULL);
+			kb_getkey();
+		}
+		else
+		{
+
+			message_display_function(1,"","IP Address Config", "Invalid IP address. Please check IP and try again", (char *)NULL);
+			kb_getkey();
+
+		}
+		}while(strlen(myConfigurations->IpAddress)==0 );
+
+//Setting port number
+		do
+		{
+			strcpy(name, "Enter port number");
+			ret = kb_getStringtwo(NUM_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"Configurations", 1);
+		if( is_valid_int(getCharacters))
+		{
+			change_made =1;
+			strcpy(myConfigurations->portNumber, getCharacters);
+		}
+		else if(ret==-1 && strlen(myConfigurations->portNumber)>0 )
+		{
+			break;
+		}
+		else if(ret==-1 && strlen(myConfigurations->portNumber) == 0 )
+		{
+			message_display_function(1,"","Port number Config", "Port number must be set . Please try again. ", (char *)NULL);
+			kb_getkey();
+
+		}
+		else
+		{
+			message_display_function(1,"","Port number Config", "Invalid port number . Please enter a numeric value.", (char *)NULL);
+			kb_getkey();
+
+		}
+		}while(strlen(myConfigurations->portNumber)==0 );
+
+//Setting APN username
+		do
+		{
+			strcpy(name, "Enter APN username");
+			ret = kb_getStringtwo(ALPHA_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"Configurations", 1);
+		if(ret !=-1)
+		{
+			change_made =1;
+			strcpy(myConfigurations->apn_username, getCharacters);
+		}
+
+		if(ret==-1 && strlen(myConfigurations->apn_username)>0 )
+		{
+			break;
+		}
+		else if(ret==-1 && strlen(myConfigurations->apn_username) == 0 )
+		{
+			message_display_function(1,"","APN username Config", "APN Username must be set. Please enter a numeric value.", (char *)NULL);
+			kb_getkey();
+
+		}
+
+		}while(strlen(myConfigurations->apn_username)==0 );
+
+	//Setting  APN password
+		strcpy(name, "Enter APN password");
+		do
+		{
+			printf("in password\n");
+			ret = kb_getStringtwo(ALPHA_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"Configurations", 1);
+		if(ret != -1)
+		{
+			change_made =1;
+			strcpy(myConfigurations->apn_password, getCharacters);
+		}
+
+		if(ret==-1 && strlen(myConfigurations->apn_password)>0 )
+		{
+			break;
+		}
+		else if(ret==-1 && strlen(myConfigurations->apn_password) == 0 )
+		{
+			message_display_function(1,"","APN password Config", "APN password must be set. Please enter a numeric value.", (char *)NULL);
+			kb_getkey();
+
+		}
+
+		}while(strlen(myConfigurations->apn_password)==0 );
+		printf("after username\n");
+
+		//setting PP timeout
+
+		strcpy(name, "Enter IP PPP time out");
+		do
+		{
+			ret = kb_getStringtwo(NUM_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"Configurations", 1);
+		if( is_valid_int(getCharacters))
+		{
+			change_made =1;
+			strcpy(myConfigurations->ppp_timeout, getCharacters);
+		}
+		else if(ret==-1 && strlen(myConfigurations->ppp_timeout)>0 )
+		{
+			break;
+		}
+		else if(ret==-1 && strlen(myConfigurations->ppp_timeout) == 0 )
+		{
+			message_display_function(1,"","PPP timeout Config", "PPP timeout number must be set. Please enter a numeric value.", (char *)NULL);
+			kb_getkey();
+		}
+		else
+		{
+			message_display_function(1,"","PPP timeout Config", "Invalid PPP timeout value. Please enter a numeric value.", (char *)NULL);
+			kb_getkey();
+
+		}
+		}while(strlen(myConfigurations->ppp_timeout)==0 );
+
+
+	if(change_made)
+		save_configarations();
+	else
+	{
+		message_display_function(1,"","Configuration Alert", "No configuration have \n been changed.", (char *)NULL);
+		kb_getkey();
+
+	}
+
+
+}
+
+/*void create_pos_users() {
+	int  ret;
+	int change_made =0;
+
+	char getCharacters[40];
+	char getCharacters1[40];
+	char name1[130];
+	char name[100];
+
+	strcpy(name1, "");
+
+
+//Setting IP address
+		do
+		{
+
+			strcpy(name, "Enter Enter IP address");
+					strcpy(name1, "Current IP address");
+
+					ret = kb_getStringtwo(ALPHA_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"Configurations", 1);
+
+
+		if( isValidIpAddress(getCharacters))
+		{
+			change_made =1;
+			strcpy(myConfigurations->IpAddress, getCharacters);
+		}
+
+		else if(ret==-1 && strlen(myConfigurations->IpAddress)>0 )
+		{
+			break;
+		}
+		else if(ret==-1 && strlen(myConfigurations->IpAddress) == 0 )
+		{
+			message_display_function(1,"","IP Address Config", "Ip address must be set . Please try again", (char *)NULL);
+			kb_getkey();
+		}
+		else
+		{
+
+			message_display_function(1,"","IP Address Config", "Invalid IP address. Please check IP and try again", (char *)NULL);
+			kb_getkey();
+
+		}
+		}while(strlen(myConfigurations->IpAddress)==0 );
+
+//Setting port number
+		do
+		{
+			strcpy(name, "Enter port number");
+			ret = kb_getStringtwo(NUM_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"Configurations", 1);
+		if( is_valid_int(getCharacters))
+		{
+			change_made =1;
+			strcpy(myConfigurations->portNumber, getCharacters);
+		}
+		else if(ret==-1 && strlen(myConfigurations->portNumber)>0 )
+		{
+			break;
+		}
+		else if(ret==-1 && strlen(myConfigurations->portNumber) == 0 )
+		{
+			message_display_function(1,"","Port number Config", "Port number must be set . Please try again. ", (char *)NULL);
+			kb_getkey();
+
+		}
+		else
+		{
+			message_display_function(1,"","Port number Config", "Invalid port number . Please enter a numeric value.", (char *)NULL);
+			kb_getkey();
+
+		}
+		}while(strlen(myConfigurations->portNumber)==0 );
+
+//Setting APN username
+		do
+		{
+			strcpy(name, "Enter APN username");
+			ret = kb_getStringtwo(ALPHA_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"Configurations", 1);
+		if(ret !=-1)
+		{
+			change_made =1;
+			strcpy(myConfigurations->apn_username, getCharacters);
+		}
+
+		if(ret==-1 && strlen(myConfigurations->apn_username)>0 )
+		{
+			break;
+		}
+		else if(ret==-1 && strlen(myConfigurations->apn_username) == 0 )
+		{
+			message_display_function(1,"","APN username Config", "APN Username must be set. Please enter a numeric value.", (char *)NULL);
+			kb_getkey();
+
+		}
+
+		}while(strlen(myConfigurations->apn_username)==0 );
+
+	//Setting  APN password
+		strcpy(name, "Enter APN password");
+		do
+		{
+			printf("in password\n");
+			ret = kb_getStringtwo(ALPHA_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"Configurations", 1);
+		if(ret != -1)
+		{
+			change_made =1;
+			strcpy(myConfigurations->apn_password, getCharacters);
+		}
+
+		if(ret==-1 && strlen(myConfigurations->apn_password)>0 )
+		{
+			break;
+		}
+		else if(ret==-1 && strlen(myConfigurations->apn_password) == 0 )
+		{
+			message_display_function(1,"","APN password Config", "APN password must be set. Please enter a numeric value.", (char *)NULL);
+			kb_getkey();
+
+		}
+
+		}while(strlen(myConfigurations->apn_password)==0 );
+		printf("after username\n");
+
+		//setting PP timeout
+
+		strcpy(name, "Enter IP PPP time out");
+		do
+		{
+			ret = kb_getStringtwo(NUM_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"Configurations", 1);
+		if( is_valid_int(getCharacters))
+		{
+			change_made =1;
+			strcpy(myConfigurations->ppp_timeout, getCharacters);
+		}
+		else if(ret==-1 && strlen(myConfigurations->ppp_timeout)>0 )
+		{
+			break;
+		}
+		else if(ret==-1 && strlen(myConfigurations->ppp_timeout) == 0 )
+		{
+			message_display_function(1,"","PPP timeout Config", "PPP timeout number must be set. Please enter a numeric value.", (char *)NULL);
+			kb_getkey();
+		}
+		else
+		{
+			message_display_function(1,"","PPP timeout Config", "Invalid PPP timeout value. Please enter a numeric value.", (char *)NULL);
+			kb_getkey();
+
+		}
+		}while(strlen(myConfigurations->ppp_timeout)==0 );
+
+
+	if(change_made)
+		save_configarations();
+	else
+	{
+		message_display_function(1,"","Configuration Alert", "No configuration have \n been changed.", (char *)NULL);
+		kb_getkey();
+
+	}
+
+
+}*/
+/*
 void set_innitial_configuration() {
 	int  ret;
 	int change_made =0;
@@ -132,9 +463,12 @@ void set_innitial_configuration() {
 
 	strcpy(name1, "");
 
+
+
 	//Setting IP address
 	do
 	{
+		printf("Segments>>222222>>>\n");
 		strcpy(name, "Enter FirstName");
 		//kb_getString(ALPHA_IN, 1, 16,getCharacters , NULL, name);
 		ret = kb_getStringtwo(ALPHA_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"Register Beneficiary", 1);
@@ -281,7 +615,9 @@ void set_innitial_configuration() {
 
 
 }
-/*
+
+*/
+
 void register_ben(int argc, char *argv[]){
 	int ret;
 	int change_made =0;
@@ -430,7 +766,7 @@ void register_ben(int argc, char *argv[]){
 
 }
 
-*/
+
 void my_account(int argc, char *argv[]){
 	int ret;
 	int change_made =0;
@@ -872,6 +1208,9 @@ int kb_getString(uint8_t ucMode, uint8_t ucMinlen, uint8_t ucMaxlen,
 					szWorkBuff[iLen - 1] = pszAlphaSmall[iLastKey][iIndex];
 				}
 			}
+
+
+
 			else if(strcmp(mode_in, "Caps:ON")==0)
 			{
 				iIndex = (iIndex + 1) % strlen(pszAlphaCaps[iLastKey]);

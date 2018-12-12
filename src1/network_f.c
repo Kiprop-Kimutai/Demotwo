@@ -17,9 +17,10 @@
 #include <posapi.h>
 #include <arpa/inet.h>
 #include "ppp.h"
-
+#include "../src/utilities/send_online_request.h"
 #include "../src/utilities/keyboart.h"
 #include "../src/utilities/lcd.h"
+
 
 void change_password(void );
 int getRandoms();
@@ -162,15 +163,18 @@ int read_config() {
 	int counter;
 	char buffer_int[100];
 	int changes_made =0;
-
+/*	FILE *f;
+	//system("mv config.cfg config.cfg.bak");
+	f = fopen("config.cfg", "w");*/
 	myConfigurations = (ConfigFile *) malloc(sizeof(ConfigFile));
+
 	if (!myConfigurations)
 		return -1;
 	config_fp = fopen("config.cfg", "r");
 
 	if (config_fp == NULL)
 	{
-		//printf("Error Openning the file\n");
+		printf("Error Openning the file\n");
 		set_innitial_configuration();
 		return 1;
 	}
@@ -597,7 +601,7 @@ void change_configuration(int type) {
 			flag_offline_login = 0;
 			login_successful = 0 ;
 			logged_offline = 0;
-			power_on_modem_device();
+			power_on_modem_device(myConfigurations->apn_username,myConfigurations->apn_password,myConfigurations->ppp_timeout);
 			if(flag_online)
 			{
 				message_display_function(1,"","Network Mode  ", "The POS shall operate in online mode . Please login again", (char *)NULL);

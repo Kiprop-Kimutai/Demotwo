@@ -3184,7 +3184,7 @@ void load_image_for_screen(IDirectFB *dfb, const char *filename ,IDirectFBSurfac
 	err = dfb->CreateImageProvider(dfb, filename, &provider);
 	if (err != DFB_OK) {
 		fprintf( stderr, "Couldn't load image from file '%s': %s\n", filename,DirectFBErrorString(err));
-		return NULL;
+		return;
 	}
 	DFBCHECK (main_surface->GetSize (main_surface, &screen_width, &screen_height));
 	provider->GetSurfaceDescription(provider, &dsc);

@@ -4,7 +4,7 @@
 #include <sys/time.h>
 #include <curl/curl.h>
 #include <stdlib.h>
-
+#include "../src/utilities/send_online_request.h"
 #include "../src/utilities/keyboart.h"
 #include "../src/utilities/lcd.h"
 #include "receipt.h"
@@ -15,7 +15,7 @@
 void start_ppp_sess(void);
 int starting_time= 1,retval;
 pthread_t tidx,tidx1;
-char gprs_chat_file[] = { "ABORT          'NO CARRIER'" "\n"
+char gprs_chat_file1[] = { "ABORT          'NO CARRIER'" "\n"
 		"ABORT          'NO DIALTONE'" "\n"
 		"ABORT          'ERROR'" "\n"
 		"ABORT          'NO ANSWER'" "\n"
@@ -219,7 +219,7 @@ void* threader1(void *arg)
 	return NULL;
 }
 
-void start_ppp_session(char * requestType, char* request) {
+void start_ppp_session2(char * requestType, char* request) {
 	CURL *curl;
 	CURLcode res;
 	char filename[100];
@@ -265,7 +265,7 @@ void start_ppp_session(char * requestType, char* request) {
 		lcd_flip();
 		int wnet_reset();
 		wnet_power_down();
-		power_on_modem_device();
+		power_on_modem_device(myConfigurations->apn_username, myConfigurations->apn_password, myConfigurations->ppp_timeout);
 		//start_ppp_sess();
 		retval = ppp_check("/var/mux1");
 		if (0 != retval) {
@@ -453,7 +453,7 @@ void start_ppp_session1(char* request) {
 void start_ppp_sess() {
 	int retval;
 	retval = 0;
-	retval = ppp_open("/var/mux1", gprs_chat_file,
+	retval = ppp_open("/var/mux1", gprs_chat_file1,
 			myConfigurations->apn_username, myConfigurations->apn_password,
 			PPP_ALG_PAP, myConfigurations->apn_password);
 	if (0 != retval) {
@@ -557,94 +557,6 @@ void power_on_modem_device() {
 }
 */
 
-void power_on_modem_device() {
-
-	int retval = 0;
-
-	if(fag_start_ppp_session)
-	{
-
-		screen_header();
-		lcd_printf(ALG_CENTER, "Starting Modem ...");
-		lcd_printf(ALG_CENTER, "Please wait ...");
-		lcd_flip();
-	retval = wnet_power_on();
-	}
-
-
-
-	if (0 != retval) {
-		printf("Hello 1\n");
-		flag_online = 0;
-		//message_display_function("Error" , "GSM module failed to start \n Please restart the POS");
-		//kb_getkey();
-	} else {
-		printf("Hello 1\n");
-		//lcd_flip();
-		retval = wnet_init("/var/mux0");
-		if (0 != retval) {
-			printf("Hello 2\n");
-			//message_display_function("Error" , "Network initialization failed \n Please check SIM and restart the POS");
-			//kb_getkey();
-		} else {
-			printf("Hello 3\n");
-			gettimeofday(&start, &tz);
-			diff.tv_sec =20;
-			diff.tv_usec = 0;
-			timeradd(&start, &diff, &end);
-
-			//lcd_flip();
-
-			while (1) {
-				printf("Hello 4\n");
-
-				retval = wnet_set_attached(1);
-				if (0 != retval) {
-					gettimeofday(&cur, &tz);
-
-					message_display_function(1, "","Error" , "Network initialization failed \n Please insert SIM and restart the POS", (char *)NULL);
-					kb_getkey();
-					if (timercmp(&cur, &end, <))
-						usleep(1000);
-					else {
-						printf("Hello 5\n");
-						break;
-					}
-					break;
-				} else
-				{
-					printf("Hello 6\n");
-					retval = ppp_open("/var/mux1", gprs_chat_file,myConfigurations->apn_username,  myConfigurations->apn_password, PPP_ALG_PAP, 30);
-					if (0 != retval){
-						flag_online = 1;
-					}
-					else
-					{
-						sleep(5);
-						retval = ppp_open("/var/mux1", gprs_chat_file,myConfigurations->apn_username,  myConfigurations->apn_password, PPP_ALG_PAP, 30);
-
-						if (0 != retval){
-							flag_online = 1;
-						}
-						else
-						{
-						message_display_function(1,"","Modem Error ", "Failed to innitialize the PPP session . The POS shall operate in offline mode", (char *)NULL);
-						kb_getkey();
-						flag_online = 0;
-						}
-					}
-				}
-					break;
-			}
-
-			if (0 == retval) {
-				//online_mode=1;
-			}
-		}
-
-		//wnet_power_down();
-	}
-}
 
 void gprs_demo() {
 
@@ -706,7 +618,7 @@ void gprs_demo() {
 
 				//lcd_flip();
 
-				retval = ppp_open("/var/mux1", gprs_chat_file,
+				retval = ppp_open("/var/mux1", gprs_chat_file1,
 						myConfigurations->apn_username,
 						myConfigurations->apn_password, PPP_ALG_PAP,
 						myConfigurations->ppp_timeout);

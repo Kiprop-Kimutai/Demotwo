@@ -10,10 +10,12 @@ int flag_getting_pwd;
 int flag_getting_pwd1;
 int flag_getting_pwd2;
 int login_successful;
+int user_found_true;
 char * key_board_title;
 #include <stdint.h>
 
 int add_message_below_input;
+void create_pos_users();
 //Functions and methods
 //int kb_getString(uint8_t ucMode, uint8_t ucMinlen, uint8_t ucMaxlen,char *pszOut, const char *ch, char *charact);
 int kb_getStringtwo(uint8_t ucMode, uint8_t ucMode1,  uint8_t ucMinlen, uint8_t ucMaxlen,char *pszOut,char *pszOut1 ,  const char *ch, char *charact, char *charact2, char * title , int display_string_below);
