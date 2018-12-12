@@ -101,7 +101,8 @@ void transaction1(int argc, char *argv[]){
 
 				lcd_flip();
 				kb_getkey();
-				fplib_test(1);
+				//Removed JT
+				//fplib_test(1);
 			}
 
 
@@ -449,7 +450,9 @@ void my_account(int argc, char *argv[]){
 	{
 
 		//Get  Beneficiary fingerprint
-		if(fplib_test(1))
+		//Removed JT
+		//if(fplib_test(1))
+		if(1)
 		{
 			//printf("You know what here it is\n " );
 			//printf(">>>>>>>JSON %s\n", cJSON_Print(txToPosted));

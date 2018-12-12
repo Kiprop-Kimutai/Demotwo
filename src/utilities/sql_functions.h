@@ -18,7 +18,7 @@ char  **  sql_data;
 int sql_row_count , sql_collumn_count , sql_data_count;
 
 void  sqlite_database_create_table_function(char *sql ,char *Db);
-int sqlite_database_read_write_operation(char *sql ,char *Db ,   char **ret_data);
+int sqlite_database_read_write_operation(char *sql ,char *Db );
 
 
 #endif /* SRC_UTILITIES_SQL_FUNCTIONS_H_ */

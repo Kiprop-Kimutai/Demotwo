@@ -75,7 +75,7 @@ void  sqlite_database_create_table_function(char *sql ,char *Db) {
 	sqlite3_close(db);
 }
 
-int sqlite_database_read_write_operation(char *sql ,char *Db ,  char **ret_data )  {
+int sqlite_database_read_write_operation(char *sql ,char *Db  )  {
 	sqlite3 *db;
 	char *zErrMsg = 0;
 	int rc;

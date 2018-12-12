@@ -13,6 +13,8 @@
 #include <string.h>
 
 #include "utilities/lcd.h"
+#include "utilities/sql_functions.h"
+#include "database.h"
 
 
 #endif /* COMMON_INCLUDES_H_ */

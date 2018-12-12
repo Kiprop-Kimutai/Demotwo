@@ -172,7 +172,7 @@ int main_old(int argc, char *argv[]){
 		switch (selected){
 			case 0:
 //				Display_Demo();
-				register_ben();
+				//register_ben();
 				//read_config();
 
 				break;

@@ -7,40 +7,51 @@
 
 #include <stdlib.h>
 #include "common_includes.h"
-#include "beneficiary_transactions.h"
+
 #include "../src/utilities/lcd.h"
 #include "utilities/keyboart.h"
 #include "utilities/cJSON.h"
 #include "fingerprint_reader.h"
 #include "../src1/desfire_test.h"
+//#include "utilities/sql_functions.h"
+//#include "database.h"
+#include "beneficiary_transactions.h"
 
+#include "utilities/common_functions.h"
 /*
  * Function to  register beneficiary
  */
 void register_beneficiary(void);
 
+/*
+ * Does transaction on the card
+ */
+void do_beneficiary_transaction( void);
+
 void beneficiary_transactions(void )
 {
 	int selected = 0;
-	const char  beneficiary_menu[][100] = {"Beneficiary Transaction","Beneficiary Registration","Balance Inquiry/Update","Mini-Statement" , "Exit"};
+	const char  beneficiary_menu[][100] = {"Beneficiary Transaction","Beneficiary Registration","Edit/Update Beneficiary  Details", "Balance Inquiry/Update","Mini-Statement" , "Exit"};
 	while(1)
 	{
 		switch(lcd_menu("Beneficiary Transactions", beneficiary_menu, 5 ,selected))
 		{
 		case 0:
-			//beneficiary_transaction_operations();
-			printf("Beneficiary Transaction\n");
+			do_beneficiary_transaction();
 			break;
 		case 1:
 			register_beneficiary();
 			break;
 		case 2:
-			printf("Balance Inquiry/Update\n");
+			//printf("Balance Inquiry/Update\n");
 			break;
 		case 3:
+			printf("Balance Inquiry/Update\n");
+			break;
+		case 4:
 			printf("Mini-Statement");
 			break;
-		case 4 :
+		case 5 :
 			return;
 			break;
 		}
@@ -48,65 +59,107 @@ void beneficiary_transactions(void )
 }
 
 //int argc, char *argv[]
+
+
 void register_beneficiary(void){
 	int ret;
 	int change_made =0;
 	int x= 0;
 
 	cJSON * txToPosted=cJSON_CreateObject();
+	cJSON * Biodata = NULL;
 	char getCharacters[40];
 	char getCharacters1[40];
 	char name1[30];
 	char name[100];
-	char details[7][40];
+	const  char details[10][100];
 
+	/*
 	const char gender[][100] = {
 			"Male",
 			"Female"
 	};
-	const char document_type[][100] = {
-			//
-			"National ID",
-			"Passport",
-			"Alien ID",
-			"NGO Card"
-	};
+	 */
+
 	//BYTE fp23;
 	int selected = 0;
+	int cur_row = 0;
 
+	char  ** data;
+	char** tokens = 0;
+	int  i;
+	char  options[100];
+	//Get  KYC from Table
+
+	sqlite_database_read_write_operation(read_kycs_sql , "database.db");
+	//data = get_collumn_data(sql_data,sql_data_count,sql_collumn_count,0);
+	/*	for(i=1; i<sql_row_count;i++)
+		strcpy( details[i-1],data[i]);*/
+	//selected= lcd_menu("Test", details,sql_row_count-1 , selected);
 
 	//Read card // replace with Kims Functions
 
 
 	strcpy(name1, "");
 
-	//Innitialize the keywords
-	strcpy(details[0], "First Name");
-	strcpy(details[1], "Last Name");
-	strcpy(details[2], "Date of Birth") ;
-	strcpy(details[3], "Gender") ;
-	strcpy(details[4], "Document Type");
-	strcpy(details[5], "Document Number");
-	strcpy(details[6], "Address Information") ;
+
 
 	//Get  Beneficiary details
 	lcd_clean();
-	for( x=0; x<4;x++)
+
+	for( x=0; x<sql_row_count-1;x++)
 	{
+
+		int w = 0;
+		cur_row = sql_collumn_count + cur_row;
 		change_made =0;
+		selected  = 0;
+		printf("Here : %d  : %s \n",(cur_row +1) , sql_data[cur_row+1]);
 
 		//Get Gender
-		if(strcpy(details[x], "Gender")  )
+		if(strcmp(sql_data[cur_row +1], "OPT") == 0)
 		{
+			printf("Options goes here %d\n", selected);
+			/*	kb_getkey();*/
+
+			sprintf( name , "Please select %s" ,sql_data [cur_row ]);
+			printf("%s", name);
+			strcpy(options  , sql_data[cur_row+3]);
+			printf("String : %s\n" ,sql_data[cur_row+3] );
+			printf("String : %s\n" ,options );
+			if(strlen(options)>0)
+				tokens = str_split(options, ',');
+
+			if (tokens)
+			{
+
+				for (w = 0; *(tokens + w); w++)
+				{
+					//printf("month=[%s]\n", *(tokens + w));
+					//if(strlen(*(tokens + w))>0)
+					strcpy(details[w], *(tokens + w));
+					free(*(tokens + w));
+				}
+				printf("Ended\n");
+				free(tokens);
+				printf("Ended 1\n");
+			}
+
+			/*		for(i=1; i<sql_row_count;i++)
+					strcpy( details[i-1],data[i]);*/
+
 			while (selected>=0){
 
-				selected= lcd_menu("Please select Gender", gender, sizeof(gender)/100, selected);
+
 
 				printf("Selected on %d\n", selected);
-				if(selected > -1 && selected < sizeof(gender)/100 )
+				selected= lcd_menu(name, details, w, selected);
+
+				printf("Selected on %d\n", selected);
+				if(selected > -1 && selected < w )
 				{
 					//strcpy(myBenf.gender, "Male" );
-					cJSON_AddStringToObject(txToPosted,details[x],gender[selected]);
+					cJSON_AddStringToObject(txToPosted,sql_data[cur_row+4],details[selected]);
 					break;
 				}
 				else if(selected == -1)
@@ -122,60 +175,30 @@ void register_beneficiary(void){
 		}
 
 		//Get Document Type
-		if(strcpy(details[x], "Document Type")  )
+		else if(strcmp(sql_data[cur_row+1], "STR")==0 || strcmp(sql_data[cur_row+1], "INT")==0  )
 		{
-			while (selected>=0){
-
-				selected= lcd_menu("Please select Document Type", document_type, sizeof(gender)/100, selected);
-
-				printf("Selected on %d\n", selected);
-				if(selected == 0 )
-				{
-					//strcpy(myBenf.documenttype, "Male" );
-					cJSON_AddStringToObject(txToPosted,"Gender","Male");
-					break;
-				}
-				else if(selected == 1)
-				{
-					//strcpy(myBenf.gender, "Female" );
-					cJSON_AddStringToObject(txToPosted,"Gender","Female");
-					break;
-				}
-				else if(selected == -1)
-				{
-					return;
-				}
+			sprintf( name , "Please enter  %s" ,sql_data [cur_row ]);
+			if(strcmp(sql_data[cur_row+1], "STR")==0)
+			{
+				if(strcmp(sql_data[cur_row+2]  , "1") == 0)
+					ret = kb_getStringtwo(ALPHA_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, "","Register Beneficiary", 0);
 				else
-				{
-					message_display_function(1,"","Invalid Selection", "Please select  again.", (char *)NULL);
-					kb_getkey();
-				}
+					ret = kb_getStringtwo(ALPHA_IN ,ALPHA_IN ,  0, 16, getCharacters,getCharacters1, NULL, name, "","Register Beneficiary", 0);
+
 			}
-		}
+			else
+			{
+				if(strcmp(sql_data[cur_row+2]  , "1") == 0)
+					ret = kb_getStringtwo(NUM_IN ,NUM_IN ,  1,16, getCharacters,getCharacters1, NULL, name, "","Register Beneficiary", 0);
+				else
+					ret = kb_getStringtwo(NUM_IN ,NUM_IN ,  0, 16, getCharacters,getCharacters1, NULL, name, "","Register Beneficiary", 0);
 
-
-		else{
-			ret = kb_getStringtwo(ALPHA_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, details[x], name1,"Register Beneficiary", 0);
+			}
 			printf("Ret on %d", ret);
 			if( strlen(getCharacters)>0 && ret!=-1)
 			{
 				change_made =1;
-				if(x==0)
-				{
-					//strcpy(myBenf.firstname, getCharacters );
-					cJSON_AddStringToObject(txToPosted,"firstname",getCharacters);
-				}
-				else if(x==1)
-				{
-					//strcpy(myBenf.lastname, getCharacters );
-					cJSON_AddStringToObject(txToPosted,"lastname",getCharacters);
-				}
-				else if(x==2)
-				{
-					//strcpy(myBenf.dateofbirth, getCharacters );
-					cJSON_AddStringToObject(txToPosted,"dateofbirth",getCharacters);
-				}
-
+				cJSON_AddStringToObject(txToPosted,sql_data[cur_row+4],getCharacters);
 
 			}
 
@@ -189,31 +212,24 @@ void register_beneficiary(void){
 
 		}
 	}
-
-/*	printf("%s\n",myBenf.firstname);
-	printf("%s\n",myBenf.lastname);
-	printf("%s\n",myBenf.dateofbirth);
-	printf("%s\n",myBenf.gender);*/
-
-
+	printf("You know what here it is\n " );
+	printf(">>>>>>>JSON %s\n", cJSON_Print(txToPosted));
 	//Get  Beneficiary fingerprint
-	if(fplib_test(0))
+	if(fplib_test(0 , Biodata))
 	{
-		//printf("You know what here it is\n " );
-		//printf(">>>>>>>JSON %s\n", cJSON_Print(txToPosted));
+		printf("You know what here it is\n " );
+		printf(">>>>>>>JSON %s\n", cJSON_Print(txToPosted));
 
 		int w=0;
 		while(w<400)
 		{
-			//printf( "%02X",myBenf.fingerprint[w]);
-			//strcpy(m[w],"%02X",imageBuffer1[w]);
+			/*			printf( "%02X",myBenf.fingerprint[w]);
+			strcpy(m[w],"%02X",imageBuffer1[w]);*/
 			w++;
 		}
 
 		if(createApplicationAndFileAndWriteData(cJSON_Print(txToPosted),"myBenf.fingerprint"))
 		{
-
-			//printf("You know what here it is\n \n %s \n" ,  str);
 
 			//Validate Beneficiary online
 			message_display_function(1,"","Registration Successful", "Please note that  your card has been successfully created. Thank you and welcome again", (char *)NULL);
@@ -223,7 +239,7 @@ void register_beneficiary(void){
 		}
 		else
 		{
-			message_display_function(1,"","EMV card Error ", "Error reading card, please check your card reader and place your at  proximity  and try  again", (char *)NULL);
+			message_display_function(1,"","EMV card Error ", "Error reading card, please check your card reader and place your at POS proximity  and try  again", (char *)NULL);
 			kb_getkey();
 		}
 	}
@@ -238,14 +254,176 @@ void register_beneficiary(void){
 
 
 
-void register_ben(int argc, char *argv[]){
-	int key;
-	message_display_function(1, "","Beneficiary Registration" ,  "Please tap the NFC card and press enter key");
-	key=kb_getkey();
-	if(key==DIKS_ENTER){
+void do_beneficiary_transaction( void){
+	int key, ret ,  selected;
+	char getCharacters[30], getCharacters1[30];
 
-		//register_ben();
+	//Transation JSON definations
+	cJSON * txToPosted;
+	cJSON * final_transaction ;
+	cJSON * json_beneficary_details ;
+	cJSON *  json_array;
+	cJSON *  json_beneficiary_data;
+	cJSON * balance_information;
+	cJSON * balance_array;
+	cJSON * transaction_json;
+	char * card_number;
+
+
+
+
+	char * txnDate, *transactionID;
+	char * existing_transaction;
+	/*	message_display_function(1, "","Beneficiary Registration" ,  "Please tap the NFC card and press enter key");
+	key=kb_getkey();
+	if(key==DIKS_ENTER){*/
+	//function to  get  the card details from the card
+	//char
+	char  * transaction_file = "{\"balances\":[{\"wallet\":\"WFP\",\"walletId\":\"100\",\"walletbalance\":3000},{\"wallet\":\"IOM\",\"walletId\":\"200\",\"walletbalance\":1000}],\"transactions\":{\"benTxn\":\"BT-122865212*82671220*111*098765789876*72355289383*6000*123432567*101#BT-122865212*82671220*111*098765789876*72355289383*6000*123432567*101#BT-122865212*82671220*111*098765789876*72355289383*6000*123432567*101#BT-122865212*82671220*111*098765789876*72355289383*6000*123432567*101#BT-122865212*82671220*111*098765789876*72355289383*6000*123432567*101#BT-122865212*82671220*111*098765789876*72355289383*6000*123432567*101#BT-122865212*82671220*111*098765789876*72355289383*6000*123432567*101#BT-122865212*82671220*111*098765789876*72355289383*6000*123432567*101#BT-122865212*82671220*111*098765789876*72355289383*6000*123432567*101#BT-122865212*82671220*111*098765789876*72355289383*6000*123432567*101\"}}";
+
+	char * beneficiary_details = "{"
+			"\"BenRegistration\":{"
+			"\"firstname\":	\"Kiptoo\","
+			"\"lastname\":	\"Alex\","
+			"\"iccid\":\"8cg4382017583718\","
+			"\"middlename\":	\"K\","
+			"\"dob\":	\"12134652\","
+			"\"docType\":	\"National ID\","
+			"\"docNumber\":	\"123465\""
+			"}, \"BioData\" : {\"finger1\":\"FCFCFCFCFCFCFCFCFCFAFBFBFAF9F8FAFCFCFBFCFCFCFBFCFCFCFCFCFCFCFDFDFDFDFEFEFEFEFEFEFEFEFEFEFFFEFEFEFEFEFEFEFDFDFEFDFDFEFEFDFCFCFCFDFDFCFAFAF5F4F2F2F5F9FAFAF9F8F4F3F4F6F2F0F0F1F1F3F4F5F9F9F9FAF9F9FBFAFBFCFEFDFDFEFEFDFEFEFEFFFEFDFDFDFEFEFFFEFDFEFEFEFEFEFFFEFFFFFFFFFEFEFDFCFAFBFDFBFAF5F3F3F3F4F4F4F4F3F2F3F1F0F0F3F5F4F4F8F8F5F5F5F4F4F3F4F2F4F3F2F2FAFDFDFDFDFEFDFDFEFEFDFEFDFDFEFEFEFEFEFEFEFEFEFEFEFDFDFCFCFAF9F8F6F6FAFEFEFEFEFDFFFEFEFDFEFEFEFEFEFEFEFEFDFDFDFDFDFDFEFEFDFEFDFEFDFDFDFCFDFEFCFCFCFCFCFCFCFCFCFCFCFCFCFCFCFCFBFBFCFCFCFCFCFCFCFCFCFAFBFCFAFAFCFDFDFDFDFDFDFCFDFDFDFDFDFDFCFDFDFDFDFEFEFEFEFDFEFEFDFEFEFEFEFEFEFEFEFEFEFEFEFDFDFDFEFEFDFDFDFDFDFDFDFEFDFCFBFAFBFBFCFCFDFAF8F5F4F3F4F0EFF0F0F0F0F1F0F0EFEDEDEEEFF1F0F1F3F6F7F8FCFEFFFEFEFEFEFEFEFEFFFEFFFEFEFEFEFEFEFEFEFEFEFEFEFDFCFFFFFCFBFDFEFEFEFBFAFCFB\""
+			",\"finger2\":\"\",\"finger3\":\"\"}"
+			"}";
+
+	//Convert  strings to  Jsons and define Jsons
+
+	txToPosted=cJSON_CreateObject();
+	final_transaction  = cJSON_CreateObject();
+	json_beneficary_details =cJSON_CreateObject();
+	json_array=  cJSON_CreateArray();
+	transaction_json =  cJSON_Parse(transaction_file);
+
+
+	printf(beneficiary_details);
+	printf("\n");
+	printf("start\n");
+	json_beneficary_details = cJSON_Parse(beneficiary_details);
+	json_beneficiary_data  = cJSON_GetObjectItem(json_beneficary_details , "BenRegistration");
+	printf(cJSON_Print(json_beneficary_details));
+	printf("End\n");
+	printf("\n");
+
+	if(fplib_test(1 , cJSON_GetObjectItem(json_beneficary_details , "BioData")))
+	{
+		//if fingerprint verification successful
+
+		//Start
+		char wallet_name[10][50];
+		char  wallet_id[10][50];
+		double  wallet_amount[10];
+		int i= 0;
+
+		//Get  vouchers
+		balance_information  = cJSON_GetObjectItem(transaction_json , "balances");
+		printf("%d\n" , cJSON_GetArraySize(balance_information));
+		for (i  = 0; i<cJSON_GetArraySize(balance_information); i++){
+			//printf("Got in\n");
+			balance_array = cJSON_GetArrayItem(balance_information,i);
+			//printf("Got in\n");
+
+			//printf("",  cJSON_Print(cJSON_GetObject(balance_array , "wallet"))));
+				//printf("Got in\n");
+			strcpy(wallet_name[i],"");
+			strcpy( wallet_name[i], get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(balance_array , "wallet"))));
+			strcpy( wallet_id[i], get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(balance_array , "walletId"))));
+			 wallet_amount[i] = atof(cJSON_Print(cJSON_GetObjectItem(balance_array , "walletbalance")));
+
+
+			printf("Got in %.2f\n" , wallet_amount[i]);
+			//i = i + collums_in_rs;
+			//x++;
+		}
+		//printf("%s\n" , cJSON_Print(balance_information));
+		//forcJSON_GetArraySize(balance_information)
+		while (selected>=0){
+			selected= lcd_menu("Please select the program", wallet_name, i, selected);
+			printf("Selected on %d\n", selected);
+			printf("Selected on %d\n", selected);
+			if(selected > -1 && selected < i )
+			{
+				ret = kb_getStringtwo(NUM_IN ,NUM_IN ,  1, 16, getCharacters,getCharacters1, NULL, "Please enter the transaction amount", "","Beneficiary Transaction", 0);
+				if( strlen(getCharacters)>0 && ret!=-1)
+				{
+					if(wallet_amount[selected]>atof(getCharacters)){
+						/*					{
+					"benTxn":{
+					"transOperation":"111",
+					"amount":1027,
+					"debiticcid":"8cg4382017583718",
+					"crediticcid":"8cg4382017583719",
+					"transId":"BT-75873937",
+					"terminalId":"82346731",
+					"date":"20181124",
+					"authMode":"100"
+					}
+					}*/
+						//logic to  compare the amount
+						card_number = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(json_beneficiary_data , "iccid")));
+
+						cJSON_AddItemToArray(json_array , txToPosted);
+						cJSON_AddItemToObject(final_transaction , "benTxn" , json_array);
+						get_date_and_receipt (0,  &txnDate , &transactionID);
+						cJSON_AddStringToObject(txToPosted,"amount",getCharacters);
+						cJSON_AddStringToObject(txToPosted,"transOperation","111");
+						cJSON_AddStringToObject(txToPosted,"debiticcid",card_number);
+						cJSON_AddStringToObject(txToPosted,"crediticcid","Merchant_ID");
+						cJSON_AddStringToObject(txToPosted,"walletId",wallet_id[selected]);
+						cJSON_AddStringToObject(txToPosted,"transId",transactionID);
+						cJSON_AddStringToObject(txToPosted,"terminalId",pos_serial_number);
+						cJSON_AddStringToObject(txToPosted,"date",txnDate);
+						cJSON_AddStringToObject(txToPosted,"authMode","101");
+						printf("The Json :  %s\n", cJSON_Print(final_transaction));
+						//111*transId
+						//#%s*%s*transOperation*debiticcid*crediticcid*amount*date*authMode
+						existing_transaction = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(json_beneficiary_data , "iccid")));
+
+						//sprintf("%s#%s*%s*111*%s*crediticcid*%s*%s*101",transactionID,pos_serial_number,card_number,getCharacters,txnDate );
+
+						//Post and get_feedback
+						//Print receipt
+						return;
+
+					}
+					else{
+						//clear all params
+						message_display_function(1, "","Beneficiary Transaction error" ,  "The requested transaction amount is more than the card balance available");
+						kb_getkey();
+
+					}
+				}
+
+				else if(ret==-1  )
+				{
+					return;
+				}
+			}
+			else if(selected == -1)
+			{
+				return;
+			}
+			else
+			{
+				message_display_function(1,"","Invalid Selection", "Please select  again.", (char *)NULL);
+				kb_getkey();
+			}
+		}
+
+		//cut
+
+
 	}
+
+	//register_ben();
+	/*	}
 	else
-		return;
+		return;*/
 }

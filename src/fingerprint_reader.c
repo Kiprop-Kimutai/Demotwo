@@ -22,6 +22,8 @@
 #include "../src1/jsonread.h"
 #include "../src1/main_old.h"
 #include "utilities/sgfplib.h"
+#include "fingerprint_reader.h"
+
 //#include ""
 
 #define FALSE 0
@@ -32,7 +34,86 @@ HSGFPM  hsgfplib;
 // ---------------------------------------------------------------- main() ---
 
 int fp_counter;
-int fplib_test(int option)
+
+
+int fingerprint_string_to_hex_converter (char  * string , BYTE  ** hex_array)
+{
+	// char *hexstring = "deadbeef10203040b00b1e50";
+	int i;
+	//unsigned char ch[400];
+	char  * local_string = string;
+	unsigned int   bytearray[400];
+	unsigned char  char_bytearray[400];
+	int str_len = strlen(local_string);
+	printf("Obtained :  %s\n" , local_string);
+	printf("bytearray : %d\n" , str_len);
+	//kb_getkey();
+	for (i = 0; i < (str_len / 2); i++) {
+		//char_bytearray[i] =string + 2*i;
+		sscanf(local_string + 2*i, "%02x", &bytearray[i]);
+		printf("%02x ", bytearray[i]);
+		//kb_getkey();
+	}
+
+//992537
+	//ch = (unsigned )bytearray;
+	//char *ch = (unsigned char *)&bytearray;
+	//memcpy(&ch, &bytearray,400);
+
+
+	printf("Stick : %d\n" , str_len);
+	//char_bytearray = (unsigned char *)bytearray;
+	for (i = 0; i < (str_len / 2); i++) {
+		//sscanf(string + 2*i, "%02x", &bytearray[i]);
+		//scan
+		//printf(char_bytearray , "%x ", hex_array);
+		char_bytearray[i] = bytearray[i];
+
+		printf("%02x", char_bytearray[i]);
+
+	}
+	printf("Stick : %d\n" , str_len);
+
+	*hex_array = char_bytearray;
+	return 0;
+}
+
+
+int fingerprint_hex_to_string(BYTE * readingreg)
+{
+	/*    unsigned char readingreg[4];
+    readingreg[0] = 0x4a;
+    readingreg[1] = 0xaa;
+    readingreg[2] = 0xaa;
+    readingreg[3] = 0xa0;*/
+	int x;
+	char temp[801];
+	char tmp[3];
+
+
+	//"%x", readingreg[x]
+
+	strcpy(temp, "");
+
+	printf("\nhex_to_string : \n");
+	for(x =0; x<400 ; x++){
+		//printf("%d : %x\n",x,  readingreg[x]);
+		sprintf(tmp, "%x", readingreg[x]);
+		//printf("%d :%s\n",x,  tmp);
+		strcat(temp, tmp);
+
+		//temp[x]= tmp;
+	}
+	strcat(temp, "\0");
+	printf("\nThis is element : %s\n", temp);
+
+	//string_to_hex_converter(temp);
+	return 0;
+}
+
+
+
+int fplib_test(int option , cJSON * Biodata)
 {
 	//option 0 = capture
 	//Option 1  = compare
@@ -40,11 +121,12 @@ int fplib_test(int option)
 	DWORD templateSize, templateSizeMax;
 	DWORD quality;
 	BYTE *imageBuffer1;
-	BYTE imageBuffer2[13][405];
+	BYTE *imageBuffer2;
 	BYTE *minutiaeBuffer1;
+	BYTE *minutiaeBuffer2;
 	SGDeviceInfoParam deviceInfo;
 	DWORD score;
-	SGFingerInfo fingerInfo;
+	SGFingerInfo fingerInfo ,  fingerInfo2;
 	BOOL matched;
 	int x = 0;
 	int w , yr;
@@ -211,13 +293,14 @@ int fplib_test(int option)
 				}
 
 				err = SGFPM_SetLedOn(hsgfplib,FALSE);
-				w=0;
-				while(w<400)
+				//w=0;
+				//printf()
+				/*			while(w<400)
 				{
 					printf("%02X",imageBuffer1[w]);
 					myBenf.fingerprint[w]= imageBuffer1[w];
 					w++;
-				}
+				}*/
 				if (err == SGFDX_ERROR_NONE)
 				{
 				}
@@ -249,7 +332,8 @@ int fplib_test(int option)
 
 				}
 				x = 0;
-
+				//to  be removed
+				fp_counter = 1;
 				//Compare the FP
 				while(x<fp_counter)
 				{
@@ -257,13 +341,43 @@ int fplib_test(int option)
 					quality = 0;
 					printf("CreateTemplate returned : [%ld]\n",err);
 					err = SGFDX_ERROR_NONE;
+
+					//get stored
+					printf("Finger Test :  %s\n", get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(Biodata,"finger1"))));
+					//printf("Finger Test :  %s\n", cJSON_GetObjectItem(Biodata,"finger1"));
+					fingerprint_string_to_hex_converter(get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(Biodata,"finger1"))) , &imageBuffer2);
+
+					w = 0 ;
+					printf("Started here\n");
+					while(w<400)
+						{
+							printf("%x",imageBuffer2[w]);
+							//myBenf.fingerprint[w]= imageBuffer1[w];
+							w++;
+						}
+					printf("Ended here\n");
 					if (err == SGFDX_ERROR_NONE)
 					{
 						quality = 0;
-						err = SGFPM_GetTemplateSize(hsgfplib, imageBuffer2[x], &templateSize);
+						err = SGFPM_GetTemplateSize(hsgfplib, imageBuffer2, &templateSize);
 					}
+
+					printf("1 Ended here\n");
+					minutiaeBuffer2 = (BYTE*) malloc(templateSizeMax);
+					fingerInfo2.FingerNumber = SG_FINGPOS_UK;
+					fingerInfo2.ViewNumber = 1;
+					fingerInfo2.ImpressionType = SG_IMPTYPE_LP;
+					fingerInfo2.ImageQuality = quality; //0 to 100
+					printf("2 Ended here\n");
+					err = SGFPM_CreateTemplate(hsgfplib,&fingerInfo, imageBuffer1, minutiaeBuffer2);
 					// MatchTemplate()
-					err = SGFPM_MatchTemplate(hsgfplib,minutiaeBuffer1, imageBuffer2[x], SL_LOW, &matched);
+
+					printf("3 Ended here\n");
+		/*			minutiaeBuffer2 = (BYTE*) malloc(templateSizeMax);
+					err = SGFPM_CreateTemplate(hsgfplib,&fingerInfo, imageBuffer2, minutiaeBuffer2);*/
+
+					err = SGFPM_MatchTemplate(hsgfplib,minutiaeBuffer1, minutiaeBuffer2, SL_LOW, &matched);
+					printf("4 Ended here\n");
 					//  kb_getkey();
 					if (matched == TRUE)
 					{
@@ -285,7 +399,10 @@ int fplib_test(int option)
 						printf("<<NO MATCH>>\n\n");
 					}
 
-					err = SGFPM_GetMatchingScore(hsgfplib,minutiaeBuffer1, imageBuffer2[x], &score);
+					//Get stored fingerprint
+					//fingerprint_string_to_hex_converter(cJSON_Print(cJSON_GetObjectItem(Biodata,"finger1")) , &imageBuffer2);
+
+					err = SGFPM_GetMatchingScore(hsgfplib,minutiaeBuffer1, imageBuffer2, &score);
 					printf("Score is : [%ld]\n\n",score);
 					x++;
 
@@ -314,94 +431,95 @@ int fplib_test(int option)
 		else
 		{
 			y = get_y_position();
-							//Alex
+			//Alex
 			message_display_function(1,"","Fetching Finger Print","Press Enter after placing finger", (char *)NULL);
 
-							lcd_printf(ALG_LEFT ,"%s : " ,"Please place finger");
-							lcd_flip();
-							key = kb_getkey();
-							if(key== 0x1B){
-								err = SGFPM_CloseDevice(hsgfplib);
-								err = SGFPM_Terminate(hsgfplib);
-								return 0;
-							}
-							err = SGFPM_SetLedOn(hsgfplib,TRUE);
-							err = SGFPM_SetBrightness(hsgfplib,30);
-							deviceInfo.DeviceID = 0;
-							err = SGFPM_GetDeviceInfo(hsgfplib,&deviceInfo);
-							if (err == SGFDX_ERROR_NONE)
-							{
-								printf("\tdeviceInfo.DeviceID   : %ld\n", deviceInfo.DeviceID);
-								printf("\tdeviceInfo.DeviceSN   : %s\n",  deviceInfo.DeviceSN);
-								printf("\tdeviceInfo.ComPort    : %ld\n", deviceInfo.ComPort);
-								printf("\tdeviceInfo.ComSpeed   : %ld\n", deviceInfo.ComSpeed);
-								printf("\tdeviceInfo.ImageWidth : %ld\n", deviceInfo.ImageWidth);
-								printf("\tdeviceInfo.ImageHeight: %ld\n", deviceInfo.ImageHeight);
-								printf("\tdeviceInfo.Contrast   : %ld\n", deviceInfo.Contrast);
-								printf("\tdeviceInfo.Brightness : %ld\n", deviceInfo.Brightness);
-								printf("\tdeviceInfo.Gain       : %ld\n", deviceInfo.Gain);
-								printf("\tdeviceInfo.ImageDPI   : %ld\n", deviceInfo.ImageDPI);
-								printf("\tdeviceInfo.FWVersion  : %04X\n", (unsigned int) deviceInfo.FWVersion);
-							}
+			lcd_printf(ALG_LEFT ,"%s : " ,"Please place finger");
+			lcd_flip();
+			key = kb_getkey();
+			if(key== 0x1B){
+				err = SGFPM_CloseDevice(hsgfplib);
+				err = SGFPM_Terminate(hsgfplib);
+				return 0;
+			}
+			err = SGFPM_SetLedOn(hsgfplib,TRUE);
+			err = SGFPM_SetBrightness(hsgfplib,30);
+			deviceInfo.DeviceID = 0;
+			err = SGFPM_GetDeviceInfo(hsgfplib,&deviceInfo);
+			if (err == SGFDX_ERROR_NONE)
+			{
+				printf("\tdeviceInfo.DeviceID   : %ld\n", deviceInfo.DeviceID);
+				printf("\tdeviceInfo.DeviceSN   : %s\n",  deviceInfo.DeviceSN);
+				printf("\tdeviceInfo.ComPort    : %ld\n", deviceInfo.ComPort);
+				printf("\tdeviceInfo.ComSpeed   : %ld\n", deviceInfo.ComSpeed);
+				printf("\tdeviceInfo.ImageWidth : %ld\n", deviceInfo.ImageWidth);
+				printf("\tdeviceInfo.ImageHeight: %ld\n", deviceInfo.ImageHeight);
+				printf("\tdeviceInfo.Contrast   : %ld\n", deviceInfo.Contrast);
+				printf("\tdeviceInfo.Brightness : %ld\n", deviceInfo.Brightness);
+				printf("\tdeviceInfo.Gain       : %ld\n", deviceInfo.Gain);
+				printf("\tdeviceInfo.ImageDPI   : %ld\n", deviceInfo.ImageDPI);
+				printf("\tdeviceInfo.FWVersion  : %04X\n", (unsigned int) deviceInfo.FWVersion);
+			}
 
-							imageBuffer1 = (BYTE*) malloc(deviceInfo.ImageHeight*deviceInfo.ImageWidth);
-							err = SGFPM_GetImage(hsgfplib,imageBuffer1);
-							if (err != SGFDX_ERROR_NONE)
-							{
-								//message_display_function(1,"","error", "could_not_fetch_image_from_fingerprint_device",  (char *)NULL);
-								//kb_getkey();
-								//err = SGFPM_CloseDevice(hsgfplib);
-								//err = SGFPM_Terminate(hsgfplib);
-								//return 0;
-							}
+			imageBuffer1 = (BYTE*) malloc(deviceInfo.ImageHeight*deviceInfo.ImageWidth);
+			err = SGFPM_GetImage(hsgfplib,imageBuffer1);
+			if (err != SGFDX_ERROR_NONE)
+			{
+				//message_display_function(1,"","error", "could_not_fetch_image_from_fingerprint_device",  (char *)NULL);
+				//kb_getkey();
+				//err = SGFPM_CloseDevice(hsgfplib);
+				//err = SGFPM_Terminate(hsgfplib);
+				//return 0;
+			}
 
-							err = SGFPM_SetLedOn(hsgfplib,FALSE);
-							w=0;
-							while(w<400)
-							{
-								printf("%02X",imageBuffer1[w]);
-								w++;
+			err = SGFPM_SetLedOn(hsgfplib,FALSE);
+			w=0;
+			while(w<400)
+			{
+				printf("%02X",imageBuffer1[w]);
+				w++;
 
-							}
-							//strcpy(myBenf.fpbyte, imageBuffer1[w] );
-							if (err == SGFDX_ERROR_NONE)
-							{
-							}
+			}
+			//hex_to_string(imageBuffer1);
+			//strcpy(myBenf.fpbyte, imageBuffer1[w] );
+			if (err == SGFDX_ERROR_NONE)
+			{
+			}
 
-							// getImageQuality()
-							quality = 0;
-							err = SGFPM_GetImageQuality(hsgfplib,deviceInfo.ImageWidth, deviceInfo.ImageHeight, imageBuffer1, &quality);
+			// getImageQuality()
+			quality = 0;
+			err = SGFPM_GetImageQuality(hsgfplib,deviceInfo.ImageWidth, deviceInfo.ImageHeight, imageBuffer1, &quality);
 
-							///////////////////////////////////////////////
-							// getMaxTemplateSize()
-							quality = 0;
-							err = SGFPM_GetMaxTemplateSize(hsgfplib,&templateSizeMax);
+			///////////////////////////////////////////////
+			// getMaxTemplateSize()
+			quality = 0;
+			err = SGFPM_GetMaxTemplateSize(hsgfplib,&templateSizeMax);
 
-							///////////////////////////////////////////////
-							minutiaeBuffer1 = (BYTE*) malloc(templateSizeMax);
-							fingerInfo.FingerNumber = SG_FINGPOS_UK;
-							fingerInfo.ViewNumber = 1;
-							fingerInfo.ImpressionType = SG_IMPTYPE_LP;
-							fingerInfo.ImageQuality = quality; //0 to 100
-							err = SGFPM_CreateTemplate(hsgfplib,&fingerInfo, imageBuffer1, minutiaeBuffer1);
-							printf("CreateTemplate returned : [%ld]\n",err);
-							if (err == SGFDX_ERROR_NONE)
-							{
-								///////////////////////////////////////////////
-								// getTemplateSize()
-								quality = 0;
-								err = SGFPM_GetTemplateSize(hsgfplib,minutiaeBuffer1, &templateSize);
-								strcpy(myBenf.fingerprint, minutiaeBuffer1 );
-								printf("We got the image");
+			///////////////////////////////////////////////
+			minutiaeBuffer1 = (BYTE*) malloc(templateSizeMax);
+			fingerInfo.FingerNumber = SG_FINGPOS_UK;
+			fingerInfo.ViewNumber = 1;
+			fingerInfo.ImpressionType = SG_IMPTYPE_LP;
+			fingerInfo.ImageQuality = quality; //0 to 100
+			err = SGFPM_CreateTemplate(hsgfplib,&fingerInfo, imageBuffer1, minutiaeBuffer1);
+			printf("CreateTemplate returned : [%ld]\n",err);
+			if (err == SGFDX_ERROR_NONE)
+			{
+				///////////////////////////////////////////////
+				// getTemplateSize()
+				quality = 0;
+				err = SGFPM_GetTemplateSize(hsgfplib,minutiaeBuffer1, &templateSize);
+				//strcpy(myBenf.fingerprint, minutiaeBuffer1 );
+				printf("We got the image");
 
-							}
-							free(imageBuffer1);
-							free(minutiaeBuffer1);
-							imageBuffer1 = NULL;
-							minutiaeBuffer1 = NULL;
-							err = SGFPM_CloseDevice(hsgfplib);
-							err = SGFPM_Terminate(hsgfplib);
-							return 1;
+			}
+			free(imageBuffer1);
+			free(minutiaeBuffer1);
+			imageBuffer1 = NULL;
+			minutiaeBuffer1 = NULL;
+			err = SGFPM_CloseDevice(hsgfplib);
+			err = SGFPM_Terminate(hsgfplib);
+			return 1;
 
 		}
 	}

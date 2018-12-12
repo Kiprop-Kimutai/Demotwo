@@ -47,7 +47,7 @@ int in_purchase;
 int started_program ;
 int sam_verification;
 
-int fplib_test(int option);
+//int fplib_test(int option);
 
 
 #endif /* GENERAL_FUNTIONS_AND_VARAIBLES_H_ */
