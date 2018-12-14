@@ -29,7 +29,7 @@ void get_current_time(void);
 extern void create_all_table();
 void* threader(void *arg);
 int logged_offline;
-void land_rate_operations();
+
 void offline_login(char * password);
 void login(void);
 extern int read_config();

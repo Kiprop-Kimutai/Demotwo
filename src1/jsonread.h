@@ -26,7 +26,19 @@
 #include "../src/utilities/uthash.h"
 
 
-
+typedef struct
+{
+	char * transaction;
+	char * fileinfo;
+	char * getfile;
+	char * login;
+	char * uploadfile;
+	char * operators;
+	char * adminz;
+	char * landoperations;
+	/*char * ping;*/
+}endPoints ;
+ endPoints * endpoints;
 
 char transactionfile[3000];
 char transactionfile1[3000];
@@ -125,7 +137,7 @@ char current_menu[];
 int start_display_test(void );
 int main_menu_count;
 //void Start_online_display(void );
-void Start_online_display(char *filename);
+char * Start_online_display(char *filename);
 //void read_online_jason_file();
 void read_online_jason_file(json_object *jobj, char *key);
 //void read_online_jason_file(void );
@@ -355,7 +367,7 @@ enum serverRequest
 	REQUEST_POST
 };
 
-typedef struct
+/*typedef struct
 {
 	char * transaction;
 	char * operators;
@@ -365,9 +377,9 @@ typedef struct
 	char * uploadfile;
 	char * adminz;
 	char * landoperations;
-	/*char * ping;*/
+	char * ping;
 }endPoints ;
- endPoints * endpoints;
+ endPoints * endpoints;*/
 
 
 
@@ -376,7 +388,7 @@ char serial_num[20];
 
 char url[100] ;
 
-
+char * string[5000];
 
 char voided_tx_time[50];
 //

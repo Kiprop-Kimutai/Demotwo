@@ -135,23 +135,21 @@ char * hash_fnc(char * Str){
 }
 
 
-void Start_online_display(char *filename) {
-	char string[5000];
+char* Start_online_display(char *filename) {
+
 	char filelast[100];
 	char str_cmp[100];
 	cJSON *name = NULL;
 	cJSON *request_json = NULL;
 
 	char * outputstring;
-	//cJSON *obj = NULL;
+
 	char * sql;
 
-	//char rm_filename[200];
-	//char transactionstring[5000];
-	//usleep(1);
+
 	FILE* body_file ;
 	body_file = fopen(filename, "r"); //open for read and write
-	printf("FILE NAME : %s\n",filename);
+	printf("FILE NAME ALEX : %s\n",filename);
 	if (body_file == NULL) {
 
 		if(strcmp("REPORT.txt",filename ) !=0)
@@ -162,13 +160,13 @@ void Start_online_display(char *filename) {
 			system("cp services.db_bak services.db");
 			update_stopped = 1;
 		}
-		return;
+		return "err";
 	} else
 	{
 		service_details_not_found = 0;
 		memset(string,0,sizeof(string));
 		if (fgets(string, 10000, body_file) != NULL) {
-			printf("RETURNED :  \n%s\n\n", string);
+			printf("RETURNED ALEX:  \n%s\n\n", string);
 			fclose(body_file);
 			sprintf(filelast,"rm %s",filename);
 			system(filelast);
@@ -178,63 +176,34 @@ void Start_online_display(char *filename) {
 			{
 				int  i =0, len_ar;
 
-				if (strcmp(filename, "GET_POS_USERS.txt") == 0) {
+				if (strcmp(filename, "data.txt") == 0) {
 
 					request_json = cJSON_Parse(string);
 					printf("Line 1\n");
-					//name = cJSON_GetObjectItem(request_json,"code");
 
-					if(cJSON_GetArraySize(request_json)){
-					 system("rm users_config.db");
+					if(request_json!=NULL){
+						printf("Line rm operator.db 1\n");
+					 system("rm operator.db");
 					 create_all_table();
-					}
 
-					  for (i = 0 ; i < cJSON_GetArraySize(request_json) ; i++)
-					  {
 						  printf("Line 2\n");
-						//char paybill, * currency, * name ,* marketid ,  * market , * status ;
-						  cJSON * obj =cJSON_GetArrayItem(request_json, i);
+						cJSON * message =cJSON_GetObjectItem(request_json,"message" );
 						  printf("Line 3\n");
-						//login_successful = 1;
-/*						response = cJSON_GetObjectItem(request_json,"response");
-						obj =  cJSON_GetObjectItem(response,"obj");*/
 
-/*							"userid  		TEXT  PRIMARY KEY NOT NULL,"
-							"username   	TEXT ,"
-							"password   	TEXT ,"
-							"watchTimer   	TEXT ,"
-							"name			TEXT ,"
-							"MarketID		TEXT ,"
-							"Market			TEXT ,"
-							"paybill		TEXT ,"
-							"Currency		TEXT ,"
-							"voidTime		TEXT ,"
-							"voidLimit		TEXT ,"
-							"Status			TEXT ,"*/
-						 char *  pin1    = remove_quotes(cJSON_Print(cJSON_GetObjectItem(obj, "posPin")));
-						 char *  username1    = remove_quotes(cJSON_Print(cJSON_GetObjectItem(obj, "username")));
-						 char *  userid1    = cJSON_Print(cJSON_GetObjectItem(obj, "userid"));
-						 char *  watchTimer1= cJSON_Print(cJSON_GetObjectItem(obj, "watchTimer"));
-					     char *  paybill1   = remove_quotes(cJSON_Print(cJSON_GetObjectItem(obj, "paybill")));
-					     char *  currency1  = remove_quotes(cJSON_Print(cJSON_GetObjectItem(obj, "currency")));
-					     char *  name1      = remove_quotes(cJSON_Print(cJSON_GetObjectItem(obj, "Uname")));
-					     char *  marketid1  = cJSON_Print(cJSON_GetObjectItem(obj, "marktId"));
-					     char *  posVersion  = remove_quotes(cJSON_Print(cJSON_GetObjectItem(obj, "posVersion")));
-					     char *  market1    = remove_quotes(cJSON_Print(cJSON_GetObjectItem(obj, "market")));
-					     char *  voidTime1  = remove_quotes(cJSON_Print(cJSON_GetObjectItem(obj, "voidTime")));
-					     char *  voidLimit1 = remove_quotes(cJSON_Print(cJSON_GetObjectItem(obj, "voidLimit")));
-					     char *  transactionLimit1 = remove_quotes(cJSON_Print(cJSON_GetObjectItem(obj, "transactionLimit")));
-					     //read_database("Delete from users","users_config.db");
+						 char *  pin    = remove_quotes(cJSON_Print(cJSON_GetObjectItem(message, "pin")));
+						 char *  username    = remove_quotes(cJSON_Print(cJSON_GetObjectItem(message, "username")));
+						 char *  agentid    = remove_quotes(cJSON_Print(cJSON_GetObjectItem(message, "agentid")));
+						 char *  idnumber    = remove_quotes(cJSON_Print(cJSON_GetObjectItem(message, "idnumber")));
+
 					     printf("Line 4\n");
 					     sql = malloc(750);
-					     //id|username|password|Level|Name|MarketID|Market|Status
-					     sprintf(sql , "insert into users (username,userid,password,watchTimer,Name,MarketID,Market,paybill,Currency , voidLimit ,voidTime , transactionLimit,posVersion) values ( LOWER('%s'),'%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')" , username1, userid1, hash_fnc(pin1), watchTimer1,   name1 ,  marketid1 , market1, paybill1,currency1, voidLimit1,voidTime1 , transactionLimit1,posVersion);
+					     sprintf(sql , "insert into operator (username,pin,idnumber,agentid ) values ( LOWER('%s'),'%s','%s', '%s')" , username, pin, idnumber, agentid /*hash_fnc(pin1)*/);
 					     printf("%s\n",sql);
-					    // printf("Line 5\n");
-					     read_database(sql,"users_config");
+
+					     read_database(sql,"operator");
 					     free(sql);
 					}
-					  return;
+					  return string;
 				}
 				else
 				{
@@ -283,7 +252,7 @@ void Start_online_display(char *filename) {
 
 									read_online_jason_file(jobj, NULL);
 								} else {
-									return;
+									return "err";
 								}
 				}
 								//flag_online = 1;
@@ -310,7 +279,7 @@ void Start_online_display(char *filename) {
 				}
 				if(online)
 				design_url("SERVICEDATA", "j");
-				return;
+				return "err";
 			}
 
 			if (strcmp(response, "Invalid user") == 0)
@@ -595,14 +564,7 @@ void Start_online_display(char *filename) {
 					//if(printflag == 0){
 						sprintf(transactionfile , "update TRANSACTIONS set  receipt_printed= '2' where billno = '%s'", recptnum);
 						sqlite_database_insert_into_table(transactionfile,"transaction");
-					//}
-/*
-					else if (printflag == 1)
-					{
-						sprintf(transactionfile , "update TRANSACTIONS set receipt_printed = '1' and print_flag = '0' where billno = '%s'", recptnum);
-						sqlite_database_insert_into_table(transactionfile,"transaction");
-					}
-*/
+
 
 
 
@@ -802,65 +764,11 @@ void Start_online_display(char *filename) {
 				}
 			}
 
-			//printf("JSON : %s\n", string);
+
 			please_print = 0;
-			/*if (strcmp(string, "null") == 0 | strcmp(string, "0") == 0) {
-				if (!login_successful) {
-					goto EXITLOOP;
-				}
-				design_url("SERVICEDATA", "j");
-				body_file = fopen(filename, "r");
-				strcpy(string, "");
-				fgets(string, 10000, body_file);
-				fclose(body_file);
-			}
-
-			else if (strcmp(string, "9006") == 0) {
-				login_successful = 0;
-			} else {
 
 
-				int x = 0, len_ar;
-				if (subservice_id != 0) {
-					free(subservice_id);
-					subservice_id = 0;
-				}
-				if (service_level != 0) {
-					free(service_level);
-					service_level = 0;
-				}
-				if (parentType != 0) {
-					free(parentType);
-					parentType = 0;
-				}
-				if (params != 0) {
-					free(params);
-					params = 0;
-				}
-
-				if (parentId != 0) {
-					free(parentId);
-					parentId = 0;
-				}
-				if (subservice_name != 0) {
-					free(subservice_name);
-					subservice_name = 0;
-				}
-				strcpy(charge, "");
-				json_object * jobj = json_tokener_parse(string);
-				json_object *jarray = jobj;
-
-				if (jobj != NULL) {
-					arraylen = json_object_array_length(jarray);
-					int loop = 0;
-
-					read_online_jason_file(jobj, NULL);
-				} else {
-					return;
-				}
-			}*/
-
-			EXITLOOP: return;
+			EXITLOOP: return "exit";
 
 		} else {
 			printf("The file is empty");
@@ -872,10 +780,10 @@ void Start_online_display(char *filename) {
 			 }
 			//memset(string,0,sizeof(string));
 
-			return;
+			return "empty_file";
 		}
 	}
-	return;
+	return string;
 
 }
 

@@ -41,11 +41,11 @@ char gprs_chat_file[] = { "ABORT          'NO CARRIER'" "\n"
 		"'OK'           'ATDT*99***1#'" "\n"
 		"'CONNECT'      ''" "\n" };
 
-int send_gprs_request(cJSON * requestjson, char * url){
+char * send_gprs_request(char * requestType, cJSON * requestjson, char * url ){
 
 	int ret_val;
 
-
+char  string1[100];
 
 	if(/*!logged_offline &&*/ /*flag_online  && */login_successful)
 	{
@@ -59,24 +59,25 @@ int send_gprs_request(cJSON * requestjson, char * url){
 			ret_val  = power_on_modem_device(myConfigurations->apn_username , myConfigurations->apn_password, atoi(myConfigurations->ppp_timeout));
 			if(ret_val == GPRS_SUCCESS)
 			{
+				screen_header();
+				lcd_printf(ALG_CENTER, "");
+				lcd_printf(ALG_CENTER, "Please wait ..");
+				lcd_printf(ALG_CENTER, "Sending Request");
+				lcd_flip();
 
-					printf("%s initial json\n",cJSON_Print(requestjson));
-					getDataFromServer("networkrequest",requestjson,0,url);
 
-					screen_header();
-								lcd_printf(ALG_CENTER, "");
-								lcd_printf(ALG_CENTER, "Please wait ..");
-								lcd_printf(ALG_CENTER, "Sending Request");
-								lcd_flip();
-								kb_getkey();
-				return 0;
+				printf("%s initial json\n",cJSON_Print(requestjson));
+			strcpy(	string1,getDataFromServer(requestType,requestjson,0,url));
+
+				kb_getkey();
+				return string1;
 
 			}
 			else
 			{
 				message_display_function(1,"","Online Posting Error", "The POS is operating in offline mode. Please turn on GPRS to post your transactions.", (char *)NULL);
 				kb_getkey();
-				return 0;
+				return "network error";
 			}
 
 
@@ -88,9 +89,9 @@ int send_gprs_request(cJSON * requestjson, char * url){
 	{
 		message_display_function(1,"","Online Posting Error", " Please confirm if you have Internet connectivity and you have been logged in online to do a Z report", (char *)NULL);
 		kb_getkey();
-		return 0;
+		return "Error";
 	}
-	return 1;
+	return string1;
 
 }
 
@@ -314,13 +315,13 @@ int start_ppp_session(char * requestType, char * request ,  int operation , char
 	else
 		return CURL_FAILED_SETUP;
 }
-int getDataFromServer (char * requestType , cJSON * request ,   int operation ,  char * endpoint)
+char * getDataFromServer (char * requestType , cJSON * request ,   int operation ,  char * endpoint)
 {
 	printf("\noffload point atget Data 1\n\n\n");
 	char * final_request;
 		char filename[100];
 		char adminz[100];
-
+char response[5000];
 		int resp;
 
 		sprintf(filename , "%s.txt" , requestType);
@@ -329,26 +330,26 @@ int getDataFromServer (char * requestType , cJSON * request ,   int operation , 
 		memset(serial_num,0,sizeof(serial_num)+1);
 			sys_get_sn(serial_num,100);
 			printf("Serial num : %s\n\n\n\n\n\n\n", serial_num);
-		//final_request = buildFinalrequest1(requestType , request );
+
 		printf("%s\n",cJSON_Print(request));
 
 		resp = start_ppp_session(requestType, request , operation , url);
-		//printf("final_request : ", cJSON_Print(final_request));
+
 
 
 		if(resp == CURL_SUCCESS)
 		{
-			Start_online_display(filename);
+		strcpy(response, Start_online_display(filename));
 			token_received =1;
-			return 1;
+			return response;
 		}
 		else if(resp == CURL_FAILED_POST)
 		{
 			process_response_on_fail(requestType);
-			return 0;
+			return "";
 		}
 
-		return 0;
+		return response;
 	}
 void process_response_on_fail (char * requestType)
 {

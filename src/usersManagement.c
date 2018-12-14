@@ -20,10 +20,8 @@
 
 const char operatorfieldsa[][100] = {
 		"User Name",
-		"First Name",
-		"Last Name",
 		"PIN",
-		"User Level"
+		"Exit"
 };
 
 
@@ -82,7 +80,7 @@ void manage_users_menu(void )
 	}
 
 }
-void request_operators(){
+int request_operators(){
 
 	/*
 	 * check flag for online
@@ -91,31 +89,42 @@ void request_operators(){
 	int ret;
 	char plotNo[30];
 	if(flag_online == 0)
-		{
-			message_display_function(1,"","Network Mode Config ", "Please wait as the POS switches GPRS configuration", (char *)NULL);
+	{
+		message_display_function(1,"","Network Mode Config ", "Please wait as the POS switches GPRS configuration", (char *)NULL);
 
-			ret_val  = power_on_modem_device(myConfigurations->apn_username , myConfigurations->apn_password, atoi(myConfigurations->ppp_timeout));
-			if(ret_val == GPRS_SUCCESS){
+		ret_val  = power_on_modem_device(myConfigurations->apn_username , myConfigurations->apn_password, atoi(myConfigurations->ppp_timeout));
+		if(ret_val == GPRS_SUCCESS){
 
-/*	if(!flag_online){
+			/*	if(!flag_online){
 		message_display_function(1,"","Offline network", "power on connection to proceed", (char *)NULL);
 
 	}*/
-	char plotNo[30];
-	char holder[30];
-	strcpy(plotNo,"69");
+			char plotNo[30];
+			char holder[30];
+			strcpy(plotNo,"69");
 
-	cJSON * landratejson;
-	landratejson = cJSON_CreateObject();
-	cJSON_AddStringToObject(landratejson,"request","posuser");
-	cJSON_AddStringToObject(landratejson,"Mac Id","12392323");
+			cJSON * landratejson;
+			landratejson = cJSON_CreateObject();
+			printf("####Serial Number %s\n",serial_num );
+			cJSON_AddStringToObject(landratejson,"mac_address",serial_num);
 
-	printf("%s initial json\n",cJSON_Print(landratejson));
-	getDataFromServer("networkrequest",landratejson,0,"/getMenus");
+			printf("%s initial json\n",cJSON_Print(landratejson));
+			getDataFromServer("networkrequest",landratejson,0,"/api/usersrequest/fetchusers");
+
+			//heloo
 
 
-}}
+
+		}else
+		{
+			message_display_function(1,"","Online Posting Error", "The POS is operating in offline mode. Please turn on GPRS to post your transactions.", (char *)NULL);
+			kb_getkey();
+			return 0;
 		}
+
+	}
+	return 0;
+}
 
 int request_pos_users(void){
 
@@ -432,52 +441,52 @@ void select_user_from_db(char * password){
 void select_from_db() {
 	int ret;
 
-	  char idNumber[30];
-	  char holder[30];
-	  strcpy(idNumber,"69");
+	char idNumber[30];
+	char holder[30];
+	strcpy(idNumber,"69");
 
-		ret = kb_getStringtwo(NUM_IN ,NUM_IN ,  1, 20, idNumber,holder, NULL, "Enter ID No", "","EDIT POSUSER", 0);
-
-
+	ret = kb_getStringtwo(NUM_IN ,NUM_IN ,  1, 20, idNumber,holder, NULL, "Enter ID No", "","EDIT POSUSER", 0);
 
 
-		printf("Entered ID Number is %s\n", idNumber);
-		char * sqlstmt;
-			char idnumber[40];
 
-			sqlstmt = malloc(700);
-			strcpy(idnumber,(idNumber));
 
-			sprintf(sqlstmt , "select firstname as login_firstname  from operator where idnumber =  '%s';", idnumber);
-			printf("%s\n",sqlstmt);
-			increament_read = 0;
-			read_database(sqlstmt,"operator");
-			free(sqlstmt);
-			/**
-			 * if results are found,it means users exist,set login_successful to 1
-			 */
-			if(increament_read > 0)
-			{
+	printf("Entered ID Number is %s\n", idNumber);
+	char * sqlstmt;
+	char idnumber[40];
 
-				user_found_true  = 1;
-				flag_offline_login = 1;
+	sqlstmt = malloc(700);
+	strcpy(idnumber,(idNumber));
 
-			}
-			/**
-			 * if increament_read = 0,it means no results were found,
-			 * this is a case of invalid login credentials
-			 */
-			else
-			{
-				message_display_function(1,"","Invalid Operator ID", "Please check the Operator ID and Try again !", (char *)NULL);
-				kb_getkey();
-				user_found_true  = 0;
-			}
-			//set increament_read to 0 for the next login
-			increament_read = 0;
+	sprintf(sqlstmt , "select firstname as login_firstname  from operator where idnumber =  '%s';", idnumber);
+	printf("%s\n",sqlstmt);
+	increament_read = 0;
+	read_database(sqlstmt,"operator");
+	free(sqlstmt);
+	/**
+	 * if results are found,it means users exist,set login_successful to 1
+	 */
+	if(increament_read > 0)
+	{
 
+		user_found_true  = 1;
+		flag_offline_login = 1;
 
 	}
+	/**
+	 * if increament_read = 0,it means no results were found,
+	 * this is a case of invalid login credentials
+	 */
+	else
+	{
+		message_display_function(1,"","Invalid Operator ID", "Please check the Operator ID and Try again !", (char *)NULL);
+		kb_getkey();
+		user_found_true  = 0;
+	}
+	//set increament_read to 0 for the next login
+	increament_read = 0;
+
+
+}
 
 
 void edit_user_details(void){
@@ -488,47 +497,36 @@ void edit_user_details(void){
 	 */
 	int selected;
 	int ret;
-int i;
+	int key;
+	int i;
 	char posid[30];
 	char holder[30];
 	user_found_true=0;
 	while(1){
-	 select_from_db();
+		select_from_db();
 
-	while (user_found_true) {
-		flag_update_menu= 0;
-		selected = lcd_menu("EDIT POS USER", operatorfieldsa, sizeof(operatorfieldsa) / 100,selected);
-		switch (selected) {
-					case 0:
+		while (user_found_true) {
+			flag_update_menu= 0;
+			selected = lcd_menu("EDIT POS USER", operatorfieldsa, sizeof(operatorfieldsa) / 100,selected);
+			switch (selected) {
+			case 0:
 
-						land_rate_operations();
+				update_operator_firstname();
 
-						break;
-					case 1:
-						for( i=0; i<4; i++){
-					printf("update firstname\n");
-						}
-						break;
-					case 2:
-						for( i=0; i<4; i++){
-					printf("update lastname\n");
-						}
-						break;
-					case 3:
-						for( i=0; i<4; i++){
-					printf("update PIN\n");
-						}
-						break;
-					case 4:
-						for( i=0; i<4; i++){
-					printf("update userlevel\n");
-						}
-						break;
-					}
+				break;
+			case 1:
+				update_operator_pin();
+				break;
+			case 2:
+				return;
+				break;
 
-	}
+			}
+
+		}
 	}
 
+//key=kb_getkey();
 
 
 
@@ -554,7 +552,7 @@ void initialize_user_params(void){
 	return;
 
 }
-void land_rate_operations(){
+void update_operator_firstname(){
 
 	/*
 	 * check flag for online
@@ -570,20 +568,59 @@ void land_rate_operations(){
 		message_display_function(1,"","Offline network", "power on connection to proceed", (char *)NULL);
 
 	}*/
-	  char request_name[30];
-	  char holder[30];
-	  strcpy(request_name,"69");
-		//ret = kb_getStringtwo(ALPHA_IN ,NUM_IN ,  1, 6, plotNo,"", NULL, "L/R No", "","",0);
-		ret = kb_getStringtwo(ALPHA_IN ,NUM_IN ,  1, 20, request_name,holder, NULL, "Enter User Name", "","UPDATE USERNAME", 0);
+	char request_name[30];
+	char holder[30];
+	strcpy(request_name,"69");
+	//ret = kb_getStringtwo(ALPHA_IN ,NUM_IN ,  1, 6, plotNo,"", NULL, "L/R No", "","",0);
+	ret = kb_getStringtwo(ALPHA_IN ,NUM_IN ,  1, 20, request_name,holder, NULL, "Enter User Name", "","UPDATE USERNAME", 0);
 
-if(strlen(request_name)>0){
+	if(strlen(request_name)>0)
+	{
 
-		sprintf(sqlstmt , "update operator set firstname = '%s';",  request_name);
-			printf("%s\n",sqlstmt);
-			increament_read = 0;
-			read_database(sqlstmt,"operator");
-			free(sqlstmt);}
+		sprintf(sqlstmt , "update operator set username = '%s';",  request_name);
+		printf("%s\n",sqlstmt);
+		increament_read = 0;
+		read_database(sqlstmt,"operator");
+		free(sqlstmt);
+		message_display_function(1,"","Update Operation", "USERNAME change successful", (char *)NULL);
+		kb_getkey();
+	}else{
+		message_display_function(1,"","Update Operation", "USERNAME update failed", (char *)NULL);
+		kb_getkey();
+	}
 
 
+
+
+}
+
+void update_operator_pin(){
+
+	/*
+	 * check flag for online
+	 * prompt for two menus:::enquire land balance && 2. Make payment
+	 */
+
+	char * sqlstmt;
+
+	sqlstmt = malloc(700);
+	int ret;
+
+	char request_name[30];
+	char holder[30];
+	strcpy(request_name,"69");
+	//ret = kb_getStringtwo(ALPHA_IN ,NUM_IN ,  1, 6, plotNo,"", NULL, "L/R No", "","",0);
+	ret = kb_getStringtwo(ALPHA_IN ,NUM_IN ,  1, 20, request_name,holder, NULL, "Enter New PIN", "","UPDATE OPERATOR PIN", 0);
+
+	if(strlen(request_name)>0){
+
+		sprintf(sqlstmt , "update operator set pin = '%s';",  request_name);
+		printf("%s\n",sqlstmt);
+		increament_read = 0;
+		read_database(sqlstmt,"operator");
+		free(sqlstmt);}
+
+	message_display_function(1,"","Update Operation", "PIN changed successfully", (char *)NULL);
+	kb_getkey();
 
 }

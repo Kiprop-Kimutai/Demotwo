@@ -651,7 +651,7 @@ void register_ben(int argc, char *argv[]){
 
 	//Get  Beneficiary details
 	lcd_clean();
-	for( x=0; x<4;x++)
+	for( x=0; x<strlen(details);x++)
 	{
 		change_made =0;
 

@@ -164,7 +164,7 @@ void offline_login(char * password){
 	 * Currentuser.username is obtained from username user enters when prompted by the POS
 	 */
 
-	sprintf(sqlstmt , "select idnumber as login_userid  from operator where firstname =  '%s' and pin = '%s';", CurrentOperator.username, password);
+	sprintf(sqlstmt , "select idnumber as login_userid  from operator where username =  '%s' and pin = '%s';", CurrentOperator.username, password);
 
 	//sprintf(sqlstmt , "select userid as login_userid ,username as login_username ,password as login_password,watchTimer as login_watchTimer ,name as login_name	, MarketID as login_MarketID	, Market as login_Market	, paybill as login_paybill	 ,Currency as login_Currency	, voidTime as login_voidTime ,voidLimit  as login_voidLimit , transactionLimit  , reprint , reprintLimit as login_transactionLimit , systemName as login_systemName , posVersion as login_posVersion from users where username =  LOWER('%s') and password = '%s';", CurrentUser.username, hashedpassword);
 	printf("%s\n",sqlstmt);
@@ -237,7 +237,11 @@ int main(int argc, char *argv[])
 	int selected = 0;
 	int retval = 0;
 	cJSON * requestjson;
+	cJSON * getusersjson;
+	char  requestType[30];
+	char url[50];
 	create_all_table();
+	char  response1[5000];
 	lcd_init(&argc, &argv);
 	lcd_set_bk_color(COLOR_WITE);
 	lcd_set_font_color(COLOR_BLACK);
@@ -280,12 +284,14 @@ int main(int argc, char *argv[])
 			device_management();
 			break;
 		case 3:
-			requestjson = cJSON_CreateObject();
-								cJSON_AddStringToObject(requestjson,"request","posuser");
-								cJSON_AddStringToObject(requestjson,"Mac Id","12392323");
+			strcpy(url,"/api/usersrequest/fetchusers");
+			strcpy(requestType,"data");
+			getusersjson = cJSON_CreateObject();
+			cJSON_AddStringToObject(getusersjson,"mac_address",serial_num);
 
-								//printf("%s initial json\n",cJSON_Print(requestjson));
-			send_gprs_request(requestjson, "/getMenus");
+			strcpy(response1, send_gprs_request(requestType, getusersjson, url));
+			printf("RESPONSE %s\n", response1);
+
 			break;
 		case 4:
 			goto LOGIN;

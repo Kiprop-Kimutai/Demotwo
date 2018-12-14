@@ -15,7 +15,7 @@ int flag_offline_login;
 #include "../src/utilities/cJSON.h"
 int flag_online;
 void process_response_on_fail (char * requestType);
-int send_gprs_request(cJSON * requestjson, char * url);
+char * send_gprs_request(char * requestType, cJSON * requestjson, char * url );
 int start_ppp_session(char * requestType, char * request ,  int operation , char * url);
 enum modem_error_codes
 {
@@ -29,7 +29,7 @@ enum modem_error_codes
 int sim_power_status;
 int  power_on_modem_device(char * apn_username , char *  apn_password , int timeout);
 int get_SMS_phone(int num, char * message , char * number);
-int getDataFromServer (char * requestType , cJSON * request ,   int operation ,  char * endpoint);
+char * getDataFromServer (char * requestType , cJSON * request ,   int operation ,  char * endpoint);
 int get_SMS_Count(void);
 int send_SMS_phone(void);
 char * buildFinalrequest1(char * requestType , cJSON * request );

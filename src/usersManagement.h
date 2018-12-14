@@ -22,7 +22,9 @@ char * label_one;
 char * label_two;
 const char entered_id[20];
 char *  buildFinalrequest1(char * requestType, cJSON * request);
-void request_operators();
+int request_operators();
+void update_operator_firstname();
+void update_operator_pin();
 
 void select_from_db();
 struct pos_users active_pos_user;

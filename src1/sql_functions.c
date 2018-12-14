@@ -757,10 +757,10 @@ void create_all_table() {
 
 
 	operatortable = "CREATE TABLE IF NOT EXISTS operator("
-					"firstname 	TEXT  PRIMARY KEY NOT NULL,"
-					" pin	   TEXT,"
+					"username 	TEXT  PRIMARY KEY NOT NULL,"
+					"pin	   TEXT,"
 					"idnumber  TEXT ,"
-					"operaterlevel   TEXT );";
+					"agentid   TEXT );";
 			sqlite_database_create_table(operatortable,"operator");
 
 			netconf = "CREATE TABLE IF NOT EXISTS netconf("
