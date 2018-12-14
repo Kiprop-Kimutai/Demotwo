@@ -457,7 +457,7 @@ void select_from_db() {
 	sqlstmt = malloc(700);
 	strcpy(idnumber,(idNumber));
 
-	sprintf(sqlstmt , "select firstname as login_firstname  from operator where idnumber =  '%s';", idnumber);
+	sprintf(sqlstmt , "select username as login_firstname  from operator where idnumber =  '%s';", idnumber);
 	printf("%s\n",sqlstmt);
 	increament_read = 0;
 	read_database(sqlstmt,"operator");

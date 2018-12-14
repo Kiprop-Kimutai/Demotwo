@@ -69,7 +69,7 @@ char  string1[100];
 				printf("%s initial json\n",cJSON_Print(requestjson));
 			strcpy(	string1,getDataFromServer(requestType,requestjson,0,url));
 
-				kb_getkey();
+
 				return string1;
 
 			}
