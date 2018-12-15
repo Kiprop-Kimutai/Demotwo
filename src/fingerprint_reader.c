@@ -21,7 +21,8 @@
 #include "../src/utilities/lcd.h"
 #include "../src1/jsonread.h"
 #include "../src1/main_old.h"
-#include "utilities/sgfplib.h"
+#include "mutwol.h"
+
 #include "fingerprint_reader.h"
 
 //#include ""
@@ -51,11 +52,11 @@ int fingerprint_string_to_hex_converter (char  * string , BYTE  ** hex_array)
 	for (i = 0; i < (str_len / 2); i++) {
 		//char_bytearray[i] =string + 2*i;
 		sscanf(local_string + 2*i, "%02x", &bytearray[i]);
-		printf("%02x ", bytearray[i]);
+		//printf("%02x ", bytearray[i]);
 		//kb_getkey();
 	}
 
-//992537
+	//992537
 	//ch = (unsigned )bytearray;
 	//char *ch = (unsigned char *)&bytearray;
 	//memcpy(&ch, &bytearray,400);
@@ -69,7 +70,7 @@ int fingerprint_string_to_hex_converter (char  * string , BYTE  ** hex_array)
 		//printf(char_bytearray , "%x ", hex_array);
 		char_bytearray[i] = bytearray[i];
 
-		printf("%02x", char_bytearray[i]);
+		//printf("%02x", char_bytearray[i]);
 
 	}
 	printf("Stick : %d\n" , str_len);
@@ -113,7 +114,7 @@ int fingerprint_hex_to_string(BYTE * readingreg)
 
 
 
-int fplib_test(int option , cJSON * Biodata)
+int fplib_test(int option , BYTE *imageBuffer2[] ,  cJSON * Personal_data_file)
 {
 	//option 0 = capture
 	//Option 1  = compare
@@ -121,7 +122,8 @@ int fplib_test(int option , cJSON * Biodata)
 	DWORD templateSize, templateSizeMax;
 	DWORD quality;
 	BYTE *imageBuffer1;
-	BYTE *imageBuffer2;
+	//BYTE *imageBuffer2[3];
+	BYTE *imageBuffer3;
 	BYTE *minutiaeBuffer1;
 	BYTE *minutiaeBuffer2;
 	SGDeviceInfoParam deviceInfo;
@@ -249,7 +251,7 @@ int fplib_test(int option , cJSON * Biodata)
 		//Compare fingerprint
 		if(option == 1)
 		{
-			message_display_function(1,"","Fingerprint authentication","Please press enter after placing finger", (char *)NULL);
+			message_display_function(1,"","Fingerprint authentication","Place finger and press  enter", (char *)NULL);
 			while(n<3)
 			{
 				y = get_y_position();
@@ -343,23 +345,32 @@ int fplib_test(int option , cJSON * Biodata)
 					err = SGFDX_ERROR_NONE;
 
 					//get stored
-					printf("Finger Test :  %s\n", get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(Biodata,"finger1"))));
+					//printf("Finger Test :  %s\n", get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(Biodata,"finger1"))));
 					//printf("Finger Test :  %s\n", cJSON_GetObjectItem(Biodata,"finger1"));
-					fingerprint_string_to_hex_converter(get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(Biodata,"finger1"))) , &imageBuffer2);
-
-					w = 0 ;
-					printf("Started here\n");
+					//fingerprint_string_to_hex_converter(get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(Biodata,"finger1"))) , &imageBuffer2);
+					w= 0;
+					printf("New Template \n");
 					while(w<400)
-						{
-							printf("%x",imageBuffer2[w]);
-							//myBenf.fingerprint[w]= imageBuffer1[w];
-							w++;
-						}
+					{
+						printf("%02X",imageBuffer1[w]);
+						w++;
+
+					}
+					w = 0 ;
+					printf("\nOur Stored template\n");
+					while(w<400)
+					{
+						//printf("%x",imageBuffer2[w]);
+						imageBuffer3[w] = imageBuffer2[1][w];
+						printf("%02X",imageBuffer3[w]);
+						//myBenf.fingerprint[w]= imageBuffer1[w];
+						w++;
+					}
 					printf("Ended here\n");
 					if (err == SGFDX_ERROR_NONE)
 					{
 						quality = 0;
-						err = SGFPM_GetTemplateSize(hsgfplib, imageBuffer2, &templateSize);
+						err = SGFPM_GetTemplateSize(hsgfplib, imageBuffer3, &templateSize);
 					}
 
 					printf("1 Ended here\n");
@@ -369,11 +380,11 @@ int fplib_test(int option , cJSON * Biodata)
 					fingerInfo2.ImpressionType = SG_IMPTYPE_LP;
 					fingerInfo2.ImageQuality = quality; //0 to 100
 					printf("2 Ended here\n");
-					err = SGFPM_CreateTemplate(hsgfplib,&fingerInfo, imageBuffer1, minutiaeBuffer2);
+					err = SGFPM_CreateTemplate(hsgfplib,&fingerInfo, imageBuffer3, minutiaeBuffer2);
 					// MatchTemplate()
 
 					printf("3 Ended here\n");
-		/*			minutiaeBuffer2 = (BYTE*) malloc(templateSizeMax);
+					/*			minutiaeBuffer2 = (BYTE*) malloc(templateSizeMax);
 					err = SGFPM_CreateTemplate(hsgfplib,&fingerInfo, imageBuffer2, minutiaeBuffer2);*/
 
 					err = SGFPM_MatchTemplate(hsgfplib,minutiaeBuffer1, minutiaeBuffer2, SL_LOW, &matched);
@@ -402,7 +413,7 @@ int fplib_test(int option , cJSON * Biodata)
 					//Get stored fingerprint
 					//fingerprint_string_to_hex_converter(cJSON_Print(cJSON_GetObjectItem(Biodata,"finger1")) , &imageBuffer2);
 
-					err = SGFPM_GetMatchingScore(hsgfplib,minutiaeBuffer1, imageBuffer2, &score);
+					err = SGFPM_GetMatchingScore(hsgfplib,minutiaeBuffer1, imageBuffer1, &score);
 					printf("Score is : [%ld]\n\n",score);
 					x++;
 
@@ -509,6 +520,7 @@ int fplib_test(int option , cJSON * Biodata)
 				// getTemplateSize()
 				quality = 0;
 				err = SGFPM_GetTemplateSize(hsgfplib,minutiaeBuffer1, &templateSize);
+				personalizecard(cJSON_Print(Personal_data_file),imageBuffer1);
 				//strcpy(myBenf.fingerprint, minutiaeBuffer1 );
 				printf("We got the image");
 

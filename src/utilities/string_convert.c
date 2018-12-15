@@ -1,4 +1,4 @@
-#include "../src/utilities/string_convert.h"
+#include "string_convert.h"
 
 #include <convert.h>
 #include <malloc.h>

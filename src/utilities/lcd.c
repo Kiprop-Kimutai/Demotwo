@@ -1,4 +1,4 @@
-#include "../src/utilities/lcd.h"
+#include "lcd.h"
 //Disabled on move
 //#include "general_funtions_and_varaibles.h"
 #include <directfb.h>
@@ -6,7 +6,7 @@
 #include <stdarg.h>
 #include <led.h>
 
-#include "../src/utilities/keyboart.h"
+#include "keyboart.h"
 #include "string_convert.h"
 //#include "services.h"
 #define font_file_xx  "/usr/share/fonts/wqy-microhei.ttf"
@@ -488,7 +488,7 @@ void screen_header(void){
 
 	main_surface->SetFont(main_surface, font_16);
 	lcd_clean();
-	lcd_printf(ALG_CENTER, "DEMOAPP");
+	lcd_printf(ALG_CENTER, "SAFARICOM");
 	current_y = current_y -16;
 	//lcd_show_picture("images.jpg");
 	lcd_printf(ALG_CENTER, "___________________________");

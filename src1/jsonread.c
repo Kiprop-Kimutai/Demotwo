@@ -3,6 +3,7 @@
 
 #include "../../src/utilities/JSON_checker.h"
 #include "../src/utilities/cJSON.h"
+#include "../src/utilities/send_online_request.h"
 #include "../src/utilities/lcd.h"
 #include "receipt.h"
 #include "main_old.h"
@@ -18,83 +19,6 @@ extern void Printer_Demo(char * mychar);
 //int jcheck(char* mystr);
 
 /*printing the value corresponding to boolean, double, integer and strings*/
-void print_json_value(json_object *jobj) {
-	enum json_type type;
-	type = json_object_get_type(jobj); /*Getting the type of the json object*/
-	switch (type) {
-	case json_type_boolean:
-		break;
-	case json_type_double:
-		break;
-	case json_type_int:
-		printf("          value: %d\n", json_object_get_int(jobj));
-		break;
-	case json_type_string:
-		printf("          value: %s\n", json_object_get_string(jobj));
-		break;
-	}
-
-}
-
-void json_online(json_object *jobj) {
-	void json_parse(json_object * jobj); /*Forward Declaration*/
-	enum json_type type;
-
-	json_object *jarray = jobj; /*Simply get the array*/
-
-	int arraylen_online = json_object_array_length(jarray); /*Getting the length of the array*/
-	int serviceId[arraylen_online];
-	const char* serviceName[arraylen_online][100];
-	const char* serviceCode[arraylen_online][100];
-	int serviceLevel[arraylen_online];
-	int loop = 0;
-
-	int i;
-
-	json_object * jvalue;
-
-	for (i = 0; i < arraylen_online; i++) {
-		loop = 0;
-		jvalue = json_object_array_get_idx(jarray, i); /*Getting the array element at position i*/
-		type = json_object_get_type(jvalue);
-		json_object_object_foreach(jobj, key, val) { /*Passing through every array element*/
-			printf("type: ", type);
-			type = json_object_get_type(val);
-			switch (type) {
-			case json_type_boolean:
-			case json_type_double:
-			case json_type_int:
-			case json_type_null:
-			case json_type_string:
-
-				print_json_value(val);
-				if (lock_at_menu_items == 0) {
-					if (strcmp(json_object_get_string(val), "-1") == 0) {
-						location = 0;
-						lock_at_menu_items = 1;
-					} else {
-						if (location == 0) {
-							add_menu(main_menu_string,
-									json_object_get_string(val));
-							location = 1;
-						} else if (location == 1) {
-							add_code(main_menu_string,
-									json_object_get_string(val));
-							location = 0;
-						}
-					}
-				}
-				if (lock_at_menu_items == 1) {
-					lock_at_menu_items = 1;
-				}
-
-				break;
-			}
-
-		}
-		loop++;
-	}
-}
 
 char * remove_quotes(char * string){
 	char * out;
@@ -134,23 +58,21 @@ char * hash_fnc(char * Str){
 }
 
 
-void Start_online_display(char *filename) {
-	char string[5000];
+char* Start_online_display(char *filename) {
+
 	char filelast[100];
 	char str_cmp[100];
 	cJSON *name = NULL;
 	cJSON *request_json = NULL;
 
 	char * outputstring;
-	//cJSON *obj = NULL;
+
 	char * sql;
 
-	//char rm_filename[200];
-	//char transactionstring[5000];
-	//usleep(1);
+
 	FILE* body_file ;
 	body_file = fopen(filename, "r"); //open for read and write
-	printf("FILE NAME : %s\n",filename);
+	printf("FILE NAME ALEX : %s\n",filename);
 	if (body_file == NULL) {
 
 		if(strcmp("REPORT.txt",filename ) !=0)
@@ -161,13 +83,13 @@ void Start_online_display(char *filename) {
 			system("cp services.db_bak services.db");
 			update_stopped = 1;
 		}
-		return;
+		return "err";
 	} else
 	{
 		service_details_not_found = 0;
 		memset(string,0,sizeof(string));
 		if (fgets(string, 10000, body_file) != NULL) {
-			printf("RETURNED :  \n%s\n\n", string);
+			printf("RETURNED ALEX:  \n%s\n\n", string);
 			fclose(body_file);
 			sprintf(filelast,"rm %s",filename);
 			system(filelast);
@@ -177,63 +99,34 @@ void Start_online_display(char *filename) {
 			{
 				int  i =0, len_ar;
 
-				if (strcmp(filename, "GET_POS_USERS.txt") == 0) {
+				if (strcmp(filename, "data.txt") == 0) {
 
 					request_json = cJSON_Parse(string);
 					printf("Line 1\n");
-					//name = cJSON_GetObjectItem(request_json,"code");
 
-					if(cJSON_GetArraySize(request_json)){
-					 system("rm users_config.db");
+					if(request_json!=NULL){
+						printf("Line rm operator.db 1\n");
+					 system("rm operator.db");
 					 create_all_table();
-					}
 
-					  for (i = 0 ; i < cJSON_GetArraySize(request_json) ; i++)
-					  {
 						  printf("Line 2\n");
-						//char paybill, * currency, * name ,* marketid ,  * market , * status ;
-						  cJSON * obj =cJSON_GetArrayItem(request_json, i);
+						cJSON * message =cJSON_GetObjectItem(request_json,"message" );
 						  printf("Line 3\n");
-						//login_successful = 1;
-/*						response = cJSON_GetObjectItem(request_json,"response");
-						obj =  cJSON_GetObjectItem(response,"obj");*/
 
-/*							"userid  		TEXT  PRIMARY KEY NOT NULL,"
-							"username   	TEXT ,"
-							"password   	TEXT ,"
-							"watchTimer   	TEXT ,"
-							"name			TEXT ,"
-							"MarketID		TEXT ,"
-							"Market			TEXT ,"
-							"paybill		TEXT ,"
-							"Currency		TEXT ,"
-							"voidTime		TEXT ,"
-							"voidLimit		TEXT ,"
-							"Status			TEXT ,"*/
-						 char *  pin1    = remove_quotes(cJSON_Print(cJSON_GetObjectItem(obj, "posPin")));
-						 char *  username1    = remove_quotes(cJSON_Print(cJSON_GetObjectItem(obj, "username")));
-						 char *  userid1    = cJSON_Print(cJSON_GetObjectItem(obj, "userid"));
-						 char *  watchTimer1= cJSON_Print(cJSON_GetObjectItem(obj, "watchTimer"));
-					     char *  paybill1   = remove_quotes(cJSON_Print(cJSON_GetObjectItem(obj, "paybill")));
-					     char *  currency1  = remove_quotes(cJSON_Print(cJSON_GetObjectItem(obj, "currency")));
-					     char *  name1      = remove_quotes(cJSON_Print(cJSON_GetObjectItem(obj, "Uname")));
-					     char *  marketid1  = cJSON_Print(cJSON_GetObjectItem(obj, "marktId"));
-					     char *  posVersion  = remove_quotes(cJSON_Print(cJSON_GetObjectItem(obj, "posVersion")));
-					     char *  market1    = remove_quotes(cJSON_Print(cJSON_GetObjectItem(obj, "market")));
-					     char *  voidTime1  = remove_quotes(cJSON_Print(cJSON_GetObjectItem(obj, "voidTime")));
-					     char *  voidLimit1 = remove_quotes(cJSON_Print(cJSON_GetObjectItem(obj, "voidLimit")));
-					     char *  transactionLimit1 = remove_quotes(cJSON_Print(cJSON_GetObjectItem(obj, "transactionLimit")));
-					     //read_database("Delete from users","users_config.db");
+						 char *  pin    = remove_quotes(cJSON_Print(cJSON_GetObjectItem(message, "pin")));
+						 char *  username    = remove_quotes(cJSON_Print(cJSON_GetObjectItem(message, "username")));
+						 char *  agentid    = remove_quotes(cJSON_Print(cJSON_GetObjectItem(message, "agentid")));
+						 char *  idnumber    = remove_quotes(cJSON_Print(cJSON_GetObjectItem(message, "idnumber")));
+
 					     printf("Line 4\n");
 					     sql = malloc(750);
-					     //id|username|password|Level|Name|MarketID|Market|Status
-					     sprintf(sql , "insert into users (username,userid,password,watchTimer,Name,MarketID,Market,paybill,Currency , voidLimit ,voidTime , transactionLimit,posVersion) values ( LOWER('%s'),'%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')" , username1, userid1, hash_fnc(pin1), watchTimer1,   name1 ,  marketid1 , market1, paybill1,currency1, voidLimit1,voidTime1 , transactionLimit1,posVersion);
+					     sprintf(sql , "insert into operator (username,pin,idnumber,agentid ) values ( LOWER('%s'),'%s','%s', '%s')" , username, pin, idnumber, agentid /*hash_fnc(pin1)*/);
 					     printf("%s\n",sql);
-					    // printf("Line 5\n");
-					     read_database(sql,"users_config");
+
+					     read_database(sql,"operator");
 					     free(sql);
 					}
-					  return;
+					  return string;
 				}
 				else
 				{
@@ -272,7 +165,7 @@ void Start_online_display(char *filename) {
 
 								strcpy(response, "");
 
-
+/*
 								json_object * jobj = json_tokener_parse(string);
 								json_object *jarray = jobj;
 
@@ -282,8 +175,8 @@ void Start_online_display(char *filename) {
 
 									read_online_jason_file(jobj, NULL);
 								} else {
-									return;
-								}
+									return "err";
+								}*/
 				}
 								//flag_online = 1;
 
@@ -309,7 +202,7 @@ void Start_online_display(char *filename) {
 				}
 				if(online)
 				design_url("SERVICEDATA", "j");
-				return;
+				return "err";
 			}
 
 			if (strcmp(response, "Invalid user") == 0)
@@ -594,14 +487,7 @@ void Start_online_display(char *filename) {
 					//if(printflag == 0){
 						sprintf(transactionfile , "update TRANSACTIONS set  receipt_printed= '2' where billno = '%s'", recptnum);
 						sqlite_database_insert_into_table(transactionfile,"transaction");
-					//}
-/*
-					else if (printflag == 1)
-					{
-						sprintf(transactionfile , "update TRANSACTIONS set receipt_printed = '1' and print_flag = '0' where billno = '%s'", recptnum);
-						sqlite_database_insert_into_table(transactionfile,"transaction");
-					}
-*/
+
 
 
 
@@ -801,65 +687,11 @@ void Start_online_display(char *filename) {
 				}
 			}
 
-			//printf("JSON : %s\n", string);
+
 			please_print = 0;
-			/*if (strcmp(string, "null") == 0 | strcmp(string, "0") == 0) {
-				if (!login_successful) {
-					goto EXITLOOP;
-				}
-				design_url("SERVICEDATA", "j");
-				body_file = fopen(filename, "r");
-				strcpy(string, "");
-				fgets(string, 10000, body_file);
-				fclose(body_file);
-			}
-
-			else if (strcmp(string, "9006") == 0) {
-				login_successful = 0;
-			} else {
 
 
-				int x = 0, len_ar;
-				if (subservice_id != 0) {
-					free(subservice_id);
-					subservice_id = 0;
-				}
-				if (service_level != 0) {
-					free(service_level);
-					service_level = 0;
-				}
-				if (parentType != 0) {
-					free(parentType);
-					parentType = 0;
-				}
-				if (params != 0) {
-					free(params);
-					params = 0;
-				}
-
-				if (parentId != 0) {
-					free(parentId);
-					parentId = 0;
-				}
-				if (subservice_name != 0) {
-					free(subservice_name);
-					subservice_name = 0;
-				}
-				strcpy(charge, "");
-				json_object * jobj = json_tokener_parse(string);
-				json_object *jarray = jobj;
-
-				if (jobj != NULL) {
-					arraylen = json_object_array_length(jarray);
-					int loop = 0;
-
-					read_online_jason_file(jobj, NULL);
-				} else {
-					return;
-				}
-			}*/
-
-			EXITLOOP: return;
+			EXITLOOP: return "exit";
 
 		} else {
 			printf("The file is empty");
@@ -871,368 +703,14 @@ void Start_online_display(char *filename) {
 			 }
 			//memset(string,0,sizeof(string));
 
-			return;
+			return "empty_file";
 		}
 	}
-	return;
-
-}
-
-void read_online_jason_file(json_object *jobj, char *key) {
-	char str[15];
-	void json_parse(json_object * jobj); /*Forward Declaration*/
-	enum json_type type;
-
-	json_object *jarray = jobj; /*Simply get the array*/
-	if (key) {
-		jarray = json_object_object_get(jobj, key); /*Getting the array if it is a key value pair*/
-	}
-	int arraylen = json_object_array_length(jarray); /*Getting the length of the array*/
-	printf("Array Length: %d\n", arraylen);
-	int i;
-	int loop = 0;
-	json_object * jvalue;
-
-	for (i = 0; i < arraylen; i++) {
-		loop = 0;
-		jvalue = json_object_array_get_idx(jarray, i); /*Getting the array element at position i*/
-
-		json_object_object_foreach(jvalue, key, val)
-		{ /*Passing through every array element*/
-			type = json_object_get_type(val);
-			type = json_object_get_type(val); /*Getting the type of the json object*/
-			switch (type) {
-			printf("%s : \n", key);
-		case json_type_boolean:
-			printf("json_type_boolean");
-			printf("value: %s\n",
-					json_object_get_boolean(val) ? "true" : "false");
-			break;
-		case json_type_double:
-			printf("json_type_doublen");
-			printf("          value: %lf\n", json_object_get_double(val));
-			break;
-		case json_type_int:
-
-		case json_type_string:
-			// Routine for services
-		{
-			if (strcmp(key, "id") == 0)
-			{
-				sprintf(str, "%d", json_object_get_int(val));
-				subservice_id = realloc(subservice_id,(i + 1) * sizeof(char *));
-				subservice_id[i] = malloc(strlen(str) + 1);
-				strcpy(subservice_id[i], str);
-				printf("Read ID : %s", str);
-
-			}
-			if (strcmp(key, "updatemenu") == 0)
-			{
-				sprintf(str, "%d", json_object_get_int(val));
-				if (strcmp(str, "1") == 0)
-				{
-					flag_update_menu = 1;
-				}
-				else
-				{
-					flag_update_menu = 0;
-				}
-
-			}
-			if (strcmp(key, "parentType") == 0)
-			{
-				sprintf(str, "%d", json_object_get_int(val));
-				parentType = realloc(parentType, (i + 1) * sizeof(char *));
-				parentType[i] = malloc(strlen(str) + 1);
-				strcpy(parentType[i], str);
-			}
-			if (strcmp(key, "parentId") == 0) {
-				sprintf(str, "%d", json_object_get_int(val));
-				parentId = realloc(parentId, (i + 1) * sizeof(char *));
-				parentId[i] = malloc(strlen(str) + 1);
-				strcpy(parentId[i], str);
-			}
-			if (strcmp(key, "name") == 0) {
-				printf(" service_level  value: %s\n",json_object_get_string(val));
-				subservice_name = realloc(subservice_name,(i + 1) * sizeof(char *));
-				subservice_name[i] = malloc(strlen(json_object_get_string(val)) + 1);
-				strcpy(subservice_name[i], json_object_get_string(val));
-
-			}
-			if (strcmp(key, "level") == 0) {
-				sprintf(str, "%d", json_object_get_int(val));
-				service_level = realloc(service_level,
-						(i + 1) * sizeof(char *));
-				service_level[i] = malloc(
-						strlen(json_object_get_string(val)) + 1);
-				strcpy(service_level[i], str);
-			}
-
-			if (strcmp(key, "serviceCode") == 0) {
-				printf(" service_code         value: %s\n",
-						json_object_get_string(val));
-				service_code = realloc(service_code, (i + 1) * sizeof(char *));
-				service_code[i] = malloc(
-						strlen(json_object_get_string(val)) + 1);
-				strcpy(service_code[i], json_object_get_string(val));
-			}
-			if (strcmp(key, "serviceName") == 0) {
-				printf("  service_name        value: %s\n",
-						json_object_get_string(val));
-				service_name = realloc(service_name, (i + 1) * sizeof(char *));
-				service_name[i] = malloc(
-						strlen(json_object_get_string(val)) + 1);
-				strcpy(service_name[i], json_object_get_string(val));
-			}
-			if (strcmp(key, "paramtype") == 0) {
-				printf("  paramtype        value: %s\n",
-						json_object_get_string(val));
-				paramtype = realloc(paramtype, (i + 1) * sizeof(char *));
-				paramtype[i] = malloc(
-						strlen(json_object_get_string(val)) + 1);
-				strcpy(paramtype[i], json_object_get_string(val));
-			}
-			if (strcmp(key, "param") == 0)
-			{
-				printf(" param  value: %s\n", json_object_get_string(val));
-				params = realloc(params, (i + 1) * sizeof(char *));
-				params[i] = malloc(strlen(json_object_get_string(val)) + 1);
-				strcpy(params[i], json_object_get_string(val));
-				printf(" param  value: %s\n", json_object_get_string(val));
-			}
-			if (strcmp(key, "charge") == 0) {
-				strcpy(charge, json_object_get_string(val));
-
-				//for synch
-				if(flag_update_menu)
-				{
-				charges = realloc(charges, (i + 1) * sizeof(char *));
-				charges[i] = malloc(strlen(json_object_get_string(val)) + 1);
-				strcpy(charges[i], json_object_get_string(val));
-				}
-
-			}
-			if (strcmp(key, "userId") == 0) {
-				printf("%d\n Val userId", json_object_get_int(val));
-				CurrentUser.userid = json_object_get_int(val);
-				login_successful = 1;
-			}
-			if (strcmp(key, "watchTimer") == 0) {
-				printf("%d\n Val Watchtimer", json_object_get_int(val));
-				CurrentUser.watchTimer = json_object_get_int(val);
-				//login_successful = 1;
-			}
-			if (strcmp(key, "transactionLimit") == 0) {
-				CurrentUser.transactionLimit = atoi(json_object_get_string(val));
-				//login_successful = 1;
-			}
-			if (strcmp(key, "voidTime") == 0) {
-				CurrentUser.voidTimer = atoi(json_object_get_string(val));
-				//login_successful = 1;
-			}
-			if (strcmp(key, "voidLimit") == 0) {;
-				CurrentUser.voidLimit = atoi(json_object_get_string(val));
-				//login_successful = 1;
-			}
-			if (strcmp(key, "paybill") == 0) {
-				printf("%d\n Val paybill", json_object_get_string(val));
-				strcpy(CurrentUser.paybill, json_object_get_string(val));
-			}
-			if (strcmp(key, "sftpUrl") == 0) {
-				printf("%s\n sftpUrl", json_object_get_string(val));
-				strcpy(CurrentUser.update_url, json_object_get_string(val));
-			}
-			if (strcmp(key, "posVersion") == 0) {
-				printf("%d\n Val paybill", json_object_get_string(val));
-				strcpy(CurrentUser.latest_version_number, json_object_get_string(val));
-			}
-			if (strcmp(key, "currency") == 0) {
-				printf("%d\n Val currency", json_object_get_string(val));
-				strcpy(CurrentUser.currency , json_object_get_string(val));
-				//login_successful = 1;
-			}
-			if (strcmp(key, "username") == 0) {
-				printf(" username: %s\n", json_object_get_string(val));
-				strcpy(CurrentUser.username, json_object_get_string(val));
-			}
-			if (strcmp(key, "Uname") == 0) {
-				printf(" Uname: %s\n", json_object_get_string(val));
-				strcpy(CurrentUser.name, json_object_get_string(val));
-			}
-			if (strcmp(key, "token") == 0) {
-				strcpy(token, json_object_get_string(val));
-
-			}
-			if (strcmp(key, "marktId") == 0) {
-				printf(" param  value: %s\n", json_object_get_string(val));
-				sprintf(str, "%d", json_object_get_int(val));
-				marktId = realloc(marktId, (i + 1) * sizeof(char *));
-				marktId[i] = malloc(strlen(str) + 1);
-				strcpy(marktId[i], str);
-			}
-			if (strcmp(key, "market") == 0)
-
-			{
-				printf(" market  value: %s\n", json_object_get_string(val));
-				strcpy(CurrentUser.market, json_object_get_string(val));
-				printf(" market  value: %s\n", json_object_get_string(val));
-			}
-
-			if (strcmp(key, "response") == 0)
-
-			{
-				printf(" response: %s\n", json_object_get_string(val));
-				strcpy(response, json_object_get_string(val));
-				printf("response: %s\n", json_object_get_string(val));
-			}
-
-
-			if (strcmp(key, "z_number") == 0)
-			{
-
-				printf("z_number: %d\n", json_object_get_int(val));
-				z_number_recieved = json_object_get_int(val);
-			}
-			if (strcmp(key, "subcounty") == 0)
-				strcpy(CurrentUser.subcounty, json_object_get_string(val));
-
-
-			//SBP
-			if (strcmp(key, "bname") == 0)
-				strcpy(bname, json_object_get_string(val));
-			if (strcmp(key, "bid") == 0)
-				strcpy(bid, json_object_get_string(val));
-			if (strcmp(key, "bcode") == 0)
-				strcpy(bcode, json_object_get_string(val));
-			if (strcmp(key, "bdep") == 0)
-				strcpy(bdep, json_object_get_string(val));
-
-
-
-
-			/*
-			 * map.put("bname", rs.getString("bm.name"));
-     map.put("bid", rs.getString("bm.bid"));
-     map.put("bcode", rs.getString("t.code"));
-     map.put("bdep", "t.description");
-     map.put("charge", fee.contains(".") ? fee.substring(0, fee.indexOf(".")) : fee);
-			 */
-			break;
-		}
-			}
-
-			login_successful = 1;
-
-		}
-
-	}
-}
-
-void json_parse_array(json_object *jobj, char *key) {
-	void json_parse(json_object * jobj); /*Forward Declaration*/
-	enum json_type type;
-
-	json_object *jarray = jobj; /*Simply get the array*/
-	if (key) {
-		jarray = json_object_object_get(jobj, key); /*Getting the array if it is a key value pair*/
-	}
-
-	int arraylen = json_object_array_length(jarray); /*Getting the length of the array*/
-	//printf("Array Length: %d\n",arraylen);
-	int i;
-	json_object * jvalue;
-
-	for (i = 0; i < arraylen; i++) {
-		main_menu_string = one_level_deep(main_menu_string, i);
-		// printf("\n\n\nMenu Items Number [%d]: ::level in %s:: ",i, main_menu_string);
-		jvalue = json_object_array_get_idx(jarray, i); /*Getting the array element at position i*/
-		type = json_object_get_type(jvalue);
-		if (type == json_type_array) {
-			json_parse_array(jvalue, NULL);
-		} else if (type != json_type_object) {
-			//strcpy(menu_name,json_object_get_string(jobj));
-			//printf("%s ",menu_name);
-
-		} else {
-			json_parse(jvalue);
-		}
-		lock_at_menu_items = 0;
-		main_menu_string = one_level_up(main_menu_string, 1);
-	}
-}
-
-void json_parse_array_start(json_object *jobj) {
-	void json_parse(json_object * jobj); /*Forward Declaration*/
-	enum json_type type;
-
-	json_object *jarray = jobj; /*Simply get the array*/
-
-	main_menu_count = json_object_array_length(jarray); /*Getting the length of the array*/
-	int i, number_of_menu_below;
-	json_object * jvalue;
-
-	for (i = 0; i < main_menu_count; i++) {
-		main_menu_string = one_level_deep(main_menu_string, i);
-		add_menu(main_menu_string, "");
-		jvalue = json_object_array_get_idx(jarray, i); /*Getting the array element at position i*/
-		type = json_object_get_type(jvalue);
-		if (type == json_type_array) {
-			number_of_menu_below = json_object_array_length(jvalue);
-			json_parse_array(jvalue, NULL);
-		} else if (type != json_type_object) {
-			strcpy(menu_name, json_object_get_string(jobj));
-			printf("%s ", menu_name);
-		} else {
-			json_parse(jvalue);
-		}
-		main_menu_string = one_level_up(main_menu_string, 1);
-	}
+	return string;
 
 }
 
 /*Parsing the json object*/
-void json_parse(json_object * jobj) {
-	enum json_type type;
-	json_object_object_foreach(jobj, key, val)
-	{ /*Passing through every array element*/
-		type = json_object_get_type(val);
-		switch (type) {
-		case json_type_boolean:
-		case json_type_double:
-		case json_type_int:
-		case json_type_string:
-			print_json_value(val);
-			if (lock_at_menu_items == 0) {
-				if (strcmp(json_object_get_string(val), "-1") == 0) {
-					location = 0;
-					lock_at_menu_items = 1;
-				} else {
-					if (location == 0) {
-						add_menu(main_menu_string, json_object_get_string(val));
-						location = 1;
-					} else if (location == 1) {
-						add_code(main_menu_string, json_object_get_string(val));
-						location = 0;
-					}
-				}
-			}
-			if (lock_at_menu_items == 1) {
-				lock_at_menu_items = 1;
-			}
-			break;
-
-		case json_type_object:
-			lock_at_menu_items = 0;
-			jobj = json_object_object_get(jobj, key);
-			json_parse(jobj);
-			break;
-		case json_type_array:
-			lock_at_menu_items = 0;
-			json_parse_array(jobj, key);
-			break;
-		}
-	}
-}
 
 int jcheck(char* mystr){
 	/*

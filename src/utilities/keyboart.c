@@ -2,16 +2,16 @@
 
 #include "ctype.h"
 #include "unistd.h"
-#include "../src1/general_funtions_and_varaibles.h"
-#include "../src1/jsonread.h"
-#include "../src1/desfire_test.h"
+#include "../../src1/general_funtions_and_varaibles.h"
+#include "../../src1/jsonread.h"
+#include "../../src1/desfire_test.h"
 #include <pthread.h>
 
 #include <stdarg.h>		/* for va_ stuff */
 
 #include <sys/time.h>
 
-#include "../src/utilities/visualstring.h"
+#include "visualstring.h"
 #include "cJSON.h"
 #include "lcd.h"
 #include "postslib_extern.h"
@@ -128,17 +128,21 @@ void set_innitial_configuration() {
 
 	char getCharacters[40];
 	char getCharacters1[40];
-	char name1[30];
+	char name1[130];
 	char name[100];
 
 	strcpy(name1, "");
 
-	//Setting IP address
-	do
-	{
-		strcpy(name, "Enter FirstName");
-		//kb_getString(ALPHA_IN, 1, 16,getCharacters , NULL, name);
-		ret = kb_getStringtwo(ALPHA_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"Register Beneficiary", 1);
+
+//Setting IP address
+		do
+		{
+
+			strcpy(name, "Enter Enter IP address");
+					strcpy(name1, "Current IP address");
+
+					ret = kb_getStringtwo(ALPHA_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"Configurations", 1);
+
 
 		if( isValidIpAddress(getCharacters))
 		{
@@ -162,13 +166,13 @@ void set_innitial_configuration() {
 			kb_getkey();
 
 		}
-	}while(strlen(myConfigurations->IpAddress)==0 );
+		}while(strlen(myConfigurations->IpAddress)==0 );
 
-	//Setting port number
-	do
-	{
-		strcpy(name, "Enter port number");
-		ret = kb_getStringtwo(NUM_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"Configurations", 1);
+//Setting port number
+		do
+		{
+			strcpy(name, "Enter port number");
+			ret = kb_getStringtwo(NUM_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"Configurations", 1);
 		if( is_valid_int(getCharacters))
 		{
 			change_made =1;
@@ -190,13 +194,13 @@ void set_innitial_configuration() {
 			kb_getkey();
 
 		}
-	}while(strlen(myConfigurations->portNumber)==0 );
+		}while(strlen(myConfigurations->portNumber)==0 );
 
-	//Setting APN username
-	do
-	{
-		strcpy(name, "Enter APN username");
-		ret = kb_getStringtwo(ALPHA_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"Configurations", 1);
+//Setting APN username
+		do
+		{
+			strcpy(name, "Enter APN username");
+			ret = kb_getStringtwo(ALPHA_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"Configurations", 1);
 		if(ret !=-1)
 		{
 			change_made =1;
@@ -214,14 +218,14 @@ void set_innitial_configuration() {
 
 		}
 
-	}while(strlen(myConfigurations->apn_username)==0 );
+		}while(strlen(myConfigurations->apn_username)==0 );
 
 	//Setting  APN password
-	strcpy(name, "Enter APN password");
-	do
-	{
-		printf("in password\n");
-		ret = kb_getStringtwo(ALPHA_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"Configurations", 1);
+		strcpy(name, "Enter APN password");
+		do
+		{
+			printf("in password\n");
+			ret = kb_getStringtwo(ALPHA_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"Configurations", 1);
 		if(ret != -1)
 		{
 			change_made =1;
@@ -239,15 +243,15 @@ void set_innitial_configuration() {
 
 		}
 
-	}while(strlen(myConfigurations->apn_password)==0 );
-	printf("after username\n");
+		}while(strlen(myConfigurations->apn_password)==0 );
+		printf("after username\n");
 
-	//setting PP timeout
+		//setting PP timeout
 
-	strcpy(name, "Enter IP PPP time out");
-	do
-	{
-		ret = kb_getStringtwo(NUM_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"Configurations", 1);
+		strcpy(name, "Enter IP PPP time out");
+		do
+		{
+			ret = kb_getStringtwo(NUM_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"Configurations", 1);
 		if( is_valid_int(getCharacters))
 		{
 			change_made =1;
@@ -268,7 +272,7 @@ void set_innitial_configuration() {
 			kb_getkey();
 
 		}
-	}while(strlen(myConfigurations->ppp_timeout)==0 );
+		}while(strlen(myConfigurations->ppp_timeout)==0 );
 
 
 	if(change_made)

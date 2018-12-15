@@ -4,7 +4,7 @@
 #include <sys/time.h>
 #include <curl/curl.h>
 #include <stdlib.h>
-
+#include "../src/utilities/send_online_request.h"
 #include "../src/utilities/keyboart.h"
 #include "../src/utilities/lcd.h"
 #include "receipt.h"
@@ -15,7 +15,7 @@
 void start_ppp_sess(void);
 int starting_time= 1,retval;
 pthread_t tidx,tidx1;
-char gprs_chat_file[] = { "ABORT          'NO CARRIER'" "\n"
+char gprs_chat_file1[] = { "ABORT          'NO CARRIER'" "\n"
 		"ABORT          'NO DIALTONE'" "\n"
 		"ABORT          'ERROR'" "\n"
 		"ABORT          'NO ANSWER'" "\n"
@@ -219,7 +219,8 @@ void* threader1(void *arg)
 	return NULL;
 }
 
-void start_ppp_session(char * requestType, char* request) {
+int start_ppp_session_old(char * requestType, char * request ,  int operation , char * url)
+{
 	CURL *curl;
 	CURLcode res;
 	char filename[100];
@@ -265,7 +266,7 @@ void start_ppp_session(char * requestType, char* request) {
 		lcd_flip();
 		int wnet_reset();
 		wnet_power_down();
-		power_on_modem_device();
+		//power_on_modem_device();
 		//start_ppp_sess();
 		retval = ppp_check("/var/mux1");
 		if (0 != retval) {
@@ -453,6 +454,19 @@ void start_ppp_session1(char* request) {
 void start_ppp_sess() {
 	int retval;
 	retval = 0;
+	char gprs_chat_file[] = { "ABORT          'NO CARRIER'" "\n"
+			"ABORT          'NO DIALTONE'" "\n"
+			"ABORT          'ERROR'" "\n"
+			"ABORT          'NO ANSWER'" "\n"
+			"ABORT          'BUSY'" "\n"
+			"ABORT          'Invalid Login'" "\n"
+			"ABORT          'Login incorrect'" "\n"
+			"TIMEOUT        '60'" "\n"
+			"''             'ATZ'" "\n"
+			"'OK'           'AT+CGDCONT=1,\"IP\",\"4.2.2.2\"'" "\n"
+			"'OK'           'ATDT*99***1#'" "\n"
+			"'CONNECT'      ''" "\n" };
+
 	retval = ppp_open("/var/mux1", gprs_chat_file,
 			myConfigurations->apn_username, myConfigurations->apn_password,
 			PPP_ALG_PAP, myConfigurations->apn_password);
@@ -557,9 +571,21 @@ void power_on_modem_device() {
 }
 */
 
-void power_on_modem_device() {
+int  power_on_modem_device_old(char * apn_username , char *  apn_password , int timeout) {
 
 	int retval = 0;
+	char gprs_chat_file[] = { "ABORT          'NO CARRIER'" "\n"
+			"ABORT          'NO DIALTONE'" "\n"
+			"ABORT          'ERROR'" "\n"
+			"ABORT          'NO ANSWER'" "\n"
+			"ABORT          'BUSY'" "\n"
+			"ABORT          'Invalid Login'" "\n"
+			"ABORT          'Login incorrect'" "\n"
+			"TIMEOUT        '60'" "\n"
+			"''             'ATZ'" "\n"
+			"'OK'           'AT+CGDCONT=1,\"IP\",\"4.2.2.2\"'" "\n"
+			"'OK'           'ATDT*99***1#'" "\n"
+			"'CONNECT'      ''" "\n" };
 
 	if(fag_start_ppp_session)
 	{
@@ -648,6 +674,18 @@ void power_on_modem_device() {
 
 void gprs_demo() {
 
+	char gprs_chat_file[] = { "ABORT          'NO CARRIER'" "\n"
+			"ABORT          'NO DIALTONE'" "\n"
+			"ABORT          'ERROR'" "\n"
+			"ABORT          'NO ANSWER'" "\n"
+			"ABORT          'BUSY'" "\n"
+			"ABORT          'Invalid Login'" "\n"
+			"ABORT          'Login incorrect'" "\n"
+			"TIMEOUT        '60'" "\n"
+			"''             'ATZ'" "\n"
+			"'OK'           'AT+CGDCONT=1,\"IP\",\"4.2.2.2\"'" "\n"
+			"'OK'           'ATDT*99***1#'" "\n"
+			"'CONNECT'      ''" "\n" };
 	int retval = 0;
 	int len;
 

@@ -9,7 +9,7 @@
  *
  *   Author:  amir zamani
  *****************************************************************************/
-#include "../src/utilities/visualstring.h"
+#include "visualstring.h"
 
 #include <memory.h>
 

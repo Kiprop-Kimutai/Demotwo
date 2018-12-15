@@ -30,4 +30,10 @@ void manage_users_menu(void );
  */
 void initialize_user_params(void);
 
+int request_operators(void);
+
+void login( void) ;
+
+int user_found_true;
+
 #endif /* USERSMANAGEMENT_H_ */

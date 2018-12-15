@@ -68,6 +68,7 @@ static int callback(void *data, int argc, char **argv, char **azColName) {
 		printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
 	}
 	printf("\n");
+	increament_read++;
 	return 0;
 }
 static int callback_receiptlogs(void *data, int argc, char **argv, char **azColName) {
@@ -560,6 +561,8 @@ void  sqlite_database_create_table(char *sql ,char *Db) {
 		rc = sqlite3_open("vihiga.db", &db);
 	else if(strcmp(Db , "users_config")==0)
 		rc = sqlite3_open("users_config.db", &db);
+	else if(strcmp(Db , "operator")==0)
+			rc = sqlite3_open("operator.db", &db);
 	else
 		return;
 
@@ -643,6 +646,8 @@ void read_database(char * sql,char * Db) {
 			rc = sqlite3_open("vihiga.db", &db);
 		else if(strcmp(Db , "users_config")==0)
 			rc = sqlite3_open("users_config.db", &db);
+		else if(strcmp(Db , "operator")==0)
+				rc = sqlite3_open("operator.db", &db);
 
 
 		if (rc) {
@@ -654,7 +659,8 @@ void read_database(char * sql,char * Db) {
 		}
 		clear_arrays();
 		increament_read = 0;
-
+		if(strcmp(Db , "operator")==0)
+				rc = sqlite3_exec(db, sql, callback, (void*) data, &zErrMsg);
 		if(strcmp(Db , "transaction")==0)
 		rc = sqlite3_exec(db, sql, callback1, (void*) data, &zErrMsg);
 		if(strcmp(Db , "services")==0 || strcmp(Db , "users_config")==0)
@@ -909,6 +915,28 @@ void create_all_table() {
 	char * voids_count;
 	char * receipt_logs;
 
+	//configs
+
+		char * operatortable;
+		char * netconf;
+		//Services
+
+
+		operatortable = "CREATE TABLE IF NOT EXISTS operator("
+						"username 	TEXT  PRIMARY KEY NOT NULL,"
+						"pin	   TEXT,"
+						"idnumber  TEXT ,"
+						"agentid   TEXT );";
+				sqlite_database_create_table(operatortable,"operator");
+
+				netconf = "CREATE TABLE IF NOT EXISTS netconf("
+					"ip 			TEXT   PRIMARY KEY NOT NULL,"
+					"port   	TEXT ,"
+					"protocol   		TEXT ,"
+					"timeout   TEXT ,"
+					"apnname   TEXT ,"
+					"password   TEXT );";
+			sqlite_database_create_table(netconf,"operator");
 
 	transactiontable = "CREATE TABLE TRANSACTIONS("
 			"mac_address  		CHAR(50)    NOT NULL,"

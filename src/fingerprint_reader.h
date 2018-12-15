@@ -8,9 +8,10 @@
 #ifndef SRC_FINGERPRINT_READER_H_
 #define SRC_FINGERPRINT_READER_H_
 #include "utilities/cJSON.h"
+#include "utilities/sgfplib.h"
 
 //unsigned char   stored_fingerprint[600];
-int fplib_test(int option , cJSON * Biodata);
+int fplib_test(int option , BYTE *imageBuffer2[] ,  cJSON * Personal_data_file);
 #include "utilities/common_functions.h"
 
 #endif /* SRC_FINGERPRINT_READER_H_ */

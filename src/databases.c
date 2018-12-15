@@ -19,6 +19,58 @@ char * create_kyc_table =
 				"Options		TEXT, "
 				"tag		TEXT "
 				");";
+
+
+/*char * operatortable;
+char * netconf;*/
+//Services
+
+
+char  * operatortable = "CREATE TABLE IF NOT EXISTS operator("
+				"username 	TEXT  PRIMARY KEY NOT NULL,"
+				"pin	   TEXT,"
+				"idnumber  TEXT ,"
+				"agentid   TEXT );";
+	//	sqlite_database_create_table(operatortable,"operator");
+
+		char  * 	netconf = "CREATE TABLE IF NOT EXISTS netconf("
+			"ip 			TEXT   PRIMARY KEY NOT NULL,"
+			"port   	TEXT ,"
+			"protocol   		TEXT ,"
+			"timeout   TEXT ,"
+			"apnname   TEXT ,"
+			"password   TEXT );";
+	//sqlite_database_create_table(netconf,"operator");
+
+
+/*
+{
+	"benTxn":	[{
+			"amount":	"105",
+			"transOperation":	"111",
+			"debiticcid":	"8cg4382017583718",
+			"crediticcid":	"Merchant_ID",
+			"walletId":	"100",
+			"transId":	"BT-82461843-181212224826",
+			"terminalId":	"82461843",
+			"date":	"2018-12-12 22:48:26",
+			"authMode":	"101"
+		}]
+}
+*/
+
+char * create_transactions_table =
+		" CREATE TABLE transaction_table("
+				"transId   	TEXT PRIMARY KEY	 ,"
+				"transOperation		TEXT ,"
+				"debiticcid 	TEXT ,"
+				"crediticcid		TEXT, "
+				"walletId		TEXT, "
+		"amount		REAL, "
+		"terminalId		TEXT, "
+		"date		TEXT, "
+				"authMode		TEXT "
+				");";
 /*firstname
 middlename
 lastname
@@ -49,13 +101,16 @@ char * insert_default_kyc =
  *
  */
 
-void create_all_tables(void)
+void final_create_all_tables(void)
 {
 	//char  * data;
 	int  i = 0;
 	read_kycs_sql =  "select  * from KYCs";
 	sqlite_database_create_table_function(create_kyc_table,"database.db");
 	sqlite_database_read_write_operation(insert_default_kyc , "database.db" );
+	sqlite_database_read_write_operation(create_transactions_table , "database.db" );
+	sqlite_database_create_table_function(operatortable,"operator.db");
+	sqlite_database_create_table_function(netconf,"operator.db");
 	//printf
 	//sqlite_database_read_write_operation(read_kycs_sql , "database.db" );
 /*	printf("Data count = %d\n Collumn Count = %d\n Row Count = %d\n" , sql_data_count,sql_collumn_count, sql_row_count );

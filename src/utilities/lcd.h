@@ -64,7 +64,7 @@ int  kb_getkey(void);
 int flag_new_line;
 void screen_title(char * title);
 void set_font(int x);
-
+void screen_header(void);
 void reload_font(void);
 
 int defined_x;

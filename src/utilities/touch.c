@@ -1,4 +1,4 @@
-#include "../src/utilities/touch.h"
+#include "touch.h"
 
 #include <stdio.h>
 #include <stdlib.h>

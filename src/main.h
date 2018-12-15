@@ -9,5 +9,20 @@
 #define MAIN_H_
 
 
+typedef struct user_details
+{
+char userid[30];
+char username[30];
+char operaterlevel[10];
+char pin[50];
+int watchTimer;
+char firstname[30];
+char lastname[30];
+
+
+}operatorDetails;
+
+operatorDetails CurrentOperator;
+
 
 #endif /* MAIN_H_ */
