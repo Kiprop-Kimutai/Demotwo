@@ -64,9 +64,10 @@ int personalizecard(char *personaldetails,unsigned char *fp){
 				if(authstatus>=0){
 					int x = createbeneficiaryapplication(fd,keyno,app0,authkey);
 					if(x==0){
-						createfpfile(fd,keyno,app0,authkey,fp);
+
 						createbiodatafile(fd,keyno,app0,authkey,personaldetails);
 						createtransactionfile(fd,keyno,app0,authkey);
+						createfpfile(fd,keyno,app0,authkey,fp);
 						printf("personalize card result %d\n",x);
 						sleep(2);
 						message_display_function(1,"","card personalization success", "please  remove card", (char *)NULL);
@@ -459,7 +460,7 @@ int createtransactionfile(int fd,uint8_t keyno,char MF[3],char *authkey){
 	}
 }
 
-int cardoperations(int operation,char *data , char * response[] , BYTE * fingerprint[]){
+int cardoperations(int operation,char *data , char * response[200] , BYTE * fingerprint[]){
 	desfire_appinfo benapp2;
 	(benapp2).AID[0]=0x11;
 	(benapp2).AID[1]=0x00;
@@ -560,7 +561,7 @@ int cardoperations(int operation,char *data , char * response[] , BYTE * fingerp
 }
 
 
-int readfile(int fd,uint8_t keyno,char MF[3],char APP[3],char *authkey,char *response[] , BYTE * fingerprint[]){
+int readfile(int fd,uint8_t keyno,char MF[3],char APP[3],char *authkey,char *response[200] , BYTE * fingerprint[]){
 	int ret,ret1,authstatus;
 	desfire_appinfo benapp2;
 	(benapp2).AID[0]=0x11;
@@ -575,7 +576,7 @@ int readfile(int fd,uint8_t keyno,char MF[3],char APP[3],char *authkey,char *res
 
 	uint32_t outlen;
 	char personaldetails[200];
-	char fingerprints[400];
+	unsigned char fingerprints[400];
 	char txndetails[100];
 
 
@@ -594,7 +595,7 @@ int readfile(int fd,uint8_t keyno,char MF[3],char APP[3],char *authkey,char *res
 		if(ret == 0){
 			printf("data out ...\n");
 			printf("personal details out %s\n",personaldetails);
-			//response[0] = personaldetails;
+			*(response+0) = personaldetails;
 			//strcpy(*(response+0),personaldetails);
 			//response[0] = personaldetails;
 			//return 0;
@@ -608,6 +609,7 @@ int readfile(int fd,uint8_t keyno,char MF[3],char APP[3],char *authkey,char *res
 		if(ret == 0){
 			printf("data out ...\n");
 			printf("transactions out %s\n",txndetails);
+			*(response+1) = txndetails;
 			printf("<==========done============>\n");
 
 
@@ -620,8 +622,10 @@ int readfile(int fd,uint8_t keyno,char MF[3],char APP[3],char *authkey,char *res
 		ret =  desfire_read_data(fd,1,0x00,0,400,&outlen,fingerprints);
 		if(ret == 0){
 			printf("data out ...\n");
-			//printf("fingerprints out %s\n",fingerprints);
+			printf("fingerprints out %s\n",fingerprints);
 			printf("<======dumping fingerprints====>\n");
+			*(fingerprint+0) = fingerprints;
+			printf("done.....\n");
 		}
 		else{
 			printf("Failed to read card with status ret %d corresponding to errno %d\n",ret,errno);

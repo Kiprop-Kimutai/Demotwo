@@ -77,8 +77,9 @@ void register_beneficiary(void){
 	char name[100];
 	const  char details[10][100];
 	BYTE * imageBuffer2[2];
-	BYTE  imageBuffer1 []={0x80, 0xE0, 0x00, 0x00, 0x11, 0x85, 0x0F, 0x17, 0x70, 0x10, 0xF1,
-			0x01, 0x00, 0x36, 0x33, 0x33, 0x01, 0x04, 0x00, 0x00, 0x00, 0xFA, 0x00};
+/*	BYTE  imageBuffer1 []={0x80, 0xE0, 0x00, 0x00, 0x11, 0x85, 0x0F, 0x17, 0x70, 0x10, 0xF1,
+			0x01, 0x00, 0x36, 0x33, 0x33, 0x01, 0x04, 0x00, 0x00, 0x00, 0xFA, 0x00};*/
+	BYTE  imageBuffer1 [] = {0x6a,0x6f,0x6e,0x61,0x68,0x6b,0x69,0x70,0x72,0x6f,0x70,0x6b,0x69,0x6d,0x75,0x74,0x61,0x69,0x6b,0x69,0x70,0x6b,0x65,0x75};
 	/*
 	const char gender[][100] = {
 			"Male",
@@ -222,23 +223,33 @@ void register_beneficiary(void){
 	printf(">>>>>>>JSON %s\n", cJSON_Print(txToPosted));
 	//Get  Beneficiary fingerprint
 	printf("Sample finger print\n" );
-	for(x = 0 ; x<10 ; x++)
+	printf("%s\n",imageBuffer1);
+	/*for(x = 0 ; x<10 ; x++)
 		printf("%02x",imageBuffer1[x]);
+	printf("\n\n");*/
 	personalizecard(cJSON_Print(txToPosted),imageBuffer1);
 
 	kb_getkey();
 
 	printf("================================================================\n" );
 	printf("Data Read\n" );
-	char * read_data[2];
+	char * read_data[200];
 	BYTE * fingerprint[2];
 	cardoperations(1,"",  read_data ,fingerprint);
 
 	printf("Read sample fingerprint\n" );
-	for(x = 0 ; x<10 ; x++)
-		printf("%02x",imageBuffer2[0][x]);
+	printf("%s\n",*(fingerprint+0));
+	printf("<---------------------------------->\n");
+	printf("Read personal details\n");
+	printf("%s\n",*(read_data+0));
+	printf("<---------------------------------->\n");
+	printf("Read transaction file\n");
+	printf("%s\n",*(read_data+1));
+	printf("<----------------done--------------->\n");
+/*	for(x = 0 ; x<10 ; x++)
+		printf("%02x",imageBuffer2[0][x]);*/
 
-	printf(">>>>>>>Read P_details %s\n", *(read_data+0));
+	//printf(">>>>>>>Read P_details %s\n", *(read_data+0));
 	printf("End Read\n" );
 	printf("================================================================\n" );
 
@@ -254,8 +265,8 @@ void register_beneficiary(void){
 			strcpy(m[w],"%02X",imageBuffer1[w]);*/
 			w++;
 		}
-
-		if(createApplicationAndFileAndWriteData(cJSON_Print(txToPosted),"myBenf.fingerprint"))
+		int kim=1;
+		if(kim/*createApplicationAndFileAndWriteData(cJSON_Print(txToPosted),"myBenf.fingerprint")*/)
 		{
 
 			//Validate Beneficiary online

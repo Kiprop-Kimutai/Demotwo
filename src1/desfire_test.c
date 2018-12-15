@@ -207,14 +207,14 @@ int createApplicationAndFileAndWriteData(char *data1, char *data2){
 		 ret = desfire_authenticate(fd,keyno,mfauthkey);
 		 printf("App selection result:%d\n",ret);
 
-		 fileno = 1;
+		 fileno = 5;
 		 fileinfo.ISOFileID[0] = 0x00;
 		 fileinfo.ISOFileID[1] = 0x01;
 
 		 ret =  desfire_create_std_datafile(fd,fileno,&fileinfo);
 		  printf("Personal details  file creation result:::%d\n   ",ret);
 
-		  fileno = 2;
+		  fileno = 6;
 		  fileinfo.ISOFileID[0] = 0x00;
 		  fileinfo.ISOFileID[1] = 0x02;
 
