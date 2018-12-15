@@ -109,7 +109,7 @@ int request_operators(){
 			cJSON_AddStringToObject(landratejson,"mac_address",serial_num);
 
 			printf("%s initial json\n",cJSON_Print(landratejson));
-			getDataFromServer("networkrequest",landratejson,0,"/api/usersrequest/fetchusers");
+			getDataFromServer("data",landratejson,0,"/api/usersrequest/fetchusers");
 
 			//heloo
 
