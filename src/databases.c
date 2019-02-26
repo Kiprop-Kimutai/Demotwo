@@ -26,21 +26,7 @@ char * netconf;*/
 //Services
 
 
-char  * operatortable = "CREATE TABLE IF NOT EXISTS operator("
-				"username 	TEXT  PRIMARY KEY NOT NULL,"
-				"pin	   TEXT,"
-				"idnumber  TEXT ,"
-				"agentid   TEXT );";
-	//	sqlite_database_create_table(operatortable,"operator");
 
-		char  * 	netconf = "CREATE TABLE IF NOT EXISTS netconf("
-			"ip 			TEXT   PRIMARY KEY NOT NULL,"
-			"port   	TEXT ,"
-			"protocol   		TEXT ,"
-			"timeout   TEXT ,"
-			"apnname   TEXT ,"
-			"password   TEXT );";
-	//sqlite_database_create_table(netconf,"operator");
 
 
 /*
@@ -59,17 +45,37 @@ char  * operatortable = "CREATE TABLE IF NOT EXISTS operator("
 }
 */
 
+
+/*transID,
+pos_serial_number,
+card_number,
+myMerchantUser->agentid,
+getCharacters,transaction amount
+txnDate,
+wallet_id[selected] ,
+(wallet_amount[selected]+atof(getCharacters)), Card balance Before
+wallet_amount[selected] , card balance after
+wallet_currency[selected], Currency
+myLoginPosUser->username,*/
+
 char * create_transactions_table =
 		" CREATE TABLE transaction_table("
 				"transId   	TEXT PRIMARY KEY	 ,"
 				"transOperation		TEXT ,"
 				"debiticcid 	TEXT ,"
 				"crediticcid		TEXT, "
-				"walletId		TEXT, "
-		"amount		REAL, "
-		"terminalId		TEXT, "
-		"date		TEXT, "
-				"authMode		TEXT "
+				"wallet		TEXT, "
+				"amount		REAL, "
+				"balanceBefore		REAL, "
+				"balanceAfter		REAL, "
+				"currency		REAL, "
+				"terminalId		TEXT, "
+				"date		TEXT, "
+				"authMode		TEXT ,"
+				"userId		TEXT ,"
+				"posted		INTEGER	, "
+				"receiptPrinted		INTEGER, "
+				"cardUpdated		INTEGER"
 				");";
 /*firstname
 middlename
@@ -85,6 +91,40 @@ transId
 terminalId
 date
 operator*/
+
+
+//Services
+
+
+
+
+char  * operatortable = "CREATE TABLE IF NOT EXISTS operator("
+    "username  TEXT  PRIMARY KEY NOT NULL,"
+	"name  TEXT,"
+    "pin    TEXT,"
+    "idnumber  TEXT ,"
+	"active   TEXT,"
+    "userlevel TEXT );";
+
+
+
+char  * merchantsTable = "CREATE TABLE IF NOT EXISTS agentsTables("
+    "merchantid  TEXT NOT NULL,"
+	"agentid  TEXT NOT NULL,"
+	"agentName  TEXT,"
+    "merchantName  TEXT ,"
+	"active   INTEGER);";
+
+  //sqlite_database_create_table(operatortable,"operator");
+
+ char  * netconf = "CREATE TABLE IF NOT EXISTS netconf("
+   "ip    TEXT   PRIMARY KEY NOT NULL,"
+   "port    TEXT ,"
+   "protocol     TEXT ,"
+   "timeout   TEXT ,"
+   "apnname   TEXT ,"
+   "password   TEXT );";
+ //sqlite_database_create_table(netconf,"operator");
 
 char * insert_default_kyc =
 		"INSERT INTO KYCS (name , DataType , mandatory ,Options ,  tag) VALUES ('First Name'   , 'STR' ,1, '',  'firstname'); "
@@ -110,6 +150,7 @@ void final_create_all_tables(void)
 	sqlite_database_read_write_operation(insert_default_kyc , "database.db" );
 	sqlite_database_read_write_operation(create_transactions_table , "database.db" );
 	sqlite_database_create_table_function(operatortable,"operator.db");
+	sqlite_database_create_table_function(merchantsTable,"operator.db");
 	sqlite_database_create_table_function(netconf,"operator.db");
 	//printf
 	//sqlite_database_read_write_operation(read_kycs_sql , "database.db" );

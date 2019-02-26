@@ -8,6 +8,9 @@
 #ifndef SRC1_MUTWOL_H_
 #define SRC1_MUTWOL_H_
 #include "../src/utilities/sgfplib.h"
-int personalizecard(char *personaldetails,unsigned char *fp);
-int cardoperations(int operation,char *data , char * response[200] , BYTE * fingerprint[]);
+int personalizecard(char *personaldetails,unsigned char *fp ,  char  * balances , char * card_number);
+int cardoperations(int operation,char *data ,char ** personal_details ,char ** transaction_file, BYTE * fingerprint[], char  *  input_personal_details , char  * input_transaction_data , char * card_number ,  char ** card_uid_to_be_obtained);
+char * readcarduid(void);
+char *processcarduid(char *uid);
+int testnfc(void);
 #endif /* SRC1_MUTWOL_H_ */

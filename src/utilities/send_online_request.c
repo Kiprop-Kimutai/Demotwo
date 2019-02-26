@@ -8,7 +8,10 @@
 #include <ppp.h>
 #include "lcd.h"
 #include "send_online_request.h"
+#include "common_functions.h"
+#include "../device_management.h"
 #include "cJSON.h"
+#include "JSON_checker.h"
 #include <posapi.h>
 #include <wnet.h>
 #include <ppp.h>
@@ -16,7 +19,6 @@
 #include <sys/time.h>
 #include <curl/curl.h>
 #include <time.h>
-#include "../../src1/jsonread.h"
 
 
 #include <stdio.h> /* printf, sprintf */
@@ -41,57 +43,117 @@ char gprs_chat_file[] = { "ABORT          'NO CARRIER'" "\n"
 		"'OK'           'ATDT*99***1#'" "\n"
 		"'CONNECT'      ''" "\n" };
 
-char * send_gprs_request(char * requestType, cJSON * requestjson, char * url ){
 
-	int ret_val;
+/*
+ * if ret =  0 - Failure
+ * else if ret  = 1  -  Success
+ */
+int send_gprs_request(char * requestType, cJSON * requestjson, char * endpoint ,  cJSON ** response_json , int display_errors_messages ){
 
-char  string1[100];
+	char filename[100];
+	char  url[200];
+	int resp;
+	char  * response;
+//	char *  file_string;
 
-	if(/*!logged_offline &&*/ /*flag_online  && */login_successful)
+	//char * reponse;
+
+	//char  string1[100];
+
+	printf("initial json\n");
+	if(flag_online == 0)
 	{
-		disable_timer = 1;
+		message_display_function(1,"","Network Mode Config ", "Please wait as the POS switches GPRS configuration", (char *)NULL);
 
-
-		if(flag_online == 0)
+		ret_val  = power_on_modem_device(myConfigurations->apn_username , myConfigurations->apn_password, atoi(myConfigurations->ppp_timeout));
+		if(ret_val == GPRS_SUCCESS){
+	/*	if(1)
+		{*/
+		}
+		else
 		{
-			message_display_function(1,"","Network Mode Config ", "Please wait as the POS switches GPRS configuration", (char *)NULL);
-
-			ret_val  = power_on_modem_device(myConfigurations->apn_username , myConfigurations->apn_password, atoi(myConfigurations->ppp_timeout));
-			if(ret_val == GPRS_SUCCESS)
-			{
-				screen_header();
-				lcd_printf(ALG_CENTER, "");
-				lcd_printf(ALG_CENTER, "Please wait ..");
-				lcd_printf(ALG_CENTER, "Sending Request");
-				lcd_flip();
-
-
-				printf("%s initial json\n",cJSON_Print(requestjson));
-			strcpy(	string1,getDataFromServer(requestType,requestjson,0,url));
-
-
-				return string1;
-
-			}
-			else
-			{
+			if(display_errors_messages){
 				message_display_function(1,"","Online Posting Error", "The POS is operating in offline mode. Please turn on GPRS to post your transactions.", (char *)NULL);
-				kb_getkey();
-				return "network error";
-			}
+				kb_getkey();}
+			return 0;
+		}
+		/*		else
+		{
+			return 0;
+		}*/
+	}
 
+	//}
+
+
+
+	screen_header();
+	lcd_printf(ALG_CENTER, "");
+	lcd_printf(ALG_CENTER, "Please wait ..");
+	lcd_printf(ALG_CENTER, "Sending Request");
+	lcd_flip();
+
+
+	printf("%s initial json\n",cJSON_Print(requestjson));
+	sprintf(filename , "%s.txt" , requestType);
+	sprintf(url , "https://%s:%s%s",myConfigurations->IpAddress,myConfigurations->portNumber,endpoint);
+	resp = start_ppp_session(requestType, cJSON_Print(requestjson) , 0 , url ,&response);
+
+	if(resp == CURL_SUCCESS){
+
+		//char filelast[100];
+/*		FILE* body_file ;
+		body_file = fopen(filename, "r"); //open for read and write
+		printf("FILE NAME: %s\n",filename);
+		if (body_file == NULL)
+		{
+			if(display_errors_messages)
+			{
+				message_display_function(1,"","Network Error", "No data received from server. Please check connection and try again", (char *)NULL);
+				kb_getkey();
+			}
+			return 0;
 
 		}
+		file_string  = malloc(10000);
+		//memset(file_string,0,sizeof(file_string));
+		if (fgets(file_string, 10000, body_file) != NULL)
+		{
+			printf("RETURNED : \n %d : \n%s\n\n", strlen(file_string) , file_string);
+			fclose(body_file);
+			//sprintf(filelast,"rm %s",filename);
+			system(filelast);*/
+			if(strlen(response))
+			{
+				printf("Returned from  ppp :  %s\n" ,  response);
+				if(jcheck(response))
+				{
+					*response_json = cJSON_Parse(response);
+					//free(file_string);
+					return 1;
+				}
+				else
+				{
+					//free(file_string);
+					if(display_errors_messages){
+						message_display_function(1,"","Network Error", "Invalid received from server. Please check connection and try again", (char *)NULL);
+						kb_getkey();
+					}
+				}
+			}
+		}
 
+	/*}*/
+	else if(resp == CURL_FAILED_POST){
+		//process_response_on_fail(requestType);
+		if(display_errors_messages){
+			message_display_function(1,"","Network Error", "Server connection failed. Please check connection and try again", (char *)NULL);
+			kb_getkey();
+		}
+	}
 
-	}
-	else
-	{
-		message_display_function(1,"","Online Posting Error", " Please confirm if you have Internet connectivity and you have been logged in online to do a Z report", (char *)NULL);
-		kb_getkey();
-		return "Error";
-	}
-	return string1;
+	return 0;
+
 
 }
 
@@ -100,21 +162,18 @@ void start_modem(void){
 
 	ret_val = ppp_check("/var/mux1");
 	if (0 == ret_val) {
-/*				flag_online = 1;
+		/*				flag_online = 1;
 		flag_offline_login = 0;
 		login_successful = 0 ;
 		logged_offline = 0;*/
-		if(login_successful && logged_offline)
+		if(login_successful)
 		{
-			logged_offline = 0;
 			cJSON * cjson_login_params = cJSON_CreateObject();
 			//cJSON_AddStringToObject(cjson_login_params , "password", CurrentUser.password);
 			//getDataFromServer("LOGIN", cjson_login_params ,REQUEST_POST, endpoints->transaction);
 
 			cJSON_Delete(cjson_login_params);
 		}
-		flag_offline_login = 0;
-		logged_offline = 0;
 		flag_online = 1;
 
 		message_display_function(1,"","Network Mode  ", "The POS shall operate in online mode . Please login again", (char *)NULL);
@@ -122,7 +181,7 @@ void start_modem(void){
 		return ;
 	}
 
-/*			fag_start_ppp_session = 1;
+	/*			fag_start_ppp_session = 1;
 	flag_online = 0;
 	flag_offline_login = 0;
 	login_successful = 0 ;
@@ -131,17 +190,14 @@ void start_modem(void){
 
 	if(flag_online)
 	{
-		if(login_successful && logged_offline)
+		if(login_successful)
 		{
-			logged_offline = 0;
 			cJSON * cjson_login_params = cJSON_CreateObject();
 			/*cJSON_AddStringToObject(cjson_login_params , "password", CurrentUser.password);
 			getDataFromServer("LOGIN", cjson_login_params ,REQUEST_POST, endpoints->transaction);*/
 
 			cJSON_Delete(cjson_login_params);
 		}
-		flag_offline_login = 0;
-		logged_offline = 0;
 		flag_online = 1;
 
 		message_display_function(1,"","Network Mode  ", "The POS shall operate in online mode . Please login again", (char *)NULL);
@@ -151,11 +207,6 @@ void start_modem(void){
 	}
 	else
 	{
-		if(login_successful)
-			flag_offline_login = 1;
-		else
-			flag_offline_login = 0;
-		logged_offline = 1;
 		flag_online = 0;
 		message_display_function(1,"","Network Mode  ", "The POS can not operate in Online mode. Please check your connectivity and try again", (char *)NULL);
 		kb_getkey();
@@ -176,92 +227,202 @@ int  power_on_modem_device(char * apn_username , char *  apn_password , int time
 		return GPRS_SUCCESS;
 	}
 	printf("before power 1\n");
-		retval = wnet_power_on();
-		printf("1 afterr power\n");
+	retval = wnet_power_on();
+	printf("1 afterr power\n");
+	if (0 != retval){
+		return GPRS_FAILED_TO_START_DEVICE;
+	}else {
+
+		retval = wnet_init("/var/mux0");
+		printf("after wnet 1\n");
 		if (0 != retval){
-			return GPRS_FAILED_TO_START_DEVICE;
+			return GPRS_FAILED_TO_START_MODEL;
 		}else {
+			//Started WNET
 
-			retval = wnet_init("/var/mux0");
-			printf("after wnet 1\n");
-			if (0 != retval){
-				return GPRS_FAILED_TO_START_MODEL;
-			}else {
-				//Started WNET
+			sim_power_status = 1;
+			gettimeofday(&start, &tz);
+			diff.tv_sec = 20;
+			diff.tv_usec = 0;
+			timeradd(&start, &diff, &end);
+			while (1){
+				printf("b4 attached 1\n");
+				retval = wnet_set_attached(1);
+				if (0 != retval){
+					gettimeofday(&cur, &tz);
 
-				sim_power_status = 1;
-				gettimeofday(&start, &tz);
-				diff.tv_sec = 20;
-				diff.tv_usec = 0;
-				timeradd(&start, &diff, &end);
-				while (1){
-					printf("b4 attached 1\n");
-					retval = wnet_set_attached(1);
-					if (0 != retval){
-						gettimeofday(&cur, &tz);
-
-						if (timercmp(&cur, &end, < ))
-							usleep(10000);
-						else {
-							return GPRS_FAILED_TO_ATTACH_TO_NETWORK;
-						}
-					}else
-						break;
-				}
-
-				if (0 == retval){
-					//retval = ppp_open("/var/mux1", gprs_chat_file, "saf", "data", PPP_ALG_PAP, 30);
-					printf("before PPP \n");
-					retval = ppp_open("/var/mux1", gprs_chat_file,apn_username, apn_password, PPP_ALG_PAP,timeout);
-					printf("PPP_OPEN : %d\n",retval);
-					if (0 != retval){
-
-						//sleep(1);
-						printf("check \n");
-						retval = ppp_check("/var/mux1");
-						printf("after check \n");
-						if (0 == retval)
-						{
-
-
-
-							return GPRS_SUCCESS;
-						}
-						else
-						{
-							return GPRS_FAILED_TO_START_PPP;
-						}
-					}else {
-						gettimeofday(&start, &tz);
-						diff.tv_sec = 20;
-						diff.tv_usec = 0;
-						timeradd(&start, &diff, &end);
-						while (1){
-							retval = ppp_check("/var/mux1");
-							if (0 == retval){
-								return GPRS_SUCCESS;
-							}
-							else{
-								gettimeofday(&cur, &tz);
-								if (timercmp(&cur, &end, < ))
-									usleep(10000);
-								else {
-
-									break;
-								}
-							}
-						}
-
-						//ppp_close("/var/mux1");
+					if (timercmp(&cur, &end, < ))
+						usleep(10000);
+					else {
+						return GPRS_FAILED_TO_ATTACH_TO_NETWORK;
 					}
-				}
+				}else
+					break;
 			}
 
-			//wnet_power_down();
+			if (0 == retval){
+				//retval = ppp_open("/var/mux1", gprs_chat_file, "saf", "data", PPP_ALG_PAP, 30);
+				printf("before PPP \n");
+				retval = ppp_open("/var/mux1", gprs_chat_file,apn_username, apn_password, PPP_ALG_PAP,timeout);
+				printf("PPP_OPEN : %d\n",retval);
+				if (0 != retval){
+
+					//sleep(1);
+					printf("check \n");
+					retval = ppp_check("/var/mux1");
+					printf("after check \n");
+					if (0 == retval)
+					{
+
+
+
+						return GPRS_SUCCESS;
+					}
+					else
+					{
+						return GPRS_FAILED_TO_START_PPP;
+					}
+				}else {
+					gettimeofday(&start, &tz);
+					diff.tv_sec = 20;
+					diff.tv_usec = 0;
+					timeradd(&start, &diff, &end);
+					while (1){
+						retval = ppp_check("/var/mux1");
+						if (0 == retval){
+							return GPRS_SUCCESS;
+						}
+						else{
+							gettimeofday(&cur, &tz);
+							if (timercmp(&cur, &end, < ))
+								usleep(10000);
+							else {
+
+								break;
+							}
+						}
+					}
+
+					//ppp_close("/var/mux1");
+				}
+			}
 		}
-		sim_power_status = 1;
-		return GPRS_SUCCESS;
+
+		//wnet_power_down();
+	}
+	sim_power_status = 1;
+	return GPRS_SUCCESS;
 }
+
+
+struct string {
+  char *ptr;
+  size_t len;
+};
+
+void init_string(struct string *s) {
+  s->len = 0;
+  s->ptr = malloc(s->len+1);
+  if (s->ptr == NULL) {
+    fprintf(stderr, "malloc() failed\n");
+    exit(EXIT_FAILURE);
+  }
+  s->ptr[0] = '\0';
+}
+
+size_t writefunc(void *ptr, size_t size, size_t nmemb, struct string *s)
+{
+  size_t new_len = s->len + size*nmemb;
+  s->ptr = realloc(s->ptr, new_len+1);
+  if (s->ptr == NULL) {
+    fprintf(stderr, "realloc() failed\n");
+    exit(EXIT_FAILURE);
+  }
+  memcpy(s->ptr+s->len, ptr, size*nmemb);
+  s->ptr[new_len] = '\0';
+  s->len = new_len;
+
+  return size*nmemb;
+}
+
+
+int start_ppp_session(char * requestType, char * request ,  int operation , char * url , char **response) {
+	CURL *curl;
+	CURLcode res;
+	char  * resp_str;
+	//char filename[100];
+	//FILE *out_fd = (FILE *) 0;
+	//FILE *head_fd = (FILE *) 0;
+/*	struct curl_slist *headers = NULL;
+
+
+	//if(endpoint == ENDPOINT_TRANSACTION)
+	headers = curl_slist_append(headers, "Accept: application/json");
+	headers = curl_slist_append(headers, "Content-Type: application/json");*/
+
+	curl = curl_easy_init();
+	if (curl) {
+	   struct curl_slist *chunk = NULL;
+
+	    struct string s;
+	    init_string(&s);
+		/* Add a custom header */
+		chunk = curl_slist_append(chunk, "X-InstaConnect-API-Key: 36b7d76a-7020-4b4a-a369-0bdc9c63eb52");
+		chunk = curl_slist_append(chunk, "Accept: application/json");
+		chunk = curl_slist_append(chunk, "Content-Type: application/json");
+		/* set our custom set of headers */
+		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
+
+		//sprintf(filename, "%s%s.txt", "", requestType);
+		//out_fd = fopen(filename, "w");
+		//head_fd = fopen("header.txt", "w"); //open for read and write
+		//res = curl_easy_setopt(curl, CURLOPT_FILE, out_fd);
+	    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writefunc);
+	    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &s);
+
+		//printf("Thus :  %s\n" , &res);
+		res = curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
+
+		res  = curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+		res = curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+		printf("URL : %s\n", url);
+
+		res = curl_easy_setopt(curl, CURLOPT_URL, url);
+		res = curl_easy_setopt(curl, CURLOPT_POSTFIELDS,request);
+	//	res = curl_easy_setopt(curl, CURLOPT_WRITEHEADER, head_fd);
+
+
+		//token_received = 0 ;
+		res = curl_easy_perform(curl);
+		   printf("Returned Ster : %s\n", s.ptr);
+		   resp_str =  malloc(strlen(resp_str) +5);
+		   strcpy(resp_str , s.ptr);
+		   * response = resp_str;
+		    free(s.ptr);
+
+		curl_easy_cleanup(curl);
+		//disable_timer = 0;
+		if(res!= CURLE_OK)
+		{
+/*			out_fd = fopen("error.txt", "w");
+			fclose(out_fd);*/
+			return CURL_FAILED_POST;
+		}
+		else
+		{
+	/*		fclose(out_fd);
+			fclose(head_fd);*/
+
+			printf("CURL RESPONSE:::%d\n",CURL_SUCCESS);
+			return CURL_SUCCESS;
+		}
+
+	}
+	else
+		return CURL_FAILED_SETUP;
+}
+/*
+
 int start_ppp_session(char * requestType, char * request ,  int operation , char * url) {
 	CURL *curl;
 	CURLcode res;
@@ -284,7 +445,7 @@ int start_ppp_session(char * requestType, char * request ,  int operation , char
 		out_fd = fopen(filename, "w");
 		head_fd = fopen("header.txt", "w"); //open for read and write
 		res = curl_easy_setopt(curl, CURLOPT_FILE, out_fd);
-		res = curl_easy_setopt(curl, CURLOPT_TIMEOUT, 20L);
+		res = curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
 
 		printf("%s\n", url);
 
@@ -292,10 +453,10 @@ int start_ppp_session(char * requestType, char * request ,  int operation , char
 		res = curl_easy_setopt(curl, CURLOPT_POSTFIELDS,request);
 		res = curl_easy_setopt(curl, CURLOPT_WRITEHEADER, head_fd);
 
-		token_received = 0 ;
+		//token_received = 0 ;
 		res = curl_easy_perform(curl);
 		curl_easy_cleanup(curl);
-		disable_timer = 0;
+		//disable_timer = 0;
 		if(res!= CURLE_OK)
 		{
 			out_fd = fopen("error.txt", "w");
@@ -315,111 +476,69 @@ int start_ppp_session(char * requestType, char * request ,  int operation , char
 	else
 		return CURL_FAILED_SETUP;
 }
+*/
+/*
+
 char * getDataFromServer (char * requestType , cJSON * request ,   int operation ,  char * endpoint)
 {
-	printf("\noffload point atget Data 1\n\n\n");
-	char * final_request;
-		char filename[100];
-		char adminz[100];
-char response[5000];
-		int resp;
+	char filename[100];
+	char * response;
+	char  url[200];
+	int resp;
+	char *  file_string;
 
-		sprintf(filename , "%s.txt" , requestType);
+	sprintf(filename , "%s.txt" , requestType);
 
-		sprintf(url , "http://%s:%s%s",myConfigurations->IpAddress,myConfigurations->portNumber,endpoint);
-		memset(serial_num,0,sizeof(serial_num)+1);
-			sys_get_sn(serial_num,100);
-			printf("Serial num : %s\n\n\n\n\n\n\n", serial_num);
+	sprintf(url , "http://%s:%s%s",myConfigurations->IpAddress,myConfigurations->portNumber,endpoint);
 
-		printf("%s\n",cJSON_Print(request));
+	printf("%s\n",cJSON_Print(request));
 
-		resp = start_ppp_session(requestType, request , operation , url);
+	resp = start_ppp_session(requestType, cJSON_Print(request) , operation , url);
 
 
 
-		if(resp == CURL_SUCCESS)
-		{
-		strcpy(response, Start_online_display(filename));
-			token_received =1;
-			return response;
-		}
-		else if(resp == CURL_FAILED_POST)
-		{
-			process_response_on_fail(requestType);
+	if(resp == CURL_SUCCESS)
+	{
+
+		char filelast[100];
+
+		FILE* body_file ;
+		body_file = fopen(filename, "r"); //open for read and write
+		printf("FILE NAME ALEX : %s\n",filename);
+		if (body_file == NULL) {
 			return "";
+
 		}
+		file_string  = malloc(10000);
+		//memset(file_string,0,sizeof(file_string));
+		if (fgets(file_string, 10000, body_file) != NULL) {
+			printf("RETURNED :  \n%s\n\n", file_string);
+			fclose(body_file);
+			sprintf(filelast,"rm %s",filename);
+			system(filelast);
 
-		return response;
-	}
-void process_response_on_fail (char * requestType)
-{
 
-	token_received =1;
-
-	if( strcmp(requestType,"REPORTS")!=0)
-	{
-		flag_stop_z = 1;
-		flag_online = 0;
-	}
-	if(strcmp(pmode, "Cash")==0 && strcmp(requestType,"TRANSACTION")==0)
-		lcd_printf(ALG_CENTER, " Transaction shall be saved offline.");
-	if(strcmp(requestType,"TRANSACTION")==0)
-	{
-		if(strcmp(pmode, "Cash")==0 )
-		{
-			//stock_sale_selected_2 = 0;
-			//if(stock_sale_selected)
+			if(jcheck(file_string))
 			{
-				Printer_Demo("TX RECEIPT");
-				//stock_sale_selected_2 = 1;
-				message_display_function(1,"", "Stock Sale receipt","Please cut the stock sale receipt and press any key to reprint", (char *)NULL);
+
+				return file_string;
+			}
+			else
+			{
+				free(file_string);
+				message_display_function(1,"","Network Error", "Invalid or no data received from server. Please check connection and try again", (char *)NULL);
 				kb_getkey();
 			}
-			Printer_Demo("TX RECEIPT");
-			//stock_sale_selected_2 = 0;
-		sprintf(transactionfile , "update TRANSACTIONS set receipt_printed = '1' where billno = '%s'", recptnum);
-		sqlite_database_insert_into_table(transactionfile,"transaction");
-
-
-		usleep(10000);
-		please_print = 1;
-
-		sprintf(transactionfile , "update Z_REPORTS set Z_done = '0' , Printed = 1 where billno = '%s'", recptnum);
-		sqlite_database_insert_into_table(transactionfile,"transaction");
 		}
-		else
-		{
-			//revert_receipt_number();
-		}
+
 	}
-
-	if( strcmp(requestType,"LOGIN")==0)
+	else if(resp == CURL_FAILED_POST)
 	{
-		message_display_function(1,"","Error In Login", "Server connection failed. Please check connection and try again. Proceeding offline", (char *)NULL);
+		//process_response_on_fail(requestType);
+		message_display_function(1,"","Network Error", "Server connection failed. Please check connection and try again", (char *)NULL);
 		kb_getkey();
 	}
 
-
+	return 0;
 }
-char * buildFinalrequest1(char * requestType , cJSON * request )
-{
-	if(strcmp(requestType,"LAND") == 0){
-		printf("output 1\n\n\n");
-		printf("%s\n",cJSON_Print(request));
-		return cJSON_Print(request);
-	}
-	cJSON_AddStringToObject(request,"command",requestType);
-		cJSON_AddStringToObject(request,"username",CurrentOperator.username);
-		cJSON_AddStringToObject(request,"token",token);
-		cJSON_AddStringToObject(request,"serialNo",serial_num);
-		//cJSON_AddStringToObject(request,"password",CurrentUser.password);
-	/*	if(strcmp(requestType,"ZVERIFY")== 0)
-		{
-			strcpy(ZNUMBER, get_String_value_from_json(request,"znumber"));
-		}*/
-		printf("********************************************\n");
-		printf(cJSON_Print(request));
-		printf("************\n");
-		return cJSON_Print(request);
-}
-
+*/

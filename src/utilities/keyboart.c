@@ -2,9 +2,11 @@
 
 #include "ctype.h"
 #include "unistd.h"
+/*
 #include "../../src1/general_funtions_and_varaibles.h"
 #include "../../src1/jsonread.h"
 #include "../../src1/desfire_test.h"
+*/
 #include <pthread.h>
 
 #include <stdarg.h>		/* for va_ stuff */
@@ -15,6 +17,8 @@
 #include "cJSON.h"
 #include "lcd.h"
 #include "postslib_extern.h"
+#include "common_functions.h"
+#include "../device_management.h"
 
 static char *pszAlphaTbl[10]   = { "0.,*# ~`!@$%^&-+=(){}[]<>_|\\:;\"\'?/",
 		"1QZqz ", "2ABCabc", "3DEFdef", "4GHIghi", "5JKLjkl", "6MNOmno",
@@ -28,264 +32,14 @@ static char *pszAlphaCaps[10] = { "0. ,*#~`!@$%^&-+=(){}[]<>_|\\:;\"\'?/",
 int KEY_TIMEOUT = 0;
 int lastypedKey = 0;
 time_t start, current;
-const char transmenu[][100] = {
-		"Buy Goods",
-		"Cash Out"
-};
-extern  int identifyCard_Demo(void);
+
 void key_board_demo1(void);
-void buy_goods(int transaction_option);
 void organise_screen_on_input_one(char * charact,int iLen, char * szWorkBuff, char* mode_in);
 void organise_screen_on_input_login(char * charact,char * charact2,int iLen,  char * txt1, char * txt2, char* mode_in, int location , int display_string_below, char * title);
 void translate_long_strings_and_print(char *str);
 //ContactlessSmartCard_Demo();
 
 
-
-void transaction1(int argc, char *argv[]){
-	int retval = 0;
-	int i, selected;
-	int change_made = 0;
-	int ret;
-	int key;
-
-	int y=0;
-	char getCharacters[40];
-	char getCharacters1[40];
-	char name1[30];
-	char name[100];
-
-
-	lcd_init(&argc, &argv);
-	lcd_set_bk_color(COLOR_WITE);
-	lcd_set_font_color(COLOR_BLACK);
-	i = 0;
-	selected = 0;
-	identifyCard_Demo();
-	lcd_clean();
-
-	strcpy(name,"Please enter amount");
-	strcpy(name1,"");
-	//while (selected>=0){
-	selected = lcd_menu("Transactions", transmenu, sizeof(transmenu)/100, selected);
-	switch (selected){
-	case 0:case 2:
-		myTransactions.amount = selected;
-		ret = kb_getStringtwo(ALPHA_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"Transaction", 0);
-		change_made =1;
-
-		if( strlen(getCharacters)>0){
-			myTransactions.amount = atof(getCharacters);
-			printf("######Amount: %.2f\n",myTransactions.amount);
-
-			defined_x=100;
-			message_display_function(1,"","Transaction Details","",(char *)NULL);
-			y=get_y_position();
-
-			lcd_printf(ALG_LEFT, "%s", "Amount");
-			lcd_printf_ex(ALG_LEFT_DEF,y," %.2f",myTransactions.amount );
-			lcd_printf(ALG_LEFT, "");
-			lcd_printf(ALG_LEFT, "__________________________________________");
-			y=get_y_position();
-			defined_x=150;
-
-			lcd_set_font_color(COLOR_BLUE);
-			lcd_printf(ALG_CENTER, "%s","Cancel to exit     :     Enter to confirm");
-			lcd_flip();
-			lcd_set_font_color(COLOR_BLACK);
-			key=kb_getkey();
-			if(key==DIKS_ENTER){
-				lcd_clean();
-				screen_header();
-				lcd_printf(ALG_CENTER,"Enter Fingerprint");
-
-				lcd_flip();
-				kb_getkey();
-				//Removed JT
-				//fplib_test(1);
-			}
-
-
-		}else{
-			lcd_clean();
-			screen_header();
-			lcd_printf(ALG_CENTER,"Invalid amount. Please enter a");
-			lcd_printf(ALG_CENTER,"valid numeric amount");
-			lcd_flip();
-			kb_getkey();
-			printf("######Invalid Amount");
-		}
-		break;
-
-	default:
-		break;
-	}
-	//}
-}
-void set_innitial_configuration() {
-	int  ret;
-	int change_made =0;
-
-	char getCharacters[40];
-	char getCharacters1[40];
-	char name1[130];
-	char name[100];
-
-	strcpy(name1, "");
-
-
-//Setting IP address
-		do
-		{
-
-			strcpy(name, "Enter Enter IP address");
-					strcpy(name1, "Current IP address");
-
-					ret = kb_getStringtwo(ALPHA_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"Configurations", 1);
-
-
-		if( isValidIpAddress(getCharacters))
-		{
-			change_made =1;
-			strcpy(myConfigurations->IpAddress, getCharacters);
-		}
-
-		else if(ret==-1 && strlen(myConfigurations->IpAddress)>0 )
-		{
-			break;
-		}
-		else if(ret==-1 && strlen(myConfigurations->IpAddress) == 0 )
-		{
-			message_display_function(1,"","IP Address Config", "Ip address must be set . Please try again", (char *)NULL);
-			kb_getkey();
-		}
-		else
-		{
-
-			message_display_function(1,"","IP Address Config", "Invalid IP address. Please check IP and try again", (char *)NULL);
-			kb_getkey();
-
-		}
-		}while(strlen(myConfigurations->IpAddress)==0 );
-
-//Setting port number
-		do
-		{
-			strcpy(name, "Enter port number");
-			ret = kb_getStringtwo(NUM_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"Configurations", 1);
-		if( is_valid_int(getCharacters))
-		{
-			change_made =1;
-			strcpy(myConfigurations->portNumber, getCharacters);
-		}
-		else if(ret==-1 && strlen(myConfigurations->portNumber)>0 )
-		{
-			break;
-		}
-		else if(ret==-1 && strlen(myConfigurations->portNumber) == 0 )
-		{
-			message_display_function(1,"","Port number Config", "Port number must be set . Please try again. ", (char *)NULL);
-			kb_getkey();
-
-		}
-		else
-		{
-			message_display_function(1,"","Port number Config", "Invalid port number . Please enter a numeric value.", (char *)NULL);
-			kb_getkey();
-
-		}
-		}while(strlen(myConfigurations->portNumber)==0 );
-
-//Setting APN username
-		do
-		{
-			strcpy(name, "Enter APN username");
-			ret = kb_getStringtwo(ALPHA_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"Configurations", 1);
-		if(ret !=-1)
-		{
-			change_made =1;
-			strcpy(myConfigurations->apn_username, getCharacters);
-		}
-
-		if(ret==-1 && strlen(myConfigurations->apn_username)>0 )
-		{
-			break;
-		}
-		else if(ret==-1 && strlen(myConfigurations->apn_username) == 0 )
-		{
-			message_display_function(1,"","APN username Config", "APN Username must be set. Please enter a numeric value.", (char *)NULL);
-			kb_getkey();
-
-		}
-
-		}while(strlen(myConfigurations->apn_username)==0 );
-
-	//Setting  APN password
-		strcpy(name, "Enter APN password");
-		do
-		{
-			printf("in password\n");
-			ret = kb_getStringtwo(ALPHA_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"Configurations", 1);
-		if(ret != -1)
-		{
-			change_made =1;
-			strcpy(myConfigurations->apn_password, getCharacters);
-		}
-
-		if(ret==-1 && strlen(myConfigurations->apn_password)>0 )
-		{
-			break;
-		}
-		else if(ret==-1 && strlen(myConfigurations->apn_password) == 0 )
-		{
-			message_display_function(1,"","APN password Config", "APN password must be set. Please enter a numeric value.", (char *)NULL);
-			kb_getkey();
-
-		}
-
-		}while(strlen(myConfigurations->apn_password)==0 );
-		printf("after username\n");
-
-		//setting PP timeout
-
-		strcpy(name, "Enter IP PPP time out");
-		do
-		{
-			ret = kb_getStringtwo(NUM_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"Configurations", 1);
-		if( is_valid_int(getCharacters))
-		{
-			change_made =1;
-			strcpy(myConfigurations->ppp_timeout, getCharacters);
-		}
-		else if(ret==-1 && strlen(myConfigurations->ppp_timeout)>0 )
-		{
-			break;
-		}
-		else if(ret==-1 && strlen(myConfigurations->ppp_timeout) == 0 )
-		{
-			message_display_function(1,"","PPP timeout Config", "PPP timeout number must be set. Please enter a numeric value.", (char *)NULL);
-			kb_getkey();
-		}
-		else
-		{
-			message_display_function(1,"","PPP timeout Config", "Invalid PPP timeout value. Please enter a numeric value.", (char *)NULL);
-			kb_getkey();
-
-		}
-		}while(strlen(myConfigurations->ppp_timeout)==0 );
-
-
-	if(change_made)
-		save_configarations();
-	else
-	{
-		message_display_function(1,"","Configuration Alert", "No configuration have \n been changed.", (char *)NULL);
-		kb_getkey();
-
-	}
-
-
-}
 /*
 void register_ben(int argc, char *argv[]){
 	int ret;
@@ -436,88 +190,6 @@ void register_ben(int argc, char *argv[]){
 }
 
 */
-void my_account(int argc, char *argv[]){
-	int ret;
-	int change_made =0;
-	int x= 0;
-
-	cJSON * txToPosted=cJSON_CreateObject();
-
-	char name[200];
-
-	//BYTE fp23;
-	int selected = 0;
-
-
-	//Read card // replace with Kims Functions
-	if(identifyCard_Demo())
-	{
-
-		//Get  Beneficiary fingerprint
-		//Removed JT
-		//if(fplib_test(1))
-		if(1)
-		{
-			//printf("You know what here it is\n " );
-			//printf(">>>>>>>JSON %s\n", cJSON_Print(txToPosted));
-
-			int w=0;
-			while(w<400)
-			{
-				printf( "%02X",myBenf.fingerprint[w]);
-				//strcpy(m[w],"%02X",imageBuffer1[w]);
-				w++;
-			}
-
-			//printf("You know what here it is\n \n %s \n" ,  str);
-
-			//Print Beneficiarry details
-			message_display_function(1,"","Card Verification Successful", "Name : ","Tarus Jackson",  "\nCard No : ","1234564","\nDOB  :", "232323","\nGender:", "Male",(char *)NULL);
-			kb_getkey();
-			//Write Beneficiary to  card card
-		}
-		else
-		{
-			return;
-		}
-
-
-	}
-	else
-	{
-		message_display_function(1,"","EMV card Error ", "Error reading card, please check your card reader and place your at  proximity  and try  again", (char *)NULL);
-		kb_getkey();
-	}
-
-}
-
-
-void buy_goods(int transaction_option) {
-
-	int  ret;
-	int change_made =0;
-	char ammount[30];
-
-	char name[30];
-	char getCharacters[40];
-	char getCharacters1[40];
-	char name1[30];
-	strcpy(name1, "");
-
-	strcpy(name, "Enter Amount");
-	//kb_getString(ALPHA_IN, 1, 16,getCharacters , NULL, name);
-	ret = kb_getStringtwo(ALPHA_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"Buy Goods", 1);
-	change_made =1;
-
-	if( strlen(getCharacters)>0){
-		strcpy(ammount,getCharacters);
-		//printf("######Amount: %s",ammount);
-	}else{
-		printf("######Invalid Amount");
-	}
-
-
-}
 void key_board_demo1(void) {
 	int cancel_times = 0;
 	int key = 0, key_pre = 0;

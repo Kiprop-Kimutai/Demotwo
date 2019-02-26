@@ -10,6 +10,14 @@
 /*
  * Main function that  manages the merchant  transactions
  */
+int merchant_inquiry();
+int withdrawal_to_bank();
+//cJSON * data_to_print;
+int store_to_store();
+int roll_up_transfer();
+int balance_inquiry();
+int mini_statement();
 void merchant_transactions(void );
+char * errmessage;
 
 #endif /* SRC_MERCHANT_TRANSACTIONS_H_ */

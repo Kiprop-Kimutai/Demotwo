@@ -8,6 +8,6 @@
 #ifndef SRC_PRINT_RECEIPT_H_
 #define SRC_PRINT_RECEIPT_H_
 
-int print_receipt(char * type_of_receipt , cJSON * transaction ,  cJSON * personal_data , int * printflag ,  int * print_complete) ;
+int print_receipt(char * type_of_receipt , cJSON * transaction ,  int * printflag ,  int * print_complete) ;
 
 #endif /* SRC_PRINT_RECEIPT_H_ */

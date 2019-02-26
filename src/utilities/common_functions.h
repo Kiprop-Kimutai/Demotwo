@@ -31,6 +31,7 @@ void power_off_options(void);
 bool is_valid_positive_int(const char *str);
 bool is_valid_int(const char *str);
 int isValidIpAddress(char *ipAddress);
+int jcheck(char* mystr);
 char *trim(char *s);
 //'Device services
 //int funt_get_mac_address(void );
@@ -41,10 +42,16 @@ char * getdate_mine(void );
 char** str_split(char* a_str, const char a_delim);
 char ** get_pos_network_data(char * command , int * x);
 
-void get_date_and_receipt (int required_output,  char ** returned_date , char ** returned_value) ;
-
+void get_date_and_receipt (int required_output,  char ** returned_date , char ** unformatted_date,  char ** returned_value) ;
+void get_request_id (int required_output,  char ** returned_request_id);
 char macaddress[30];
 char pos_serial_number[40];
 
 char * get_string_from_jason_object(char * string);
+char * remove_quotes(char * string);
+char *my_strtok(char *str, char *delim);
+
+double getdecimalvalueforhex(char i,int position);
+char *hextodecimalconverter(char *hexstring);
+
 #endif /* SRC_UTILITIES_COMMON_FUNCTIONS_H_ */

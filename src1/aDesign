@@ -1,6 +1,0 @@
-Transaction : 200 ,400 ,anything else;\
-Login : 9006-failure , 9007-Locked account, json or message 
-watchdog : 200 on OK , 400 failure or anything else
-Request for service and service details : JSON ok , NO Service Details found , anything else
-void_transaction : 200 ok, 400 failed anything else failed
-Z_report , 200 on succress , 400 failure

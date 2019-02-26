@@ -7,8 +7,9 @@
 
 #ifndef SRC_DESFIRE_TEST_H_
 #define SRC_DESFIRE_TEST_H_
-#include "../src/utilities/keyboart.h"
-#include "../src/utilities/sgfplib.h"
+#include "keyboart.h"
+#include "lcd.h"
+#include "sgfplib.h"
 //#include "seos.h"
 
 enum apps{
@@ -18,6 +19,8 @@ enum apps{
 
 char dataout[3000];
 char *serial_number;
+
+int get_icCard(char  ** iccard_no);
 
 int createApplicationAndFileAndWriteData(char *filename,char *data);
 //int createApplicationAndFileAndWriteData(char *applicationName,char *filename,char *data);

@@ -5,9 +5,11 @@
  *      Author: linux
  */
 #include "utilities/inputs.h"
+#include <wnet.h>
+#include <pthread.h>
 
 
-
+#include "mutwol.h"
 //Common includes
 #include "common_includes.h"
 #include <posapi.h>
@@ -19,7 +21,7 @@
 #include "main.h"
 #include "../src/utilities/keyboart.h"
 #include "../src/utilities/send_online_request.h"
-#include "../src1/jsonread.h"
+//#include "../src1/jsonread.h"
 
 
 //Beneficiary  management functions
@@ -47,17 +49,18 @@
 
 /**
  * function to create processes
+ *
  */
 
 
 void* threader(void *arg)
 {
-	time_t start, current;
-	time_t start_for_flag_update, current_for_flag_update;
-	cJSON * obj ;
-	char * mysql;
 	int signal_num=0;
 	int i = 0;
+
+
+	time_t start, current;
+	time_t start_for_flag_update, current_for_flag_update;
 
 
 	start = time(NULL);
@@ -75,33 +78,34 @@ void* threader(void *arg)
 		if (difftime(current, start) == CurrentOperator.watchTimer) {
 			//if (difftime(current, start) == 5) {
 			start = time(NULL);
-			if(!disable_timer)
+			/*			if(!disable_timer)
+			{*/
+			wnet_signal(&signal_num);
+			if(signal_num<10)
 			{
-				wnet_signal(&signal_num);
-				if(signal_num<10)
-				{
-					printf("Low signal strnght\n");
-					//login_successful = 0;
-					//online = 0;
-				}
-				else
-				{
-					//online = 1;
-					//login_successful = 1;
-					printf("Normal signal strnght\n");
-				}
-				if(!logged_offline && flag_online)
-				{
-					//getDataFromServer("WATCH",empty_obj,REQUEST_POST , endpoints->transaction);
-					//cJSON_Delete(empty_obj);
-				}
-
-
+				printf("Low signal strnght\n");
+				//login_successful = 0;
+				//online = 0;
 			}
+			else
+			{
+				//online = 1;
+				//login_successful = 1;
+				printf("Normal signal strnght\n");
+			}
+			if( flag_online)
+			{
+				//getDataFromServer("WATCH",empty_obj,REQUEST_POST , endpoints->transaction);
+				//cJSON_Delete(empty_obj);
+				post_pos_offline_transactions();
+			}
+
+
+			//}
 
 		}
 		if (difftime(current_for_flag_update, start_for_flag_update) == 1800) {
-			if(!logged_offline && flag_online && login_successful)
+			if(flag_online && login_successful)
 			{
 				/*			start_for_flag_update = time(NULL);
 				mysql = "select billno as billno , receipt_printed as receiptprinted , voided_col as void from transactions;";
@@ -112,6 +116,7 @@ void* threader(void *arg)
 
 
 				 */
+				post_pos_offline_transactions();
 			}
 		}
 		i++;
@@ -125,18 +130,21 @@ int main(int argc, char *argv[])
 {
 	int selected = 0;
 	int retval = 0;
-	const char  main_menu[][100] = {"Beneficiary Transactions","Merchant  Transactions","POS/User Management" , "Exit"};
+	char  main_menu[][100] = {"Beneficiary Transactions","Merchant  Transactions","POS/User Management" , "Exit"};
 	char * date_t;
 	char * receipt_t;
+	char * sqlstmt;
 
 	final_create_all_tables();
-	create_all_table();
+
+
 	lcd_init(&argc, &argv);
 	lcd_set_bk_color(COLOR_WITE);
 	lcd_set_font_color(COLOR_BLACK);
+
 	read_config();
-	sys_get_sn(serial_num,100);
-	printf("Serial_Number = %s\n", serial_num);
+	/*	sys_get_sn(serial_num,100);
+	printf("Serial_Number = %s\n", serial_num);*/
 	fag_start_ppp_session = 0;
 
 
@@ -144,45 +152,78 @@ int main(int argc, char *argv[])
 	lcd_set_bk_color(COLOR_WITE);
 	lcd_set_font_color(COLOR_BLACK);
 
-	printf("%s %s\n",date_t, receipt_t  );
+	//fetch_beneficary_balance();
+	//testnfc();
+
+	//Start
+
+
+
+
+
+
+/*
+char *tx ;
+unsigned char*  fingerprint;
+char *  data_to_be_written = "{\"balances\":[{\"walletName\":\"WFP\",\"walletId\":\"100\",\"currency\":\"Ksh\",\"walletBalance\":9000},{\"walletName\":\"IOM\",\"walletId\":\"200\",\"currency\":\"Ksh\",\"walletBalance\":2000}],\"transactions\":\"BT-82399633-181230113807*82399633*111*27990864512*100*0*2018-12-30 11:38:07*100*0.00#BT-82399633-181230012753*82399633*111*27990864512*crediticcid*0*2018-12-30 01:27:53*100*0.00#\"}\0"; cardoperations(2,"", &tx ,&tx,&fingerprint , "" ,  data_to_be_written ,  "card_number");
+
+*/
+
+
+
+
+
+	//End
+	flag_online = 1;
+	//printf("%s %s\n",date_t, receipt_t  );
 	sys_get_sn(pos_serial_number,40);
+	//readcarduid();
+	//testnfc();
 
-
+	initialize_params();
 	while(1)
 	{
 
 
 		LOGIN: login();
-		//login_successful = 1;;
-		if(login_successful){
-			pthread_t tid;
-			int err;
 
 
-			err = pthread_create(&(tid), NULL, &threader, NULL);
-			while (login_successful) {
+		printf("\n login_successful is %d and su_ligin_successful is %d", login_successful, su_login_successful);
 
-				switch(lcd_menu("Safaricom Value Agency", main_menu, 4,selected))
-				{
 
-				case 0:
-					beneficiary_transactions();
-					break;
-				case 1:
-					merchant_transactions();
-					break;
-				case 2:
-					device_management();
-					break;
-				case 3:
-					goto LOGIN;
-					break;
+			//login_successful = 1;;
+			if(login_successful){
+				pthread_t tid;
+				int err;
+
+
+				err = pthread_create(&(tid), NULL, &threader, NULL);
+				while (login_successful) {
+
+					switch(lcd_menu("Safaricom Value Agency", main_menu, 4,selected))
+					{
+					case 0:
+
+						beneficiary_transactions();
+						break;
+					case 1:
+						merchant_transactions();
+						break;
+					case 2:
+						device_management();
+						break;
+					case 3:
+						goto LOGIN;
+						break;
+					}
 				}
+
+			}
+			else{
+				goto LOGIN;
 			}
 
-		}else{
-			goto LOGIN;
-		}
+		//}
 
 	}
 	return retval;

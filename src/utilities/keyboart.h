@@ -10,6 +10,7 @@ int flag_getting_pwd;
 int flag_getting_pwd1;
 int flag_getting_pwd2;
 int login_successful;
+int su_login_successful;
 char * key_board_title;
 #include <stdint.h>
 

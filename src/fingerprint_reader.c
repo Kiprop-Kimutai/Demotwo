@@ -11,16 +11,16 @@
  *************************************************************/
 
 #include <stdio.h>
-#include "../src1/general_funtions_and_varaibles.h"
-#include "../src1/services.h"
+//#include "general_funtions_and_varaibles.h"
+////#include "../src1/services.h"
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
 #include "../src/utilities/keyboart.h"
 #include "../src/utilities/lcd.h"
-#include "../src1/jsonread.h"
-#include "../src1/main_old.h"
+//#include "../src1/jsonread.h"
+//#include "../src1/main_old.h"
 #include "mutwol.h"
 
 #include "fingerprint_reader.h"
@@ -114,7 +114,7 @@ int fingerprint_hex_to_string(BYTE * readingreg)
 
 
 
-int fplib_test(int option , BYTE *imageBuffer2[] ,  cJSON * Personal_data_file)
+int fplib_test(int option )
 {
 	//option 0 = capture
 	//Option 1  = compare
@@ -123,12 +123,10 @@ int fplib_test(int option , BYTE *imageBuffer2[] ,  cJSON * Personal_data_file)
 	DWORD quality;
 	BYTE *imageBuffer1;
 	//BYTE *imageBuffer2[3];
-	BYTE *imageBuffer3;
 	BYTE *minutiaeBuffer1;
-	BYTE *minutiaeBuffer2;
 	SGDeviceInfoParam deviceInfo;
 	DWORD score;
-	SGFingerInfo fingerInfo ,  fingerInfo2;
+	SGFingerInfo fingerInfo;
 	BOOL matched;
 	int x = 0;
 	int w , yr;
@@ -340,6 +338,7 @@ int fplib_test(int option , BYTE *imageBuffer2[] ,  cJSON * Personal_data_file)
 				while(x<fp_counter)
 				{
 
+
 					quality = 0;
 					printf("CreateTemplate returned : [%ld]\n",err);
 					err = SGFDX_ERROR_NONE;
@@ -358,36 +357,32 @@ int fplib_test(int option , BYTE *imageBuffer2[] ,  cJSON * Personal_data_file)
 					}
 					w = 0 ;
 					printf("\nOur Stored template\n");
+
 					while(w<400)
 					{
 						//printf("%x",imageBuffer2[w]);
-						imageBuffer3[w] = imageBuffer2[1][w];
-						printf("%02X",imageBuffer3[w]);
+						//imageBuffer3[w] = imageBuffer2[w];
+						printf("%02X",fp_response[w]);
 						//myBenf.fingerprint[w]= imageBuffer1[w];
 						w++;
 					}
-					printf("Ended here\n");
+
+
+/*					printf("Ended here\n");
 					if (err == SGFDX_ERROR_NONE)
 					{
 						quality = 0;
-						err = SGFPM_GetTemplateSize(hsgfplib, imageBuffer3, &templateSize);
+						err = SGFPM_GetTemplateSize(hsgfplib, imageBuffer2, &templateSize);
 					}
 
-					printf("1 Ended here\n");
-					minutiaeBuffer2 = (BYTE*) malloc(templateSizeMax);
-					fingerInfo2.FingerNumber = SG_FINGPOS_UK;
-					fingerInfo2.ViewNumber = 1;
-					fingerInfo2.ImpressionType = SG_IMPTYPE_LP;
-					fingerInfo2.ImageQuality = quality; //0 to 100
-					printf("2 Ended here\n");
-					err = SGFPM_CreateTemplate(hsgfplib,&fingerInfo, imageBuffer3, minutiaeBuffer2);
-					// MatchTemplate()
+					printf("1 Ended here\n");*/
+
 
 					printf("3 Ended here\n");
 					/*			minutiaeBuffer2 = (BYTE*) malloc(templateSizeMax);
 					err = SGFPM_CreateTemplate(hsgfplib,&fingerInfo, imageBuffer2, minutiaeBuffer2);*/
 
-					err = SGFPM_MatchTemplate(hsgfplib,minutiaeBuffer1, minutiaeBuffer2, SL_LOW, &matched);
+					err = SGFPM_MatchTemplate(hsgfplib,minutiaeBuffer1, fp_response, SL_LOW, &matched);
 					printf("4 Ended here\n");
 					//  kb_getkey();
 					if (matched == TRUE)
@@ -396,9 +391,10 @@ int fplib_test(int option , BYTE *imageBuffer2[] ,  cJSON * Personal_data_file)
 						lcd_set_font_color(COLOR_BLUE);
 						//Alex
 						lcd_printf_ex(ALG_RIGHT, y , "authentication_success");
+						//JAck
+						//kb_getkey();
 						lcd_flip();
 						lcd_set_font_color(COLOR_BLACK);
-						sleep(1);
 						printf("<<MATCH>>\n\n");
 						err = SGFPM_CloseDevice(hsgfplib);
 						err = SGFPM_Terminate(hsgfplib);
@@ -413,8 +409,11 @@ int fplib_test(int option , BYTE *imageBuffer2[] ,  cJSON * Personal_data_file)
 					//Get stored fingerprint
 					//fingerprint_string_to_hex_converter(cJSON_Print(cJSON_GetObjectItem(Biodata,"finger1")) , &imageBuffer2);
 
-					err = SGFPM_GetMatchingScore(hsgfplib,minutiaeBuffer1, imageBuffer1, &score);
-					printf("Score is : [%ld]\n\n",score);
+					err = SGFPM_GetMatchingScore(hsgfplib,minutiaeBuffer1, fp_response, &score);
+					//printf("Score is : [%ld]\n\n",score);
+					//lcd_printf_ex(ALG_RIGHT, y+5 , "CL:%d ,SL:%d,S:[%ld]\n\n",strlen(minutiaeBuffer1), strlen(fp_response),score);
+					lcd_flip();
+
 					x++;
 
 				}
@@ -476,11 +475,11 @@ int fplib_test(int option , BYTE *imageBuffer2[] ,  cJSON * Personal_data_file)
 			err = SGFPM_GetImage(hsgfplib,imageBuffer1);
 			if (err != SGFDX_ERROR_NONE)
 			{
-				//message_display_function(1,"","error", "could_not_fetch_image_from_fingerprint_device",  (char *)NULL);
-				//kb_getkey();
-				//err = SGFPM_CloseDevice(hsgfplib);
-				//err = SGFPM_Terminate(hsgfplib);
-				//return 0;
+				message_display_function(1,"","error", "could_not_fetch_image_from_fingerprint_device",  (char *)NULL);
+				kb_getkey();
+				err = SGFPM_CloseDevice(hsgfplib);
+				err = SGFPM_Terminate(hsgfplib);
+				return 0;
 			}
 
 			err = SGFPM_SetLedOn(hsgfplib,FALSE);
@@ -516,13 +515,32 @@ int fplib_test(int option , BYTE *imageBuffer2[] ,  cJSON * Personal_data_file)
 			printf("CreateTemplate returned : [%ld]\n",err);
 			if (err == SGFDX_ERROR_NONE)
 			{
+				int wx = 0;
 				///////////////////////////////////////////////
 				// getTemplateSize()
 				quality = 0;
 				err = SGFPM_GetTemplateSize(hsgfplib,minutiaeBuffer1, &templateSize);
-				personalizecard(cJSON_Print(Personal_data_file),imageBuffer1);
+				printf("================miniature  =====================\n");
+				while(wx<400)
+				{
+					printf("%02x",minutiaeBuffer1[wx]);
+					fp_response[wx]= minutiaeBuffer1[wx];
+					wx++;
+
+				}
+				printf("\n================miniature  =====================\n");
+
+/*				printf("================Image buffer 1  =====================\n");
+				for(wx = 0 ;  wx<400 ; wx++)
+					//*(response+0)
+				//imageBuffer2[0][wx] = imageBuffer1[wx];
 				//strcpy(myBenf.fingerprint, minutiaeBuffer1 );
-				printf("We got the image");
+				printf("%2X" ,imageBuffer1[wx]  );
+				*(imageBuffer2+0) = imageBuffer1;
+				printf("================Image buffer 2  =====================\n");
+				for(wx = 0 ;  wx<400 ; wx++)
+					printf("%2X" ,imageBuffer2[wx]  );
+				printf("================End =====================\n");*/
 
 			}
 			free(imageBuffer1);

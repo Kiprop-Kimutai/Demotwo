@@ -46,7 +46,6 @@ ConfigFile myConfigurations;*/
 
 
 //configuration functions and methods
-int read_config(void );
 int save_configurations(char * config , char * value , char * name) ;
 void change_network_configuration(int type );
 void change_sim_configuration(int type );
@@ -66,14 +65,13 @@ void verify_z_report(void);
 void set_network(void);
 
 
-int read_config(void) ;
+
 
 char const config_menus_array[20][100];
 
 #include "lcd.h"
 
 #include "keyboart.h"
-#include "main_old.h"
 
 
 

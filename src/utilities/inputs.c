@@ -51,7 +51,7 @@ int menu_terminal(char * title  ,const char  menus[][100] , int menu_size){
 
 
 char ** getData_terminal(char * title  ,const char  data_requested[][100] , int menu_size){
-	int choice;
+
 	char ** return_string = 0;
 	char str[100];
 	int menu_count= 0;

@@ -14,8 +14,13 @@
 #include <sqlite3.h>
 
 char  **  sql_data;
+char  ** sql_data_header;
 
 int sql_row_count , sql_collumn_count , sql_data_count;
+
+int increament_read;
+
+int read_database(char * sql,char * Db);
 
 void  sqlite_database_create_table_function(char *sql ,char *Db);
 int sqlite_database_read_write_operation(char *sql ,char *Db );

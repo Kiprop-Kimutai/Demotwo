@@ -15,6 +15,8 @@
 #include "utilities/lcd.h"
 #include "utilities/sql_functions.h"
 #include "database.h"
+#include "global_params.h"
+
 
 
 #endif /* COMMON_INCLUDES_H_ */

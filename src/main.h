@@ -24,5 +24,8 @@ char lastname[30];
 
 operatorDetails CurrentOperator;
 
+char datam[100];
+
+
 
 #endif /* MAIN_H_ */
