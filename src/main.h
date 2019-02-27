@@ -25,6 +25,7 @@ char lastname[30];
 operatorDetails CurrentOperator;
 
 char datam[100];
+void printfConfigs(void);
 
 
 

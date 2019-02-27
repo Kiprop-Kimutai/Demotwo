@@ -451,7 +451,7 @@ int jcheck(char* mystr){
   return 0;
  }
  else{
-  printf("Good json");
+  printf("Good json\n");
   return 1;
  }
 }

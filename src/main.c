@@ -97,7 +97,8 @@ void* threader(void *arg)
 			{
 				//getDataFromServer("WATCH",empty_obj,REQUEST_POST , endpoints->transaction);
 				//cJSON_Delete(empty_obj);
-				post_pos_offline_transactions();
+
+				//post_pos_offline_transactions();
 			}
 
 
@@ -116,7 +117,8 @@ void* threader(void *arg)
 
 
 				 */
-				post_pos_offline_transactions();
+
+				//post_pos_offline_transactions();
 			}
 		}
 		i++;
@@ -130,7 +132,7 @@ int main(int argc, char *argv[])
 {
 	int selected = 0;
 	int retval = 0;
-	char  main_menu[][100] = {"Beneficiary Transactions","Merchant  Transactions","POS/User Management" , "Exit"};
+	char  main_menu[][100] = {"Beneficiary Transactions","Merchant  Transactions","POS/User Management","Exit"};
 	char * date_t;
 	char * receipt_t;
 	char * sqlstmt;
@@ -200,7 +202,7 @@ char *  data_to_be_written = "{\"balances\":[{\"walletName\":\"WFP\",\"walletId\
 				err = pthread_create(&(tid), NULL, &threader, NULL);
 				while (login_successful) {
 
-					switch(lcd_menu("Safaricom Value Agency", main_menu, 4,selected))
+					switch(lcd_menu("Safaricom Value Agency", main_menu,4,selected))
 					{
 					case 0:
 
@@ -227,4 +229,15 @@ char *  data_to_be_written = "{\"balances\":[{\"walletName\":\"WFP\",\"walletId\
 
 	}
 	return retval;
+}
+
+void printfConfigs(void){
+	int i = 0;
+	while(true){
+		printf("username %s\n",myLoginPosUser->username);
+		i++;
+		if(i>50){
+			break;
+		}
+	}
 }
