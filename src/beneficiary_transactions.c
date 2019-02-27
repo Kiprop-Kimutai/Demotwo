@@ -59,8 +59,8 @@ void beneficiary_transactions(void )
 		switch( lcd_menu("Beneficiary Transactions", beneficiary_menu, 5 ,selected))
 		{
 
-		case 0:
-			do_beneficiary_transaction(0);
+		case 0: case 1:
+			do_beneficiary_transaction(selected);
 			break;
 		case 1:
 			do_beneficiary_transaction(1);
@@ -417,7 +417,6 @@ void do_beneficiary_transaction( int option){
 						case 1:
 							//switch(wallet_id[selected]){
 							if(strcmp(wallet_id[selected],"M-PESA Account") == 0){
-								printf("OPERATIONNNN:%s\n",customer_operations->ORGANIZATION_ACCOUNT_CASH_OUT);
 								cJSON_AddStringToObject(txToPosted,"transOperation",customer_operations->ORGANIZATION_ACCOUNT_CASH_OUT);
 								strcpy(transType ,customer_operations->ORGANIZATION_ACCOUNT_CASH_OUT);
 							}
