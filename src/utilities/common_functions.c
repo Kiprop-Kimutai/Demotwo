@@ -484,6 +484,7 @@ char *hextodecimalconverter(char *hexstring){
 	  int j = 0;
 	  double x = 0;
 	  char output[16];
+	  char iccid[16];
 	  printf("%s\n",hexstring);
 	  printf("%d\n",(int)strlen(hexstring));
 	  for(i=strlen(hexstring)-1;i>=0;i--){
@@ -493,6 +494,11 @@ char *hextodecimalconverter(char *hexstring){
 	  printf("decimal value %f\n",x);
 	  sprintf(output,"%f",x);
 	  printf("%s\n",strtok(output,"."));
+	  if(strlen(strtok(output,".")) == 8){
+		  sprintf(iccid,"21100000%s",strtok(output,"."));
+		  printf("Final iccid %s",iccid);
+		  return iccid;
+	  }
 	  return strtok(output,".");
 }
 double getdecimalvalueforhex(char i,int position){

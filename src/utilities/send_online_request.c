@@ -395,7 +395,7 @@ int start_ppp_session(char * requestType, char * request ,  int operation , char
 		//token_received = 0 ;
 		res = curl_easy_perform(curl);
 		   printf("Returned Ster : %s\n", s.ptr);
-		   resp_str =  malloc(strlen(resp_str) +5);
+		   resp_str =  malloc(strlen(s.ptr) +5);
 		   strcpy(resp_str , s.ptr);
 		   * response = resp_str;
 		    free(s.ptr);

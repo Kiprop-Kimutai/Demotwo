@@ -1437,28 +1437,33 @@ int  post_transaction_file(char  * transaction_source, char * transaction , cJSO
 {
 	//char  ** tokens  = 0 ;
 	char * t_file  = transaction;
-	char  split_transactions[15][100];
+	char  split_transactions[100][200];
+	char  trans[200];
 	int w  =  0 ,  x = 0;
 	cJSON * response_json ;
 	cJSON * final_transaction;
 	cJSON * json_array;
-	cJSON * resp_balances ,  * resp_balances_result;
+	cJSON /** resp_balances , */ * resp_balances_result;
 
 	//No transactions to  post
 
 	//char * str = "BT-122865212*82671220*111*098765789876*72355289383*6000*123432567*101#BT-122865212*82671220*111*098765789876*72355289383*6000*123432567*101#BT-122865212*82671220*111*098765789876*72355289383*6000*123432567*101#BT-122865212*82671220*111*098765789876*72355289383*6000*123432567*101#BT-122865212*82671220*111*098765789876*72355289383*6000*123432567*101#BT-122865212*82671220*111*098765789876*72355289383*6000*123432567*101#BT-122865212*82671220*111*098765789876*72355289383*6000*123432567*101#BT-122865212*82671220*111*098765789876*72355289383*6000*123432567*101#BT-122865212*82671220*111*098765789876*72355289383*6000*123432567*101#BT-122865212*82671220*111*098765789876*72355289383*6000*123432567*101";
 
-	strcat(t_file , "\0");
+	//strcat(t_file , "\0");
 	char *del = "#";
 	char *s;
 	if(strlen(transaction)==0)
 		return 0;
 	s = my_strtok(t_file, del);
 	while(s) {
-		printf("%s\n", s);
+		//printf("%s\n", s);
+		strcpy(split_transactions[w], "");
 		if(strlen(s)>0)
+		{
 			strcpy(split_transactions[w], s);
-		s = 0;
+			printf("%d: %s\n", w, split_transactions[w]);
+		}
+		//s = 0;
 		s = my_strtok(NULL, del);
 		w++;
 	}
@@ -1474,7 +1479,7 @@ int  post_transaction_file(char  * transaction_source, char * transaction , cJSO
 	cJSON_AddStringToObject(final_transaction , "source" , transaction_source);
 	cJSON_AddStringToObject(final_transaction , "requestId" , req_id);
 
-	printf("Final_transaction : %s\n" ,  cJSON_Print(final_transaction));
+	//printf("Final_transaction : %s\n" ,  cJSON_Print(final_transaction));
 	printf("w : %d \n",w);
 	for(x = 0 ;  x<w;x++)
 	{
@@ -1483,7 +1488,12 @@ int  post_transaction_file(char  * transaction_source, char * transaction , cJSO
 		char * delim =  "*";
 		cJSON * txToPosted=cJSON_CreateObject();
 		//char  *  temp =
-		char * data = my_strtok(split_transactions[x], delim);
+
+		strcpy(trans , split_transactions[x]);
+		printf("tx: %s\n" , trans);
+		char * data = my_strtok(trans, delim);
+		printf("x: %d\n" , x);
+
 		//card_number = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(json_beneficiary_data , "iccid")));
 
 		cJSON_AddItemToArray(json_array , txToPosted);
@@ -1551,22 +1561,24 @@ int  post_transaction_file(char  * transaction_source, char * transaction , cJSO
 
 			//,wallet_id[selected]
 			else if(y == 5 )
-				cJSON_AddStringToObject(txToPosted,"amount",data);
+			{
+				cJSON_AddNumberToObject(txToPosted,"amount",atof(data));
+			}
 			else if(y == 6 )
 				cJSON_AddStringToObject(txToPosted,"date",data);
 			else if(y == 7 )
 				cJSON_AddStringToObject(txToPosted,"walletName",data);
 			else if(y == 8 )
-				cJSON_AddStringToObject(txToPosted,"walletBalanceBefore",data);
+				cJSON_AddNumberToObject(txToPosted,"walletBalanceBefore",atof(data));
 			else if(y == 9)
-				cJSON_AddStringToObject(txToPosted,"walletBalanceAfter",data);
+				cJSON_AddNumberToObject(txToPosted,"walletBalanceAfter",atof(data));
 			else if(y == 9)
 				cJSON_AddStringToObject(txToPosted,"currency",data);
 			else if(y == 11)
 			{
 				cJSON_AddStringToObject(txToPosted,"authMode","101");
 			//else if(y == 12)
-				cJSON_AddStringToObject(txToPosted,"userid",data);
+				cJSON_AddStringToObject(txToPosted,"userId",data);
 
 			}
 			//cJSON_AddNumberToObject(txToPosted,"balance",(wallet_amount[selected]-atof(getCharacters)));
@@ -1585,29 +1597,40 @@ int  post_transaction_file(char  * transaction_source, char * transaction , cJSO
 		cJSON *  from_server;
 		from_server  = response_json;
 		printf(cJSON_Print(response_json));
-		resp_status  = cJSON_Print(cJSON_GetObjectItem(from_server ,  "status")) ;
-		resp_balances_result = cJSON_GetObjectItem(from_server ,  "resultDesc");
-		resp_balances= (cJSON *) NULL;
-		resp_balances  = cJSON_GetObjectItem(resp_balances_result , "balances") ;
+		//start
+		if(strcmp(transaction_source , "card")== 0)
+		{
+			resp_status  = cJSON_Print(cJSON_GetObjectItem(from_server ,  "status")) ;
+			resp_balances_result = cJSON_GetObjectItem(from_server ,  "resultDesc");
+			/*resp_balances= (cJSON *) NULL;
+			resp_balances  = cJSON_GetObjectItem(resp_balances_result , "balances") ;*/
 
-		printf("resp_balances_result :  %s\n" ,  cJSON_Print(resp_balances_result));
-		printf("resp_balances : %s\n" ,  cJSON_Print(resp_balances));
-		printf (resp_status);
-		printf("\n");
-		if(strcmp(resp_status,  "true") == 0)
-		{
-			printf("True\n");
-			*response_balances = (cJSON *) NULL;
-			*response_balances = resp_balances;
-			return 1;
+			printf("resp_balances_result :  %s\n" ,  cJSON_Print(resp_balances_result));
+			//printf("resp_balances : %s\n" ,  cJSON_Print(resp_balances));
+			printf (resp_status);
+			printf("\n");
+			if(strcmp(resp_status,  "true") == 0)
+			{
+				printf("True\n");
+				*response_balances = (cJSON *) NULL;
+				*response_balances = resp_balances_result;
+				return 1;
+			}
+			else
+			{
+				*response_balances =( cJSON * )NULL;
+				//errmessage =  cJSON_Print(cJSON_GetObjectItem(resp_balances,"message"));
+				message_display_function(1,"","Transactions Error","Error posting transactions.", (char *) NULL);
+				kb_getkey();
+				return 0;
+			}
+
 		}
-		else
+		else if(strcmp(transaction_source , "pos")== 0)
 		{
-			*response_balances =( cJSON * )NULL;
-			errmessage =  cJSON_Print(cJSON_GetObjectItem(resp_balances,"message"));
-			message_display_function(1,"","Transactions Error",errmessage, (char *) NULL);
-			kb_getkey();
-			return 0;
+
+			*response_balances = from_server;
+			return 1;
 		}
 	}
 	*response_balances =( cJSON * )NULL;
@@ -1694,7 +1717,7 @@ int post_pos_offline_transactions (void)
 	char  * sql = "select transId  || '*' || terminalId || '*' || transOperation || '*' || debiticcid || '*' || crediticcid || '*' || amount || '*' || date  || '*' || wallet || '*' ||  balanceBefore  || '*' ||   balanceAfter || '*' || currency || '*' || userId from  transaction_table where posted = 0 and receiptPrinted = 1 and cardUpdated =1";
 
 	char  * new_transaction = 0;
-	cJSON * balances;
+	cJSON * response;
 	int i;
 	sqlite_database_read_write_operation(sql  ,  "database.db");
 	if(sql_data_count)
@@ -1717,7 +1740,36 @@ int post_pos_offline_transactions (void)
 		printf("Obtained :  %s\n" , new_transaction);
 		//strcat(new_transaction ,  "\0");
 		strcat(new_transaction ,"#");
-		post_transaction_file("pos" ,new_transaction  , &balances );
+		printf("Final :  %s\n" , new_transaction);
+		if(post_transaction_file("pos" ,new_transaction  , &response ))
+		{
+			//Process the response -  fetch transaction Id and delete it from the local database
+			//We need now to  update the database with what Klemo  accepted
+			//So  from the Json feedback  below , fetch the originalTransId and delete it from db DB: database.db table transaction_table
+
+/*			{
+			  "benTxnResult": [
+			    {
+			      "originalTransId": "2002",
+			      "status": true,
+			      "code": "0",
+			      "message": "success/benTxn success",
+			      "resultDesc": ""
+			    },
+			    {
+			      "originalTransId": "2001",
+			      "status": true,
+			      "code": "0",
+			      "message": "success/benTxn success",
+			      "resultDesc": ""
+			    }
+			  ]
+			}*/
+
+		}
+
+		printf("Response :  %s\n" , cJSON_Print(response) );
+
 	}
 
 	return 0 ;
