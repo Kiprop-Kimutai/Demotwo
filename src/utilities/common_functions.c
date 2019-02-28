@@ -182,6 +182,7 @@ void get_request_id (int required_output,  char ** returned_request_id) {
 	strftime(buffer, SIZE, "%Y%m%d", loctime);
 //	*unformatted_date = buffer;
 	*returned_request_id  = id_buffer;
+	printf("Val :  %s" , *returned_request_id);
 
 
 

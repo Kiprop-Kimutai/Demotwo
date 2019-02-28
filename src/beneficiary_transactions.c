@@ -45,7 +45,7 @@ void fetch_beneficary_balance( void);
 void fetch_beneficary_balances( void);
 void fetch_beneficary_mini_statement( void);
 void print_beneficairy_card_balances(void);
-int card_mini_statement(char *  read_card_number);
+int card_mini_statement(char *  read_card_number   ,  char * wallet);
 
 void beneficiary_transactions(void )
 {
@@ -59,8 +59,8 @@ void beneficiary_transactions(void )
 		switch( lcd_menu("Beneficiary Transactions", beneficiary_menu, 5 ,selected))
 		{
 
-		case 0: case 1:
-			do_beneficiary_transaction(selected);
+		case 0:
+			do_beneficiary_transaction(0);
 			break;
 		case 1:
 			do_beneficiary_transaction(1);
@@ -207,7 +207,7 @@ void register_beneficiary(void){
 				cJSON_AddStringToObject(create_new_obj , "transactions" ,"" );
 				printf("Value  to  card:  %s\n" , cJSON_Print(create_new_obj));
 
-				//if(fplib_test(0  ))
+				if(fplib_test(0  ))
 				{
 
 					char * transact_string;
@@ -329,115 +329,115 @@ void do_beneficiary_transaction( int option){
 		printf("Read stored   transactions  :  %s\n" , cJSON_Print(transaction_json));
 
 
-		/*if(fplib_test(1 ))
-		{*/
-		//if fingerprint verification successful
-		//Start
-
-
-		balance_information  = cJSON_GetObjectItem(transaction_json , "balances");
-
-		if(cJSON_GetArraySize(balance_information) == 0){
-			message_display_function(1, "","Beneficiary Transaction error" ,  "The card has no available balances. Please get update card online and try  again ");
-			kb_getkey();
-			return;
-		}
-
-		//Get  vouchers
-		balance_information  = cJSON_GetObjectItem(transaction_json , "balances");
-		printf("%d\n" , cJSON_GetArraySize(balance_information));
-
-		if(cJSON_GetArraySize(balance_information) == 0)
+		if(fplib_test(1 ))
 		{
-			message_display_function(1, "","Beneficiary Transaction error" ,  "The card has no available balances. Please get update card online and try  again ");
-			kb_getkey();
-			return;
-		}
-		for (i  = 0; i<cJSON_GetArraySize(balance_information); i++){
-			balance_array = cJSON_GetArrayItem(balance_information,i);
-			//printf("Got in\n");
+			//if fingerprint verification successful
+			//Start
 
-			//printf("",  cJSON_Print(cJSON_GetObject(balance_array , "wallet"))));
-			//printf("Got in\n");
 
-			strcpy(wallet_id[i],"");
-			//strcpy( wallet_name[i], get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(balance_array , "wallet"))));
-			strcpy( wallet_currency[i], get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(balance_array , "currency"))));
-			strcpy( wallet_id[i], get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(balance_array , "wallet"))));
-			wallet_amount[i] = atof(cJSON_Print(cJSON_GetObjectItem(balance_array , "balance")));
-			printf("wallet_name  :  %s\n" , wallet_id[i]);
+			balance_information  = cJSON_GetObjectItem(transaction_json , "balances");
 
-		}
-		printf("%s\n" , cJSON_Print(balance_information));
-		//forcJSON_GetArraySize(balance_information)
-		while (selected>=0){
+			if(cJSON_GetArraySize(balance_information) == 0){
+				message_display_function(1, "","Beneficiary Transaction error" ,  "The card has no available balances. Please get update card online and try  again ");
+				kb_getkey();
+				return;
+			}
 
-			selected= lcd_menu("Please select the program", wallet_id, i, selected);
-			printf("optioned on %d\n", option);
-			printf("Selected on %d\n", selected);
-			if(selected > -1 && selected < i )
+			//Get  vouchers
+			balance_information  = cJSON_GetObjectItem(transaction_json , "balances");
+			printf("%d\n" , cJSON_GetArraySize(balance_information));
+
+			if(cJSON_GetArraySize(balance_information) == 0)
 			{
-				strcpy(getCharacters ,"");
-				strcpy(getCharacters1 ,"");
-				ret = kb_getStringtwo(NUM_IN ,NUM_IN ,  1, 16, getCharacters,getCharacters1, NULL, "Please enter the transaction amount", "","Beneficiary Transaction", 0);
-				if( strlen(getCharacters)>0 && ret!=-1)
+				message_display_function(1, "","Beneficiary Transaction error" ,  "The card has no available balances. Please get update card online and try  again ");
+				kb_getkey();
+				return;
+			}
+			for (i  = 0; i<cJSON_GetArraySize(balance_information); i++){
+				balance_array = cJSON_GetArrayItem(balance_information,i);
+				//printf("Got in\n");
+
+				//printf("",  cJSON_Print(cJSON_GetObject(balance_array , "wallet"))));
+				//printf("Got in\n");
+
+				strcpy(wallet_id[i],"");
+				//strcpy( wallet_name[i], get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(balance_array , "wallet"))));
+				strcpy( wallet_currency[i], get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(balance_array , "currency"))));
+				strcpy( wallet_id[i], get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(balance_array , "wallet"))));
+				wallet_amount[i] = atof(cJSON_Print(cJSON_GetObjectItem(balance_array , "balance")));
+				printf("wallet_name  :  %s\n" , wallet_id[i]);
+
+			}
+			printf("%s\n" , cJSON_Print(balance_information));
+			//forcJSON_GetArraySize(balance_information)
+			while (selected>=0){
+
+				selected= lcd_menu("Please select the program", wallet_id, i, selected);
+				printf("optioned on %d\n", option);
+				printf("Selected on %d\n", selected);
+				if(selected > -1 && selected < i )
 				{
-					cJSON * txToPosted;
-					cJSON *  json_array;
-					if(wallet_amount[selected]>=atof(getCharacters)){
-						int printflag ,print_complete;
-						int resp;
-						char transType[10];
-						txToPosted=cJSON_CreateObject();
-						json_array  =  cJSON_CreateArray();
-						card_number = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(json_beneficiary_data , "iccid")));
+					strcpy(getCharacters ,"");
+					strcpy(getCharacters1 ,"");
+					ret = kb_getStringtwo(NUM_IN ,NUM_IN ,  1, 16, getCharacters,getCharacters1, NULL, "Please enter the transaction amount", "","Beneficiary Transaction", 0);
+					if( strlen(getCharacters)>0 && ret!=-1)
+					{
+						cJSON * txToPosted;
+						cJSON *  json_array;
+						if(wallet_amount[selected]>=atof(getCharacters)){
+							int printflag ,print_complete;
+							int resp;
+							char transType[10];
+							txToPosted=cJSON_CreateObject();
+							json_array  =  cJSON_CreateArray();
+							card_number = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(json_beneficiary_data , "iccid")));
 
-						cJSON_AddItemToArray(json_array , txToPosted);
-						cJSON_AddItemToObject(final_transaction , "benTxn" , json_array);
-						get_date_and_receipt (0,  &transactionDate ,&unformatedDate,  &transactionID);
-						strcpy(txnDate ,transactionDate);
-						strcpy(transID ,transactionID);
-						strcpy(receieved_unformatedDate ,unformatedDate);
-						cJSON_AddStringToObject(txToPosted,"amount",getCharacters);
-						switch(option){
-						case 0:
-							//switch(wallet_id[selected]){
-							if(strcmp(wallet_id[selected],"M-PESA Account")== 0){
-								cJSON_AddStringToObject(txToPosted,"transOperation",customer_operations->ORGANIZATION_ACCOUNT_BUY_GOODS);
-								strcpy(transType ,customer_operations->ORGANIZATION_ACCOUNT_BUY_GOODS);
-							}
-							else if(strcmp(wallet_id[selected],"WFP Beneficiary Account") == 0){
-								cJSON_AddStringToObject(txToPosted,"transOperation",customer_operations->BUY_GOODS_WFP_ACCOUNT);
-								strcpy(transType ,customer_operations->BUY_GOODS_WFP_ACCOUNT );
-							}
-							else{
-								//do nothinf
-							}
-							break;
-						case 1:
-							//switch(wallet_id[selected]){
-							if(strcmp(wallet_id[selected],"M-PESA Account") == 0){
-								cJSON_AddStringToObject(txToPosted,"transOperation",customer_operations->ORGANIZATION_ACCOUNT_CASH_OUT);
-								strcpy(transType ,customer_operations->ORGANIZATION_ACCOUNT_CASH_OUT);
-							}
+							cJSON_AddItemToArray(json_array , txToPosted);
+							cJSON_AddItemToObject(final_transaction , "benTxn" , json_array);
+							get_date_and_receipt (0,  &transactionDate ,&unformatedDate,  &transactionID);
+							strcpy(txnDate ,transactionDate);
+							strcpy(transID ,transactionID);
+							strcpy(receieved_unformatedDate ,unformatedDate);
+							cJSON_AddStringToObject(txToPosted,"amount",getCharacters);
+							switch(option){
+							case 0:
+								//switch(wallet_id[selected]){
+								if(strcmp(wallet_id[selected],"M-PESA Account")== 0){
+									cJSON_AddStringToObject(txToPosted,"transOperation",customer_operations->ORGANIZATION_ACCOUNT_BUY_GOODS);
+									strcpy(transType ,customer_operations->ORGANIZATION_ACCOUNT_BUY_GOODS);
+								}
+								else if(strcmp(wallet_id[selected],"WFP Beneficiary Account") == 0){
+									cJSON_AddStringToObject(txToPosted,"transOperation",customer_operations->BUY_GOODS_WFP_ACCOUNT);
+									strcpy(transType ,customer_operations->BUY_GOODS_WFP_ACCOUNT );
+								}
+								else{
+									//do nothinf
+								}
+								break;
+							case 1:
+								//switch(wallet_id[selected]){
+								if(strcmp(wallet_id[selected],"M-PESA Account") == 0){
+									cJSON_AddStringToObject(txToPosted,"transOperation",customer_operations->ORGANIZATION_ACCOUNT_CASH_OUT);
+									strcpy(transType ,customer_operations->ORGANIZATION_ACCOUNT_CASH_OUT);
+								}
 
-							else if(strcmp(wallet_id[selected],"WFP Beneficiary Account") == 0){
-								/*cJSON_AddStringToObject(txToPosted,"transOperation",customer_operations->ORGANIZATION_ACCOUNT_CASH_OUT);
+								else if(strcmp(wallet_id[selected],"WFP Beneficiary Account") == 0){
+									/*cJSON_AddStringToObject(txToPosted,"transOperation",customer_operations->ORGANIZATION_ACCOUNT_CASH_OUT);
 								strcpy(transType ,customer_operations->ORGANIZATION_ACCOUNT_CASH_OUT);*/
+									//cJSON_AddStringToObject(txToPosted,"transOperation",NULL);
+									message_display_function(1, "", "Operation Error" , "This transaction type is not permitted on the selected wallet.", (char *)NULL);
+									kb_getkey();
+									return;
+								}
+								break;
+							default:
 								cJSON_AddStringToObject(txToPosted,"transOperation",NULL);
-								message_display_function(1, "", "Operation Error" , "This transaction type is not permitted on the selected wallet.", (char *)NULL);
+								message_display_function(1, "", "Transaction Error" , "This transaction type is not permitted on the selected wallet. Please select  the correct  wallet and try  again", (char *)NULL);
 								kb_getkey();
 								return;
 							}
-							break;
-						default:
-							cJSON_AddStringToObject(txToPosted,"transOperation",NULL);
-							message_display_function(1, "", "Transaction Error" , "This transaction type is not permitted on the selected wallet. Please select  the correct  wallet and try  again", (char *)NULL);
-							kb_getkey();
-							return;
-						}
-	/*******************************************************************************************************/
-						/*if(option == 0 && selected ==0)
+							/*******************************************************************************************************/
+							/*if(option == 0 && selected ==0)
 						{
 							cJSON_AddStringToObject(txToPosted,"transOperation",customer_operations->BUY_GOODS_WFP_ACCOUNT);
 							strcpy(transType ,customer_operations->BUY_GOODS_WFP_ACCOUNT );
@@ -453,32 +453,32 @@ void do_beneficiary_transaction( int option){
 							strcpy(transType ,customer_operations->ORGANIZATION_ACCOUNT_CASH_OUT);
 						}*/
 
-		/*******************************************************************************************************/
-						if(option == 1 && selected == 1)
-						{
-							cJSON_AddStringToObject(txToPosted,"transOperation",NULL);
-							message_display_function(1, "", "Transaction Error" , "This transaction type is not permitted on the selected wallet. Please select  the correct  wallet and try  again", (char *)NULL);
-							kb_getkey();
-							return;
-						}
-						cJSON_AddStringToObject(txToPosted,"debitAccountNo",card_number);
-						cJSON_AddStringToObject(txToPosted,"creditAccountNo",myMerchantUser->agentid);
-						//cJSON_AddStringToObject(txToPosted,"wallet",wallet_id[selected]);
-						cJSON_AddStringToObject(txToPosted,"walletName",wallet_id[selected]);
-						cJSON_AddStringToObject(txToPosted,"currency",wallet_currency[selected]);
-						//cJSON_AddNumberToObject(txToPosted,"balance",(wallet_amount[selected]-atof(getCharacters)));
-						wallet_amount[selected] =wallet_amount[selected]-atof(getCharacters);
-						cJSON_AddNumberToObject(txToPosted,"walletBalanceBefore",(wallet_amount[selected]+atof(getCharacters)));
-						cJSON_AddNumberToObject(txToPosted,"walletBalanceAfter",(wallet_amount[selected]));
-						cJSON_AddStringToObject(txToPosted,"transId",transID);
-						cJSON_AddStringToObject(txToPosted,"terminalId",pos_serial_number);
-						cJSON_AddStringToObject(txToPosted,"date",receieved_unformatedDate);
-						cJSON_AddStringToObject(txToPosted,"authMode","101");
-						cJSON_AddStringToObject(txToPosted,"userId",myLoginPosUser->username);
-						printf("The Json :  %s\n", cJSON_Print(final_transaction));
-						printf("sql_transaction : %s\n" , transID);
+							/*******************************************************************************************************/
+							if(option == 1 && selected == 1)
+							{
+								cJSON_AddStringToObject(txToPosted,"transOperation",NULL);
+								message_display_function(1, "", "Transaction Error" , "This transaction type is not permitted on the selected wallet. Please select  the correct  wallet and try  again", (char *)NULL);
+								kb_getkey();
+								return;
+							}
+							cJSON_AddStringToObject(txToPosted,"debitAccountNo",card_number);
+							cJSON_AddStringToObject(txToPosted,"creditAccountNo",myMerchantUser->agentid);
+							//cJSON_AddStringToObject(txToPosted,"wallet",wallet_id[selected]);
+							cJSON_AddStringToObject(txToPosted,"walletName",wallet_id[selected]);
+							cJSON_AddStringToObject(txToPosted,"currency",wallet_currency[selected]);
+							//cJSON_AddNumberToObject(txToPosted,"balance",(wallet_amount[selected]-atof(getCharacters)));
+							wallet_amount[selected] =wallet_amount[selected]-atof(getCharacters);
+							cJSON_AddNumberToObject(txToPosted,"walletBalanceBefore",(wallet_amount[selected]+atof(getCharacters)));
+							cJSON_AddNumberToObject(txToPosted,"walletBalanceAfter",(wallet_amount[selected]));
+							cJSON_AddStringToObject(txToPosted,"transId",transID);
+							cJSON_AddStringToObject(txToPosted,"terminalId",pos_serial_number);
+							cJSON_AddStringToObject(txToPosted,"date",receieved_unformatedDate);
+							cJSON_AddStringToObject(txToPosted,"authMode","101");
+							cJSON_AddStringToObject(txToPosted,"userId",myLoginPosUser->username);
+							printf("The Json :  %s\n", cJSON_Print(final_transaction));
+							printf("sql_transaction : %s\n" , transID);
 
-						/*						" CREATE TABLE transaction_table("
+							/*						" CREATE TABLE transaction_table("
 								"transId   	TEXT PRIMARY KEY	 ,"
 								"transOperation		TEXT ,"
 								"debitAccountNo 	TEXT ,"
@@ -495,148 +495,151 @@ void do_beneficiary_transaction( int option){
 								"posted		INTEGER	, "
 								"receiptPrinted		INTEGER, "
 								"cardUpdated		INTEGER"*/
-						sprintf(sql_transaction , "Insert  into  transaction_table "
-								"(transId ,transOperation ,debiticcid,crediticcid , wallet ,amount ,balanceBefore ,balanceAfter, currency, terminalId ,  date , authMode ,userId, posted  ,receiptPrinted , cardUpdated) "
-								"VALUES('%s' , '%s', '%s' ,  '%s', '%s', %s,%0.2f, %0.2f ,'%s' ,'%s' , '%s' , '%s' ,  '%s' , 0 , 0 , 0);" ,
-								transID ,transType ,card_number , myMerchantUser->agentid, wallet_id[selected],getCharacters ,(wallet_amount[selected]+atof(getCharacters)) ,wallet_amount[selected] ,wallet_currency[selected] ,pos_serial_number ,receieved_unformatedDate,"101" ,myLoginPosUser->username  );
-						//sqlite_database_read_write_operation(sql_transaction ,"database.db");
-						printf("sql_transaction : %s\n" , sql_transaction);
-						sqlite_database_read_write_operation(sql_transaction ,"database.db");
+							sprintf(sql_transaction , "Insert  into  transaction_table "
+									"(transId ,transOperation ,debiticcid,crediticcid , wallet ,amount ,balanceBefore ,balanceAfter, currency, terminalId ,  date , authMode ,userId, posted  ,receiptPrinted , cardUpdated) "
+									"VALUES('%s' , '%s', '%s' ,  '%s', '%s', %s,%0.2f, %0.2f ,'%s' ,'%s' , '%s' , '%s' ,  '%s' , 0 , 0 , 0);" ,
+									transID ,transType ,card_number , myMerchantUser->agentid, wallet_id[selected],getCharacters ,(wallet_amount[selected]+atof(getCharacters)) ,wallet_amount[selected] ,wallet_currency[selected] ,pos_serial_number ,receieved_unformatedDate,"101" ,myLoginPosUser->username  );
+							//sqlite_database_read_write_operation(sql_transaction ,"database.db");
+							printf("sql_transaction : %s\n" , sql_transaction);
+							sqlite_database_read_write_operation(sql_transaction ,"database.db");
 
-						//111*transId
-						//#%s*%s*transOperation*debiticcid*crediticcid*amount*date*authModeexisting_transaction  existing_transaction
-						existing_transaction = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(transaction_json , "transactions")));
-
-
-						sprintf(new_transaction , "%s*%s*%s*%s*%s*%s*%s*%s*%.2f*%.2f%s*%s#%s" ,transID,pos_serial_number,transType , card_number,myMerchantUser->agentid, getCharacters,receieved_unformatedDate,wallet_id[selected] ,(wallet_amount[selected]+atof(getCharacters)),wallet_amount[selected] ,wallet_currency[selected],myLoginPosUser->username, existing_transaction);
-						printf("New Transaction : %s\n",  new_transaction);
+							//111*transId
+							//#%s*%s*transOperation*debiticcid*crediticcid*amount*date*authModeexisting_transaction  existing_transaction
+							existing_transaction = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(transaction_json , "transactions")));
 
 
-
-						for(w = 0 ; w<i;w++)
-						{
-							cJSON * new_wallet_item = cJSON_CreateObject();
-							cJSON_AddStringToObject(new_wallet_item, "wallet",wallet_id[w]);
-							//cJSON_AddStringToObject(new_wallet_item, "wallet",wallet_id[w]);
-							cJSON_AddStringToObject(new_wallet_item, "currency",wallet_currency[w]);
-							cJSON_AddNumberToObject(new_wallet_item, "balance",wallet_amount[w]);
-							cJSON_AddItemToArray(new_wallet ,new_wallet_item );
-						}
-						//cJSON_AddStringToObject(new_txs, "benTxn",new_transaction );
+							sprintf(new_transaction , "%s*%s*%s*%s*%s*%s*%s*%s*%.2f*%.2f*%s*%s#%s" ,transID,pos_serial_number,transType , card_number,myMerchantUser->agentid, getCharacters,receieved_unformatedDate,wallet_id[selected] ,(wallet_amount[selected]+atof(getCharacters)),wallet_amount[selected] ,wallet_currency[selected],myLoginPosUser->username, existing_transaction);
+							printf("New Transaction : %s\n",  new_transaction);
 
 
-						printf("Existing Transaction : %s\n",  existing_transaction);
-						//printf("New Balance : %s\n",  cJSON_Print(new_transaction_json));
 
-						//if Post and get_feedback is ok
-						resp = post_transaction_file("card",new_transaction, &returned_balances);
-						if(resp){
-							cJSON * new_transaction_json = cJSON_CreateObject();
-							char  * data_to_be_written;
-							char * final_data_to_be_written;
-							char  * tx;
-							char * returned_balances_string;
-							cJSON * balances_object;
-							cJSON * responded_json_balances;
-							char  update_sql[200];
-							if(resp ==2)
+							for(w = 0 ; w<i;w++)
 							{
-								//saved offline and on card
-								cJSON_AddItemToObject(new_transaction_json ,"balances" ,new_wallet);
-
-								cJSON_AddStringToObject(new_transaction_json ,"transactions" ,new_transaction);
-								//sqlite_database_read_write_operation(sql_transaction ,"database.db");
-
+								cJSON * new_wallet_item = cJSON_CreateObject();
+								cJSON_AddStringToObject(new_wallet_item, "wallet",wallet_id[w]);
+								//cJSON_AddStringToObject(new_wallet_item, "wallet",wallet_id[w]);
+								cJSON_AddStringToObject(new_wallet_item, "currency",wallet_currency[w]);
+								cJSON_AddNumberToObject(new_wallet_item, "balance",wallet_amount[w]);
+								cJSON_AddItemToArray(new_wallet ,new_wallet_item );
 							}
-							else
-							{
-								sprintf(update_sql , "update  transaction_table set posted = 1  where transId = '%s' ;" ,transID );
-								sqlite_database_read_write_operation(update_sql ,"database.db");
+							//cJSON_AddStringToObject(new_txs, "benTxn",new_transaction );
 
-								strcpy(update_sql ,"" );
-								responded_json_balances = returned_balances;
-								printf("Before add : %s\n" , cJSON_Print(new_transaction_json));
 
-								//printf("Returned Balances : %s\n" , cJSON_Print(responded_json_balances));
-								returned_balances_string = cJSON_Print(returned_balances);
-								printf("Ret String  :  %s\n" , returned_balances_string);
-								balances_object =  cJSON_GetObjectItem(cJSON_Parse(returned_balances_string),"balances");
-								printf("Ret Json  :  %s\n" , cJSON_Print(balances_object));
-								//are you here?
-								//so after posting transactions, we want to write back balances to card right?
-								cJSON_AddItemToObject(new_transaction_json ,"balances" ,balances_object);
+							printf("Existing Transaction : %s\n",  existing_transaction);
+							//printf("New Balance : %s\n",  cJSON_Print(new_transaction_json));
 
-								cJSON_AddStringToObject(new_transaction_json ,"transactions" ,"");
-								printf("1. I am writting  :  %s\n", cJSON_Print(new_transaction_json));
-							}
-							data_to_be_written = cJSON_Print(new_transaction_json);
-							cJSON_Minify(data_to_be_written);
-							printf("I am writting  :  %s\n", data_to_be_written);
-							final_data_to_be_written = malloc(strlen(data_to_be_written) + 2);
-							strcpy(final_data_to_be_written , data_to_be_written);
-							strcat(final_data_to_be_written , "\n");
-							//If write card is ok
-							//writefile(int fd,uint8_t keyno,char MF[3],char APP[3],char authkey,char transactiondata,char* personaldetails)
-							returned  = cardoperations(2,"", &tx ,&tx,fingerprint , "" ,  final_data_to_be_written , read_card_number , &new_read_card_number);
-
-							if(returned){
-								sprintf(update_sql , "update  transaction_table set cardUpdated = 1  where transId = '%s' ;" ,transID );
-								sqlite_database_read_write_operation(update_sql ,"database.db");
-
-								printf("\n card update success\n");
-								/*if(1)
-							{*/
-								//update db that write was successful
-								//
-								//sqlite_database_read_write_operation(sql_transaction ,"database.db");
-								print_receipt("TRANSACTION RECEIPT" , txToPosted ,   &printflag ,   &print_complete) ;
-								print_complete = 1;
-								if(print_complete)
+							//if Post and get_feedback is ok
+							resp = post_transaction_file("card",new_transaction, &returned_balances ,1  );
+							if(resp){
+								cJSON * new_transaction_json = cJSON_CreateObject();
+								char  * data_to_be_written;
+								char * final_data_to_be_written;
+								char  * tx;
+								char * returned_balances_string;
+								cJSON * balances_object;
+								cJSON * responded_json_balances;
+								char  update_sql[200];
+								if(resp ==2)
 								{
-									sprintf(update_sql , "update  transaction_table set receiptPrinted = 1  where transId = '%s' ;" ,transID );
+									//save offline and on card
+									cJSON_AddItemToObject(new_transaction_json ,"balances" ,new_wallet);
+
+									cJSON_AddStringToObject(new_transaction_json ,"transactions" ,new_transaction);
+									//sqlite_database_read_write_operation(sql_transaction ,"database.db");
+
+								}
+								else
+								{
+									sprintf(update_sql , "update  transaction_table set posted = 1  where transId = '%s' ;" ,transID );
 									sqlite_database_read_write_operation(update_sql ,"database.db");
-									if(resp == 1)
+
+									strcpy(update_sql ,"" );
+									responded_json_balances = returned_balances;
+									printf("Before add : %s\n" , cJSON_Print(new_transaction_json));
+
+									//printf("Returned Balances : %s\n" , cJSON_Print(responded_json_balances));
+									returned_balances_string = cJSON_Print(returned_balances);
+									printf("Ret String  :  %s\n" , returned_balances_string);
+									balances_object =  cJSON_GetObjectItem(cJSON_Parse(returned_balances_string),"balances");
+									printf("Ret Json  :  %s\n" , cJSON_Print(balances_object));
+									//are you here?
+									//so after posting transactions, we want to write back balances to card right?
+									cJSON_AddItemToObject(new_transaction_json ,"balances" ,balances_object);
+
+									cJSON_AddStringToObject(new_transaction_json ,"transactions" ,"");
+									cJSON_DeleteItemFromObject(new_transaction_json ,"benTxnResult");
+									printf("1. I am writting  :  %s\n", cJSON_Print(new_transaction_json));
+								}
+								data_to_be_written = cJSON_Print(new_transaction_json);
+								cJSON_Minify(data_to_be_written);
+								printf("I am writting  :  %s\n", data_to_be_written);
+								final_data_to_be_written = malloc(strlen(data_to_be_written) + 2);
+								strcpy(final_data_to_be_written , data_to_be_written);
+								strcat(final_data_to_be_written , "\n");
+								//If write card is ok
+								//writefile(int fd,uint8_t keyno,char MF[3],char APP[3],char authkey,char transactiondata,char* personaldetails)
+								returned  = cardoperations(2,"", &tx ,&tx,fingerprint , "" ,  final_data_to_be_written , read_card_number , &new_read_card_number);
+
+								if(returned){
+									sprintf(update_sql , "update  transaction_table set cardUpdated = 1  where transId = '%s' ;" ,transID );
+									sqlite_database_read_write_operation(update_sql ,"database.db");
+
+									printf("\n card update success\n");
+									/*if(1)
+							{*/
+									//update db that write was successful
+									//
+									//sqlite_database_read_write_operation(sql_transaction ,"database.db");
+									print_receipt("TRANSACTION RECEIPT" , txToPosted ,   &printflag ,   &print_complete) ;
+									print_complete = 1;
+									if(print_complete)
 									{
-
-										sprintf(update_sql , "delete from transaction_table where transId = %s ;" ,transID );
+										sprintf(update_sql , "update  transaction_table set receiptPrinted = 1  where transId = '%s' ;" ,transID );
 										sqlite_database_read_write_operation(update_sql ,"database.db");
-										printf("++++++++++++++++++++++++++++++++++++++++\n");
+										if(resp == 1)
+										{
 
+											//Delete the multiple posted transactions
+
+											sprintf(update_sql , "delete from transaction_table where transId = '%s' ;" ,transID );
+											sqlite_database_read_write_operation(update_sql ,"database.db");
+											printf("++++++++++++++++++++++++++++++++++++++++\n");
+
+										}
 									}
 								}
+								break;
 							}
-							break;
+
 						}
+						else{
+							//clear all params
+							message_display_function(1, "","Beneficiary Transaction error" ,  "The requested transaction amount is more than the card balance available");
+							kb_getkey();
 
+						}
 					}
-					else{
-						//clear all params
-						message_display_function(1, "","Beneficiary Transaction error" ,  "The requested transaction amount is more than the card balance available");
-						kb_getkey();
 
+					else if(ret==-1  )
+					{
+						return;
 					}
 				}
-
-				else if(ret==-1  )
+				else if(selected == -1)
 				{
 					return;
 				}
+				else
+				{
+					message_display_function(1,"","Invalid Selection", "Please select  again.", (char *)NULL);
+					kb_getkey();
+				}
 			}
-			else if(selected == -1)
-			{
-				return;
-			}
-			else
-			{
-				message_display_function(1,"","Invalid Selection", "Please select  again.", (char *)NULL);
-				kb_getkey();
-			}
+
+			//cut
+
+
 		}
-
-		//cut
-
-
-		/*}*/
 	}
 	else
 	{
@@ -856,147 +859,153 @@ void fetch_beneficary_balances( void){
 		existing_transaction = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(transaction_json , "transactions")));
 
 
-		if(strlen(existing_transaction) == 0)
+		if(fplib_test(1))
 		{
+			if(strlen(existing_transaction) == 0)
+			{
 
-			char * returned_request_id,req_id[10];
-			get_request_id(1, &returned_request_id);
-			strcpy(req_id, returned_request_id);
-			cJSON_AddItemToObject(card_update_request_json , "benfBalRequest" ,benf_req );
-			cJSON_AddStringToObject(benf_req ,"transOperation" ,"100" );
-			cJSON_AddStringToObject(benf_req ,"iccid" ,read_card_number );
-			get_date_and_receipt( 0 ,&date ,&unformatedDate ,&tx_id);
-			cJSON_AddStringToObject(benf_req ,"transId" ,tx_id );
-			cJSON_AddStringToObject(benf_req ,"requestId" ,req_id );
-			cJSON_AddStringToObject(benf_req ,"date" ,date );
-			cJSON_AddStringToObject(benf_req ,"terminalId" ,pos_serial_number );
-			cJSON_AddStringToObject(benf_req ,"authMode" ,"112" );
-			cJSON_AddStringToObject(benf_req ,"userId" ,myLoginPosUser->username);
+				char * returned_request_id,req_id[50] , transId[50];
+				get_request_id(1, &returned_request_id);
+				strcpy(req_id, returned_request_id);
+				cJSON_AddItemToObject(card_update_request_json , "benfBalRequest" ,benf_req );
+				cJSON_AddStringToObject(benf_req ,"iccid" ,read_card_number );
+				get_date_and_receipt( 0 ,&date ,&unformatedDate ,&tx_id);
+				strcpy(transId , tx_id);
+				cJSON_AddStringToObject(benf_req ,"transId" ,transId );
+
+				cJSON_AddStringToObject(benf_req ,"requestId" ,req_id );
+				cJSON_AddStringToObject(benf_req ,"date" ,date );
+				cJSON_AddStringToObject(benf_req ,"terminalId" ,pos_serial_number );
+				cJSON_AddStringToObject(benf_req ,"authMode" ,"112" );
+				cJSON_AddStringToObject(benf_req ,"userId" ,myLoginPosUser->username);
 
 
-			if(send_gprs_request("RegisterBen", card_update_request_json ,my_endpoint->beneficairy_balance_request ,&response ,  1)){
-				printf("\nresponse :  %s\n", cJSON_Print(response));
-				//printf("\ntransaction_json :  %s\n", cJSON_Print(transaction_json));
+				if(send_gprs_request("RegisterBen", card_update_request_json ,my_endpoint->beneficairy_balance_request ,&response ,  1)){
+					printf("\nresponse :  %s\n", cJSON_Print(response));
+					//printf("\ntransaction_json :  %s\n", cJSON_Print(transaction_json));
 
-				///*** Start
+					///*** Start
 
-				char * resp_status ;
-				cJSON *  new_transaction_json = cJSON_CreateObject();
-				resp_status  = cJSON_Print(cJSON_GetObjectItem(response ,  "status")) ;
-				cJSON * resp_balances_result = cJSON_GetObjectItem(response ,  "resultDesc");
+					char * resp_status ;
+					cJSON *  new_transaction_json = cJSON_CreateObject();
+					resp_status  = cJSON_Print(cJSON_GetObjectItem(response ,  "status")) ;
+					cJSON * resp_balances_result = cJSON_GetObjectItem(response ,  "resultDesc");
 
-				printf("resp_balances_result :  %s\n" ,  cJSON_Print(resp_balances_result));
-				printf("resp_balances : %s\n" ,  cJSON_Print(resp_balances_result));
-				printf (resp_status);
-				printf("\n");
-				if(strcmp(resp_status,  "true") == 0)
-				{
+					printf("resp_balances_result :  %s\n" ,  cJSON_Print(resp_balances_result));
+					printf("resp_balances : %s\n" ,  cJSON_Print(resp_balances_result));
+					printf (resp_status);
+					printf("\n");
+					if(strcmp(resp_status,  "true") == 0)
+					{
+						char  * tx;
+						int print_complete , printflag;
+						printf("True\n");
+
+						cJSON_AddItemToObject(new_transaction_json ,"balances" ,resp_balances_result);
+
+						cJSON_AddStringToObject(new_transaction_json ,"transactions" ,"");
+
+						char * data_to_be_written = cJSON_Print(new_transaction_json);
+						cJSON_Minify(data_to_be_written);
+						printf("I am writting  :  %s\n", data_to_be_written);
+
+						//If write card is ok
+						//writefile(int fd,uint8_t keyno,char MF[3],char APP[3],char authkey,char transactiondata,char* personaldetails)
+						returned  = cardoperations(2,"", &tx ,&tx,fingerprint , "" ,  data_to_be_written , read_card_number , &new_read_card_number);
+
+						if(returned){
+
+							print_receipt("CARD BALANCE RECEIPT" , resp_balances_result ,   &printflag ,   &print_complete) ;
+							print_complete = 1;
+							if(print_complete)
+							{
+								//Print success.
+							}
+						}
+						return ;
+					}
+					else
+					{
+
+						//display response
+
+
+
+						errmessage =  cJSON_Print(cJSON_GetObjectItem(response,"message"));
+
+
+						message_display_function(1,"","Balances Error",errmessage, (char *) NULL);
+						kb_getkey();
+
+
+						return ;
+					}
+				}
+
+			}
+			else {
+				//There exist offline transactions
+
+				int resp;
+				cJSON * returned_balances;
+				//if Post and get_feedback is ok
+				resp = post_transaction_file("card",existing_transaction, &returned_balances ,  1);
+				if(resp){
+					cJSON * new_transaction_json = cJSON_CreateObject();
+					char  * data_to_be_written;
+					char * final_data_to_be_written;
 					char  * tx;
+					char * returned_balances_string;
+					cJSON * balances_object ,  * new_balances_object;
+					cJSON * responded_json_balances;
+					char  update_sql[200];
+					int returned;
 					int print_complete , printflag;
-					printf("True\n");
+					if(resp ==2)
+					{
+						message_display_function(1,  "" , "Error Posting Transactions" , "Server could not be reached. Please check  your connectivity  and try  again" ,  (char * ) NULL);
+						kb_getkey();
+					}
+					else
+					{
 
-					cJSON_AddItemToObject(new_transaction_json ,"balances" ,resp_balances_result);
+						responded_json_balances = returned_balances;
+						printf("Before add : %s\n" , cJSON_Print(new_transaction_json));
 
-					cJSON_AddStringToObject(new_transaction_json ,"transactions" ,"");
+						//printf("Returned Balances : %s\n" , cJSON_Print(responded_json_balances));
+						returned_balances_string = cJSON_Print(returned_balances);
+						printf("Ret String  :  %s\n" , returned_balances_string);
+						balances_object =  cJSON_Parse(returned_balances_string);
 
-					char * data_to_be_written = cJSON_Print(new_transaction_json);
+						new_balances_object = cJSON_GetObjectItem(balances_object , "balances");
+						cJSON_AddItemToObject(new_transaction_json ,"balances" ,new_balances_object);
+						printf("Ret Json  :  %s\n" , cJSON_Print(new_balances_object));
+						cJSON_AddStringToObject(new_transaction_json ,"transactions" ,"");
+						cJSON_DeleteItemFromObject(new_transaction_json , "benTxnResult");
+						printf("1. I am writting  :  %s\n", cJSON_Print(new_transaction_json));
+					}
+					data_to_be_written = cJSON_Print(new_transaction_json);
 					cJSON_Minify(data_to_be_written);
 					printf("I am writting  :  %s\n", data_to_be_written);
-
+					final_data_to_be_written = malloc(strlen(data_to_be_written) + 2);
+					strcpy(final_data_to_be_written , data_to_be_written);
+					strcat(final_data_to_be_written , "\n");
 					//If write card is ok
 					//writefile(int fd,uint8_t keyno,char MF[3],char APP[3],char authkey,char transactiondata,char* personaldetails)
-					returned  = cardoperations(2,"", &tx ,&tx,fingerprint , "" ,  data_to_be_written , read_card_number , &new_read_card_number);
+					returned  = cardoperations(2,"", &tx ,&tx,fingerprint , "" ,  final_data_to_be_written , read_card_number , &new_read_card_number);
 
 					if(returned){
 
-						print_receipt("CARD BALANCE RECEIPT" , resp_balances_result ,   &printflag ,   &print_complete) ;
+						print_receipt("CARD BALANCE RECEIPT" , new_balances_object ,   &printflag ,   &print_complete) ;
 						print_complete = 1;
 						if(print_complete)
 						{
 							//Print success.
 						}
 					}
-					return ;
 				}
-				else
-				{
 
-					//display response
-
-
-
-					errmessage =  cJSON_Print(cJSON_GetObjectItem(response,"message"));
-
-
-					message_display_function(1,"","Balances Error",errmessage, (char *) NULL);
-					kb_getkey();
-
-
-					return ;
-				}
 			}
-
-		}
-		else {
-			//There exist offline transactions
-
-			int resp;
-			cJSON * returned_balances;
-			//if Post and get_feedback is ok
-			resp = post_transaction_file("card",existing_transaction, &returned_balances);
-			if(resp){
-				cJSON * new_transaction_json = cJSON_CreateObject();
-				char  * data_to_be_written;
-				char * final_data_to_be_written;
-				char  * tx;
-				char * returned_balances_string;
-				cJSON * balances_object;
-				cJSON * responded_json_balances;
-				char  update_sql[200];
-				int returned;
-				int print_complete , printflag;
-				if(resp ==2)
-				{
-					message_display_function(1,  "" , "Error Posting Transactions" , "Server could not be reached. Please check  your connectivity  and try  again" ,  (char * ) NULL);
-					kb_getkey();
-				}
-				else
-				{
-
-					responded_json_balances = returned_balances;
-					printf("Before add : %s\n" , cJSON_Print(new_transaction_json));
-
-					//printf("Returned Balances : %s\n" , cJSON_Print(responded_json_balances));
-					returned_balances_string = cJSON_Print(returned_balances);
-					printf("Ret String  :  %s\n" , returned_balances_string);
-					balances_object =  cJSON_Parse(returned_balances_string);
-					printf("Ret Json  :  %s\n" , cJSON_Print(balances_object));
-					cJSON_AddItemToObject(new_transaction_json ,"balances" ,balances_object);
-
-					cJSON_AddStringToObject(new_transaction_json ,"transactions" ,"");
-					printf("1. I am writting  :  %s\n", cJSON_Print(new_transaction_json));
-				}
-				data_to_be_written = cJSON_Print(new_transaction_json);
-				cJSON_Minify(data_to_be_written);
-				printf("I am writting  :  %s\n", data_to_be_written);
-				final_data_to_be_written = malloc(strlen(data_to_be_written) + 2);
-				strcpy(final_data_to_be_written , data_to_be_written);
-				strcat(final_data_to_be_written , "\n");
-				//If write card is ok
-				//writefile(int fd,uint8_t keyno,char MF[3],char APP[3],char authkey,char transactiondata,char* personaldetails)
-				returned  = cardoperations(2,"", &tx ,&tx,fingerprint , "" ,  final_data_to_be_written , read_card_number , &new_read_card_number);
-
-				if(returned){
-
-					print_receipt("CARD BALANCE RECEIPT" , balances_object ,   &printflag ,   &print_complete) ;
-					print_complete = 1;
-					if(print_complete)
-					{
-						//Print success.
-					}
-				}
-			}
-
 		}
 	}
 }
@@ -1043,6 +1052,7 @@ void fetch_beneficary_mini_statement( void){
 	printf("New C Number    %s\n"  ,  read_card_number);
 	if(returned > 0){
 		int i= 0 ,  w=0;
+		int do_mini_statement = 0;
 		transaction_json = cJSON_Parse(transaction_file);
 		cJSON  * response ;
 		char  * date,*unformatedDate,  * tx_id;
@@ -1051,101 +1061,185 @@ void fetch_beneficary_mini_statement( void){
 		json_beneficiary_data = cJSON_Parse(transaction_file);
 		existing_transaction = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(transaction_json , "transactions")));
 
-		if(strlen(existing_transaction) == 0)
-		{
-			//Requesting card Mini Statement
-			card_mini_statement(read_card_number);
-		}
-		else {
-			//There exist offline transactions
+		if(fplib_test(1)){
+			if(strlen(existing_transaction) == 0)
+			{
+				//Requesting card Mini Statement
 
-			int resp;
-			cJSON * returned_balances;
-			//if Post and get_feedback is ok
-			resp = post_transaction_file("card",existing_transaction, &returned_balances);
-			if(resp){
-				cJSON * new_transaction_json = cJSON_CreateObject();
-				char  * data_to_be_written;
-				char * final_data_to_be_written;
-				char  * tx;
-				char * returned_balances_string;
-				cJSON * balances_object;
-				cJSON * responded_json_balances;
-				char  update_sql[200];
-				int returned;
-				int print_complete , printflag;
-				if(resp ==2)
-				{
-					message_display_function(1,  "" , "Error Posting Transactions" , "Server could not be reached. Please check  your connectivity  and try  again" ,  (char * ) NULL);
-					kb_getkey();
-				}
-				else
-				{
+				//End
+				do_mini_statement = 1;
+			}
+			else {
+				//There exist offline transactions
 
-					responded_json_balances = returned_balances;
-					printf("Before add : %s\n" , cJSON_Print(new_transaction_json));
+				int resp;
+				cJSON * returned_balances;
+				//if Post and get_feedback is ok
+				resp = post_transaction_file("card",existing_transaction, &returned_balances , 1);
+				if(resp){
+					cJSON * new_transaction_json = cJSON_CreateObject();
+					char  * data_to_be_written;
+					char * final_data_to_be_written;
+					char  * tx;
+					char * returned_balances_string;
+					cJSON * balances_object ,  *new_balance_object;
+					cJSON * responded_json_balances;
+					char  update_sql[200];
+					int returned;
+					int print_complete , printflag;
+					if(resp ==2)
+					{
+						message_display_function(1,  "" , "Error Posting Transactions" , "Server could not be reached. Please check  your connectivity  and try  again" ,  (char * ) NULL);
+						kb_getkey();
+					}
+					else
+					{
 
-					//printf("Returned Balances : %s\n" , cJSON_Print(responded_json_balances));
-					returned_balances_string = cJSON_Print(returned_balances);
-					printf("Ret String  :  %s\n" , returned_balances_string);
-					balances_object =  cJSON_Parse(returned_balances_string);
-					printf("Ret Json  :  %s\n" , cJSON_Print(balances_object));
-					cJSON_AddItemToObject(new_transaction_json ,"balances" ,balances_object);
+						responded_json_balances = returned_balances;
+						printf("Before add : %s\n" , cJSON_Print(new_transaction_json));
 
-					cJSON_AddStringToObject(new_transaction_json ,"transactions" ,"");
-					printf("1. I am writting  :  %s\n", cJSON_Print(new_transaction_json));
-				}
-				data_to_be_written = cJSON_Print(new_transaction_json);
-				cJSON_Minify(data_to_be_written);
-				printf("I am writting  :  %s\n", data_to_be_written);
-				final_data_to_be_written = malloc(strlen(data_to_be_written) + 2);
-				strcpy(final_data_to_be_written , data_to_be_written);
-				strcat(final_data_to_be_written , "\n");
-				//If write card is ok
-				//writefile(int fd,uint8_t keyno,char MF[3],char APP[3],char authkey,char transactiondata,char* personaldetails)
-				returned  = cardoperations(2,"", &tx ,&tx,fingerprint , "" ,  final_data_to_be_written , read_card_number , &new_read_card_number);
+						//printf("Returned Balances : %s\n" , cJSON_Print(responded_json_balances));
+						returned_balances_string = cJSON_Print(returned_balances);
+						printf("Ret String  :  %s\n" , returned_balances_string);
+						balances_object =  cJSON_Parse(returned_balances_string);
+						printf("Ret Json  :  %s\n" , cJSON_Print(balances_object));
+						new_balance_object  =  cJSON_GetObjectItem(balances_object ,"balances");
+						cJSON_AddItemToObject(new_transaction_json ,"balances" ,new_balance_object);
 
-				if(returned){
-					card_mini_statement(read_card_number);
-					/*					print_receipt("CARD BALANCE RECEIPT" , balances_object ,   &printflag ,   &print_complete) ;
+						cJSON_AddStringToObject(new_transaction_json ,"transactions" ,"");
+						cJSON_DeleteItemFromObject(new_transaction_json ,"benTxnResult");
+						printf("1. I am writting  :  %s\n", cJSON_Print(new_transaction_json));
+					}
+					data_to_be_written = cJSON_Print(new_transaction_json);
+					cJSON_Minify(data_to_be_written);
+					printf("I am writting  :  %s\n", data_to_be_written);
+					final_data_to_be_written = malloc(strlen(data_to_be_written) + 2);
+					strcpy(final_data_to_be_written , data_to_be_written);
+					strcat(final_data_to_be_written , "\n");
+					//If write card is ok
+					//writefile(int fd,uint8_t keyno,char MF[3],char APP[3],char authkey,char transactiondata,char* personaldetails)
+					returned  = cardoperations(2,"", &tx ,&tx,fingerprint , "" ,  final_data_to_be_written , read_card_number , &new_read_card_number);
+
+					if(returned){
+
+						do_mini_statement = 1;
+						/*					print_receipt("CARD BALANCE RECEIPT" , balances_object ,   &printflag ,   &print_complete) ;
 					print_complete = 1;
 					if(print_complete)
 					{
 						//Print success.
 					}*/
-					//request  mini statement
+						//request  mini statement
+					}
 				}
+
 			}
 
+			//
+			if(do_mini_statement)
+			{
+				char wallet_id[10][100];
+
+				int selected;
+				cJSON* balance_information  = cJSON_GetObjectItem(transaction_json , "balances");
+				printf("%d\n" , cJSON_GetArraySize(balance_information));
+
+				if(cJSON_GetArraySize(balance_information) == 0)
+				{
+					message_display_function(1, "","Beneficiary Transaction error" ,  "The card has no available wallets. Please get update card online and try  again ");
+					kb_getkey();
+					return;
+				}
+				for (i  = 0; i<cJSON_GetArraySize(balance_information); i++){
+					cJSON * balance_array = cJSON_GetArrayItem(balance_information,i);
+					//printf("Got in\n");
+
+					//printf("",  cJSON_Print(cJSON_GetObject(balance_array , "wallet"))));
+					//printf("Got in\n");
+
+					strcpy(wallet_id[i],"");
+					//strcpy( wallet_name[i], get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(balance_array , "wallet"))));
+					//strcpy( wallet_currency[i], get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(balance_array , "currency"))));
+					strcpy( wallet_id[i], get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(balance_array , "wallet"))));
+					//wallet_amount[i] = atof(cJSON_Print(cJSON_GetObjectItem(balance_array , "balance")));
+					printf("wallet_name  :  %s\n" , wallet_id[i]);
+
+				}
+				printf("%s\n" , cJSON_Print(balance_information));
+				//forcJSON_GetArraySize(balance_information)
+				selected = 0;
+				while (selected>=0){
+
+					if(selected > -1 && selected < i )
+					{
+						selected= lcd_menu("Please select the program", wallet_id, i, selected);
+						card_mini_statement(read_card_number ,wallet_id[selected] );
+						return;
+					}
+					else if(selected == -1)
+					{
+						return;
+					}
+					else
+					{
+						message_display_function(1,"","Invalid Selection", "Please select  again.", (char *)NULL);
+						kb_getkey();
+					}
+
+				}
+			}
 		}
+		//
 	}
 }
 
 
-int card_mini_statement(char *  read_card_number){
+int card_mini_statement(char *  read_card_number   ,  char * wallet){
 
 	cJSON * benf_req , * card_update_request_json , * response;
 
-	char * date, *unformatedDate , *tx_id;
+	char * date, *unformatedDate , *tx_id , transId[40];
 
 	int returned;
 
-	char * returned_request_id,req_id[10];
-		get_request_id(1, &returned_request_id);
-		strcpy(req_id, returned_request_id);
+	char * returned_request_id,req_id[50];
+	get_request_id(1, &returned_request_id);
 
-	cJSON_AddItemToObject(card_update_request_json , "benfBalRequest" ,benf_req );
-	cJSON_AddStringToObject(benf_req ,"transOperation" ,"100" );
+	strcpy(req_id, returned_request_id);
+
+	printf("req_id : %s\n", req_id);
+	card_update_request_json = cJSON_CreateObject();
+	benf_req = cJSON_CreateObject();
+
+	/*
+		{
+		   "benfStmtRequest":{
+		      "iccid":"211920000000",
+		      "transId":"BFRQ-tfefsfffdr4t1",
+		      "requestId":"123",
+		      "date":"20181230",
+		      "terminalId":"82346731",
+		      "authMode":"112",
+		      "walletName": "M-PESA Account",
+		      "userId": "clement"
+		   }
+		}*/
+
+	cJSON_AddItemToObject(card_update_request_json , "benfStmtRequest" ,benf_req );
+	//cJSON_AddStringToObject(benf_req ,"transOperation" ,"100" );
 	cJSON_AddStringToObject(benf_req ,"iccid" ,read_card_number );
 	get_date_and_receipt( 0 ,&date ,&unformatedDate ,&tx_id);
-	cJSON_AddStringToObject(benf_req ,"transId" ,tx_id );
+	strcpy(transId , tx_id);
+	printf("transId : %s\n", transId);
+	cJSON_AddStringToObject(benf_req ,"transId" ,transId );
+	cJSON_AddStringToObject(benf_req ,"walletName" ,wallet );
 	cJSON_AddStringToObject(benf_req ,"requestId" ,req_id );
-	cJSON_AddStringToObject(benf_req ,"date" ,date );
+	cJSON_AddStringToObject(benf_req ,"date" ,unformatedDate );
 	cJSON_AddStringToObject(benf_req ,"terminalId" ,pos_serial_number );
 	cJSON_AddStringToObject(benf_req ,"authMode" ,"112" );
 	cJSON_AddStringToObject(benf_req ,"userId" ,myLoginPosUser->username);
 
-
+	printf("json : %s\n" , cJSON_Print(benf_req));
 	if(send_gprs_request("RegisterBen", card_update_request_json ,my_endpoint->beneficairy_statement_request ,&response ,  1)){
 		printf("\nresponse :  %s\n", cJSON_Print(response));
 		//printf("\ntransaction_json :  %s\n", cJSON_Print(transaction_json));
@@ -1481,7 +1575,7 @@ void update_beneficiary_balances( void){
 }
 
 
-int  post_transaction_file(char  * transaction_source, char * transaction , cJSON ** response_balances )
+int  post_transaction_file(char  * transaction_source, char * transaction , cJSON ** response_balances  , int display_messages)
 {
 	//char  ** tokens  = 0 ;
 	char * t_file  = transaction;
@@ -1584,7 +1678,7 @@ int  post_transaction_file(char  * transaction_source, char * transaction , cJSO
 			//strcpy(split_transactions[w], data);
 
 			//BT-122865212*82671220*111*098765789876*72355289383*6000*123432567*101
-//BT-82247929-190222084508*82247929*111*76114338*123*50.0*20190222*M-PESA Account*5765.0*5715.0*SSP*b
+			//BT-82247929-190222084508*82247929*111*76114338*123*50.0*20190222*M-PESA Account*5765.0*5715.0*SSP*b
 
 
 
@@ -1620,12 +1714,12 @@ int  post_transaction_file(char  * transaction_source, char * transaction , cJSO
 				cJSON_AddNumberToObject(txToPosted,"walletBalanceBefore",atof(data));
 			else if(y == 9)
 				cJSON_AddNumberToObject(txToPosted,"walletBalanceAfter",atof(data));
-			else if(y == 9)
-				cJSON_AddStringToObject(txToPosted,"currency",data);
+			/*	else if(y == 10)
+				cJSON_AddStringToObject(txToPosted,"currency",data);*/
 			else if(y == 11)
 			{
 				cJSON_AddStringToObject(txToPosted,"authMode","101");
-			//else if(y == 12)
+				//else if(y == 12)
 				cJSON_AddStringToObject(txToPosted,"userId",data);
 
 			}
@@ -1638,7 +1732,7 @@ int  post_transaction_file(char  * transaction_source, char * transaction , cJSO
 		}
 	}
 	printf("initial json\n");
-	if(send_gprs_request("Transactions" , final_transaction , my_endpoint->beneficary_transaction,  &response_json , 0 ))
+	if(send_gprs_request("Transactions" , final_transaction , my_endpoint->beneficary_transaction,  &response_json , display_messages ))
 	{
 
 		char * resp_status ;
@@ -1651,36 +1745,42 @@ int  post_transaction_file(char  * transaction_source, char * transaction , cJSO
 			//resp_status  = cJSON_Print(cJSON_GetObjectItem(from_server ,  "status"));
 			//disable this check once status is included in the returned responses
 			if(cJSON_Print(cJSON_GetObjectItem(from_server ,  "status"))!=NULL){
-			resp_status  = cJSON_Print(cJSON_GetObjectItem(from_server ,  "status"));
-			resp_balances_result = cJSON_GetObjectItem(from_server ,  "resultDesc");
-			printf("resp_balances_result :  %s\n" ,  cJSON_Print(resp_balances_result));
+				resp_status  = cJSON_Print(cJSON_GetObjectItem(from_server ,  "status"));
+				resp_balances_result = cJSON_GetObjectItem(from_server ,  "resultDesc");
+				printf("resp_balances_result :  %s\n" ,  cJSON_Print(resp_balances_result));
 
-			printf (resp_status);
-			printf("\n");
-			if(strcmp(resp_status,  "true") == 0)
-			{
-				printf("True\n");
-				*response_balances = (cJSON *) NULL;
-				*response_balances = resp_balances_result;
-				return 1;
+				printf (resp_status);
+				printf("\n");
+				if(strcmp(resp_status,  "true") == 0)
+				{
+					printf("True\n");
+					*response_balances = (cJSON *) NULL;
+					*response_balances = resp_balances_result;
+					return 1;
+				}
+				else
+				{
+					*response_balances =( cJSON * )NULL;
+					//errmessage =  cJSON_Print(cJSON_GetObjectItem(resp_balances,"message"));
+					if(display_messages)
+					{
+						message_display_function(1,"","Transactions Error","Error posting transactions.", (char *) NULL);
+						kb_getkey();
+					}
+					return 0;
+				}
+
 			}
-			else
-			{
+			else{
 				*response_balances =( cJSON * )NULL;
 				//errmessage =  cJSON_Print(cJSON_GetObjectItem(resp_balances,"message"));
-				message_display_function(1,"","Transactions Error","Error posting transactions.", (char *) NULL);
-				kb_getkey();
+				if(display_messages)
+				{
+					message_display_function(1,"","Transactions Error","Error posting transactions.", (char *) NULL);
+					kb_getkey();
+				}
 				return 0;
 			}
-
-		}
-		else{
-			*response_balances =( cJSON * )NULL;
-			//errmessage =  cJSON_Print(cJSON_GetObjectItem(resp_balances,"message"));
-			message_display_function(1,"","Transactions Error","Error posting transactions.", (char *) NULL);
-			kb_getkey();
-			return 0;
-		}
 		}
 		else if(strcmp(transaction_source , "pos")== 0)
 		{
@@ -1721,15 +1821,15 @@ int verify_card_and_read_data(  cJSON ** transaction_file , cJSON ** beneficiary
 
 		char * temp =  malloc(strlen(p_details)+2);
 		strcpy(temp ,p_details );
-		/*if(fplib_test(1 ))
-		{*/
-		//*cardno = "12335663232";
-		//printf("p_details : %s \n" , p_details);
-		*beneficiary_details=  cJSON_Parse(temp);
-		*transaction_file   = cJSON_Parse(tx_file);
-		printf(cJSON_Print(*beneficiary_details));
-		return 1;
-		/*}*/
+		if(fplib_test(1 ))
+		{
+			//*cardno = "12335663232";
+			//printf("p_details : %s \n" , p_details);
+			*beneficiary_details=  cJSON_Parse(temp);
+			*transaction_file   = cJSON_Parse(tx_file);
+			printf(cJSON_Print(*beneficiary_details));
+			return 1;
+		}
 	}
 	return 0;
 }
@@ -1765,10 +1865,10 @@ int process_json_response(cJSON *  json_to_be_processed ,  int json_type){
 
 int post_pos_offline_transactions (void)
 {
-/*
+	/*
 	BT-82247929-190222085436|111|76114338|123|M-PESA Account|50.0|5765.0|5715.0|SSP|82247929|20190222|101|b|0|0|0
 	sprintf(new_transaction , "%s*%s*%s*%s*%s*%s*%s*%s*%.2f*%.2f%s*%s#%s" ,transID,pos_serial_number,transType , card_number,myMerchantUser->agentid, getCharacters,receieved_unformatedDate,wallet_id[selected] ,(wallet_amount[selected]+atof(getCharacters)),wallet_amount[selected] ,wallet_currency[selected],myLoginPosUser->username, existing_transaction);
-*/
+	 */
 
 	char  * sql = "select transId  || '*' || terminalId || '*' || transOperation || '*' || debiticcid || '*' || crediticcid || '*' || amount || '*' || date  || '*' || wallet || '*' ||  balanceBefore  || '*' ||   balanceAfter || '*' || currency || '*' || userId from  transaction_table where posted = 0 and receiptPrinted = 1 and cardUpdated =1";
 
@@ -1788,22 +1888,22 @@ int post_pos_offline_transactions (void)
 			}
 			else
 			{
-			new_transaction = realloc(new_transaction,strlen(new_transaction) + strlen(sql_data[i])+1);
-			strcat(new_transaction ,"#");
-			strcat(new_transaction , sql_data[i]);
+				new_transaction = realloc(new_transaction,strlen(new_transaction) + strlen(sql_data[i])+1);
+				strcat(new_transaction ,"#");
+				strcat(new_transaction , sql_data[i]);
 			}
 		}
 		printf("Obtained :  %s\n" , new_transaction);
 		//strcat(new_transaction ,  "\0");
 		strcat(new_transaction ,"#");
 		printf("Final :  %s\n" , new_transaction);
-		if(post_transaction_file("pos" ,new_transaction  , &response ))
+		if(post_transaction_file("pos" ,new_transaction  , &response  , 0))
 		{
 			//Process the response -  fetch transaction Id and delete it from the local database
 			//We need now to  update the database with what Klemo  accepted
 			//So  from the Json feedback  below , fetch the originalTransId and delete it from db DB: database.db table transaction_table
 
-/*			{
+			/*			{
 			  "benTxnResult": [
 			    {
 			      "originalTransId": "2002",

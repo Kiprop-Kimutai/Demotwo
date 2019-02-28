@@ -24,6 +24,7 @@ void update_operator_pin(void);
 const char operatorfieldsa[][100] = {
 		"User Name",
 		"PIN",
+		"User Status",
 		"Exit"
 };
 
@@ -55,28 +56,28 @@ char insertsql[2000];
 void manage_users_menu(void )
 {
 	int selected = 0;
-	char user_managent_menu[][100] = {"Request POS Users",  "Create POS User" ,  "Edit POS User" ,  "Manage User Privilages" ,"Change User Status",  "Exit"};
+	char user_managent_menu[][100] = {/*"Request POS Users", */ "Create POS User" ,  "Edit POS User" , /* "Manage User Privilages" ,*//*"Change User Status",*/  "Exit"};
 	//const char  user_managent_menu[][100] = {"POS Device Configuration","POS User Account Operation", "Privileges Setup", "Exit"};
 	while(1)
 	{
-		switch(lcd_menu("POS User Management", user_managent_menu, 6,selected))
+		switch(lcd_menu("POS User Management", user_managent_menu, 3,selected))
 		{
-		case 0:
+		/*case 0:
 			request_operators();
-			break;
-		case 1:
+			break;*/
+		case 0:
 			create_pos_users();
 			break;
-		case 2:
+		case 1:
 			edit_user_details();
 			break;
-		case 3:
+		/*case 2:
 			manage_user_privilages();
-			break;
-		case 4:
+			break;*/
+	/*	case 3:
 			edit_user_status();
-			break;
-		case 5:
+			break;*/
+		case 2:
 			return;
 			break;
 		}
@@ -424,10 +425,14 @@ int create_pos_users() {
 		strcpy(name1, "");
 		strcpy(getCharacters , "");
 		strcpy(getCharacters1 , "");
-
+		strcpy(myPosUser->username,"");
+		printf("#### VAlue of myPosUser->username: %s\n",myPosUser->username);
 		ret = kb_getStringtwo(ALPHA_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"User Management", 1);
 
-
+		if(kb_getkey() == DIKS_ESCAPE)
+				{
+					return 0;
+				}
 		printf("#### VAlue of ret: %d\n",ret);
 
 		if(ret !=-1){
@@ -450,6 +455,8 @@ int create_pos_users() {
 			kb_getkey();
 
 		}
+
+
 	}while(strlen(myPosUser->username)==0 );
 
 
@@ -457,7 +464,7 @@ int create_pos_users() {
 	do
 	{
 		lcd_clean();
-		strcpy(name, "Enter POS User's Name");
+		strcpy(name, "Enter POS User Full Name");
 		strcpy(name1, "");
 
 		ret = kb_getStringtwo(ALPHA_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"User Management", 1);
@@ -485,8 +492,13 @@ int create_pos_users() {
 			kb_getkey();
 
 		}
-	}while(strlen(myPosUser->name)==0 );
 
+		/*if(kb_getkey() == DIKS_ESCAPE)
+		{
+			return 0;
+		}*/
+	}while(strlen(myPosUser->name)==0 );
+	printf("after posusername\n");
 	//Setting POS User PIN
 	do
 	{
@@ -513,6 +525,7 @@ int create_pos_users() {
 			kb_getkey();
 
 		}
+
 	}while(strlen(myPosUser->pin)==0 );
 
 
@@ -544,6 +557,11 @@ int create_pos_users() {
 			kb_getkey();
 
 		}
+
+		/*if(kb_getkey() == DIKS_ESCAPE)
+		{
+			return 1;
+		}*/
 	}while(strlen(myPosUser->idnumber)==0 );
 
 
@@ -641,7 +659,6 @@ void select_from_db() {
 
 
 
-
 	printf("Entered ID Number is %s\n", idNumber);
 	char * sqlstmt;
 	char idnumber[40];
@@ -649,7 +666,7 @@ void select_from_db() {
 	sqlstmt = malloc(700);
 	strcpy(idnumber,(idNumber));
 
-	sprintf(sqlstmt , "select username as login_firstname  from operator where idnumber =  '%s';", idnumber);
+	sprintf(sqlstmt , "select username as login_firstname  from operator where userlevel ='%s'  and idnumber = '%s';", "1", idnumber);
 	printf("%s\n",sqlstmt);
 	increament_read = 0;
 	read_database(sqlstmt,"operator");
@@ -685,14 +702,13 @@ void edit_user_details(void){
 
 	/*
 	 * check flag for online
-	 * prompt for two menus:::enquire land balance && 2. Make payment
 	 */
 	int selected;
-	int ret;
+	/*int ret;
 	int key;
 	int i;
 	char posid[30];
-	char holder[30];
+	char holder[30];*/
 	user_found_true=0;
 	while(1){
 		select_from_db();
@@ -710,6 +726,9 @@ void edit_user_details(void){
 				update_operator_pin();
 				break;
 			case 2:
+				edit_user_status();
+				break;
+			case 3:
 				return;
 				break;
 
@@ -733,7 +752,33 @@ void manage_user_privilages(void){
 
 void edit_user_status(void){
 
-	return;
+	/*
+	 * check flag for online
+	 */
+
+	char * sqlstmt;
+
+	sqlstmt = malloc(700);
+	int ret;
+
+	char request_name[30];
+	char holder[30];
+
+	//ret = kb_getStringtwo(ALPHA_IN ,NUM_IN ,  1, 6, plotNo,"", NULL, "L/R No", "","",0);
+	ret = kb_getStringtwo(NUM_IN ,NUM_IN ,  1, 20, request_name,holder, NULL, "Enter New User status", "","UPDATE OPERATOR STATUS", 0);
+
+
+	if(strlen(request_name)>0){
+
+		sprintf(sqlstmt , "update operator set userlevel = '%s';",  request_name);
+		printf("%s\n",sqlstmt);
+		increament_read = 0;
+		read_database(sqlstmt,"operator");
+		free(sqlstmt);}
+
+	message_display_function(1,"","Update Operation", "Status changed successfully", (char *)NULL);
+	kb_getkey();
+
 }
 
 void initialize_user_params(void){
@@ -876,7 +921,7 @@ void login(void) {
 	char uname[100];
 	char pword[100];
 	//myPosUser = (PosUserFile *) malloc(sizeof(PosUserFile));
-
+login_successful = 0;
 	char level[20];
 	char  * sqlstmt;
 	int ret ;

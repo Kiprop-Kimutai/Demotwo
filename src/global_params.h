@@ -24,7 +24,12 @@ struct  endpoints
 
 endpoints * my_endpoint;
 
+typedef struct  transAuthModes{
+	char * PIN;
+	char * fingerprint;
+}authmodes;
 
+authmodes * my_authmodes;
 
 typedef struct merchantTransOperations{
 	char *WFP_ROLL_UP ;
@@ -41,6 +46,9 @@ typedef struct cutomerTransOperations{
 }customer_trans_operations;
 
 customer_trans_operations *customer_operations;
+
+
+
 
 void initialize_params(void) ;
 #endif /* SRC_GLOBAL_PARAMS_H_ */

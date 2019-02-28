@@ -12,7 +12,7 @@
  * Function used to  manage all beneficiary  related transactions
  */
 void beneficiary_transactions(void );
-int  post_transaction_file(char  * transaction_source, char * transaction  , cJSON ** response_balance);
+int  post_transaction_file(char  * transaction_source, char * transaction  , cJSON ** response_balance  , int display_messages);
 int post_pos_offline_transactions (void);
 
 #endif /* SRC_BENEFICIARY_TRANSACTIONS_H_ */

@@ -98,7 +98,7 @@ void* threader(void *arg)
 				//getDataFromServer("WATCH",empty_obj,REQUEST_POST , endpoints->transaction);
 				//cJSON_Delete(empty_obj);
 
-				//post_pos_offline_transactions();
+				post_pos_offline_transactions();
 			}
 
 
@@ -118,7 +118,7 @@ void* threader(void *arg)
 
 				 */
 
-				//post_pos_offline_transactions();
+				post_pos_offline_transactions();
 			}
 		}
 		i++;

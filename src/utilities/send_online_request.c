@@ -63,6 +63,7 @@ int send_gprs_request(char * requestType, cJSON * requestjson, char * endpoint ,
 	printf("initial json\n");
 	if(flag_online == 0)
 	{
+		if(display_errors_messages)
 		message_display_function(1,"","Network Mode Config ", "Please wait as the POS switches GPRS configuration", (char *)NULL);
 
 		ret_val  = power_on_modem_device(myConfigurations->apn_username , myConfigurations->apn_password, atoi(myConfigurations->ppp_timeout));
@@ -86,12 +87,13 @@ int send_gprs_request(char * requestType, cJSON * requestjson, char * endpoint ,
 	//}
 
 
-
-	screen_header();
+if(display_errors_messages)
+	message_display_function(1,"", "Posting Transaction","Please wait .." ,"Sending Request" ,( char *) NULL  );
+/*	screen_header();
 	lcd_printf(ALG_CENTER, "");
 	lcd_printf(ALG_CENTER, "Please wait ..");
 	lcd_printf(ALG_CENTER, "Sending Request");
-	lcd_flip();
+	lcd_flip();*/
 
 
 	printf("%s initial json\n",cJSON_Print(requestjson));
@@ -381,7 +383,7 @@ int start_ppp_session(char * requestType, char * request ,  int operation , char
 	    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &s);
 
 		//printf("Thus :  %s\n" , &res);
-		res = curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
+		res = curl_easy_setopt(curl, CURLOPT_TIMEOUT, 20L);
 
 		res  = curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
 		res = curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);

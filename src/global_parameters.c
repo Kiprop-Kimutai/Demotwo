@@ -56,6 +56,16 @@ void initialize_params(void) {
 	merchant_operations->WFP_ROLL_UP = malloc(sizeof(merchant_operations->WFP_ROLL_UP)*3);
 	strcpy(merchant_operations->WFP_ROLL_UP , "200");
 
+	char *  PIN = "100";
+		char * fingerprint  = "101";
+		my_authmodes  =  malloc(sizeof(authmodes));
+		my_authmodes->PIN = malloc(sizeof(my_authmodes->PIN)*2);
+		strcpy(my_authmodes->PIN  ,PIN);
+
+		my_authmodes->fingerprint= malloc(sizeof(my_authmodes->fingerprint)*2);
+		strcpy(my_authmodes->fingerprint ,fingerprint);
+
+
 
 	return;
 }
