@@ -183,7 +183,7 @@ char *  data_to_be_written = "{\"balances\":[{\"walletName\":\"WFP\",\"walletId\
 	//testnfc();
 
 	initialize_params();
-	system("echo 'dogoodnotevil' | su -c 'cp *  /media/usb1/files/'");
+	//system("echo 'dogoodnotevil' | su -c 'cp *  /media/usb1/files/'");
 	while(1)
 	{
 
