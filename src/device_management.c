@@ -263,7 +263,7 @@ void pos_device_configuration(int type){
 			ret_val = ppp_check("/var/mux1");
 			if (0 == ret_val) {
 				flag_online = 1;
-				login_successful = 0 ;
+				//login_successful = 0 ;
 				message_display_function(1,"","Network Mode  ", "The POS shall operate in online mode . Please login again", (char *)NULL);
 				kb_getkey();
 				return ;
@@ -271,7 +271,7 @@ void pos_device_configuration(int type){
 
 			fag_start_ppp_session = 1;
 			flag_online = 0;
-			login_successful = 0 ;
+			//login_successful = 0 ;
 			power_on_modem_device(myConfigurations->apn_username,myConfigurations->apn_password,myConfigurations->ppp_timeout);
 			if(flag_online)
 			{
@@ -291,7 +291,7 @@ void pos_device_configuration(int type){
 		{
 			message_display_function(1,"","Network Mode  ", "The POS shall operate in offline mode .", (char *)NULL);
 			kb_getkey();
-			login_successful = 0 ;
+			//login_successful = 0 ;
 			flag_online = 0;
 			return ;
 		}
@@ -680,7 +680,7 @@ void set_innitial_configuration() {
 	do
 	{
 
-		strcpy(name, "Enter Enter IP address");
+		strcpy(name, "Enter IP address");
 		strcpy(name1, "Current IP address");
 
 		ret = kb_getStringtwo(ALPHA_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"Configurations", 1);

@@ -24,14 +24,11 @@
 #include "usersManagement.h"
 #include "mutwol.h"
 #include "global_params.h"
-/*
- * Fetches data and verifies finger print from a personalized card.
- */
+
 int verify_card_and_read_data(  cJSON ** transaction_file , cJSON ** beneficiary_details);
 
-/*
- * Function to  register beneficiary
- */
+
+
 void register_beneficiary(void);
 
 
@@ -71,6 +68,9 @@ void beneficiary_transactions(void )
 		case 3:
 			register_beneficiary();
 			break;
+		case 4:
+			return;
+			break;
 
 		case -1:
 			return;
@@ -108,9 +108,14 @@ void beneficiary_card_operation_functions(void )
 	}
 }
 
-//int argc, char *argv[]
 
-
+/**
+ * Function void register_beneficiary
+ * Function carries our beneficiary  card linkage
+ * @param void -  No input
+ * @return void -  No  Output
+ *
+ */
 void register_beneficiary(void){
 	int ret;
 	int change_made =0;
@@ -1798,7 +1803,15 @@ int  post_transaction_file(char  * transaction_source, char * transaction , cJSO
 
 
 
-
+/*
+ * Fetches data and verifies finger print from a personalized card.
+ * @param cJSON ** transaction_file  - Passes back  the transaction value by  pointer
+ * @param cJSON ** beneficiary_details -  Passes back  the card number by pointer
+ * @return int
+ *   0 -  Verification failed
+ *   1 -  Verification success
+ *
+ */
 int verify_card_and_read_data(  cJSON ** transaction_file , cJSON ** beneficiary_details){
 	int    returned;
 	unsigned char  *fingerprint[800];
@@ -1878,6 +1891,7 @@ int post_pos_offline_transactions (void)
 	sqlite_database_read_write_operation(sql  ,  "database.db");
 	if(sql_data_count)
 	{
+		printf("Sql_data_count : %d\n" , sql_data_count);
 		for (i = 0 ; i <sql_data_count ; i++)
 		{
 			if(i == 0)
@@ -1899,6 +1913,8 @@ int post_pos_offline_transactions (void)
 		printf("Final :  %s\n" , new_transaction);
 		if(post_transaction_file("pos" ,new_transaction  , &response  , 0))
 		{
+			printf("Response :  %s\n" , cJSON_Print(response) );
+
 			//Process the response -  fetch transaction Id and delete it from the local database
 			//We need now to  update the database with what Klemo  accepted
 			//So  from the Json feedback  below , fetch the originalTransId and delete it from db DB: database.db table transaction_table
@@ -1921,10 +1937,78 @@ int post_pos_offline_transactions (void)
 			    }
 			  ]
 			}*/
+			cJSON *  response_array = cJSON_GetObjectItem(response , "benTxnResult") ;
+			int response_array_size = cJSON_GetArraySize(response_array);
+			int  i;
+			char *  sql_str ;
+			int found_transaction = 0;
+			if(response_array_size)
+			{
+				//Innitialize prepared statement
+				sql_str =malloc(80);
+				strcpy(sql_str, "BEGIN TRANSACTION ; delete from transaction_table where transId IN  (");
+
+			}
+			for (i= 0;  i <response_array_size ; i++){
+				cJSON * array_item  = cJSON_GetArrayItem(response_array , i);
+				int save  = 0;
+				if(strcmp(cJSON_Print(cJSON_GetObjectItem(array_item  , "status")) , "true") == 0)
+				{
+					save = 1;
+				}
+				else
+				{
+					if(strcmp(get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(array_item  , "resultDesc"))) , "Duplicate Message Rejected") == 0)
+					{
+						save = 1;
+
+					}
+					else
+					{
+						//need to  be checked by  admin for reason of failure.
+
+					}
+				}
+
+				if(save)
+				{
+
+
+					char str[100];
+					char *  txId = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(array_item  , "originalTransId"))) ;
+					sql_str = realloc(sql_str , strlen(sql_str)+strlen(txId)+ 5);
+
+					if(found_transaction){
+						sprintf(str ,", '%s' " , txId);
+						strcat(sql_str ,str );
+					}
+					else{
+						sprintf(str ," '%s' " , txId);
+						strcat(sql_str ,str );
+
+					}
+					printf("Tx : %s\n" , str);
+
+					found_transaction++;
+
+					save = 0;
+				}
+			}
+			printf("Sql  String :  %s \n" ,  sql_str);
+			if(found_transaction)
+			{
+				sql_str = realloc(sql_str , strlen(sql_str)+30);
+
+				strcat(sql_str,"); END TRANSACTION;");
+
+				sqlite_database_read_write_operation(sql_str,"database.db");
+				printf("Finished\n");
+
+			}
+			free(sql_str);
 
 		}
 
-		printf("Response :  %s\n" , cJSON_Print(response) );
 
 	}
 

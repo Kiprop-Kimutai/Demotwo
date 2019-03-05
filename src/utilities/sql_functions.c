@@ -16,7 +16,7 @@ int create_backup_db();
 
 static int callback(void *data, int argc, char **argv, char **azColName) {
 	int i;
-	char str[100];
+	char str[1000];
 	//fprintf(stderr, "------------------------------------------\n", (const char*) data);
 	//printf("------------------------------------------\n"  );
 	if(sql_row_count == 0)

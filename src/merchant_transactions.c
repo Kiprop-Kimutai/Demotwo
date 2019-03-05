@@ -96,8 +96,10 @@ int mini_statement(){
 	get_request_id(1, &returned_request_id);
 	strcpy(req_id, returned_request_id);
 
-	ret = kb_getStringtwo(PASS_IN ,NUM_IN ,  1, 20, pin,holder, NULL, "Enter PIN", "","Mini Statement Inquiry", 0);
+	ret = kb_getStringtwo(PASS_IN ,NUM_IN ,  0, 20, pin,holder, NULL, "Enter PIN", "","Mini Statement Inquiry", 0);
 
+	if(ret == -1)
+		return 0 ;
 
 	if(strcmp(pin, myLoginPosUser->pin)==0){
 	switch(lcd_menu("Select Account", main_menu, 2,selected))
@@ -133,7 +135,12 @@ int mini_statement(){
 	cJSON_AddItemToObject(mini_statement_obj, "storeStmtRequest" , mini_statement);
 	if(send_gprs_request("storeStmtRequest", mini_statement_obj ,my_endpoint->store_statement_request ,&response ,  1)){
 
-		if(strcmp(cJSON_Print(cJSON_GetObjectItem(response,"status")) , "true")==0){
+		char  * status   = cJSON_Print(cJSON_GetObjectItem(response,"status"));
+		printf("Status : %s\n" , status);
+
+		if(status != (char*) NULL){
+
+			if(strcmp(status , "true")==0){
 			cJSON * walletsresp  = cJSON_GetObjectItem(response , "resultDesc");
 
 
@@ -148,7 +155,7 @@ int mini_statement(){
 
 
 
-		}else if(strcmp(cJSON_Print(cJSON_GetObjectItem(response,"status")) , "false")==0){
+		}else if(strcmp(status, "false")==0){
 
 
 			printf("\n Mini Statement Response JSONArray:  %s\n" , cJSON_Print(response));
@@ -162,9 +169,9 @@ int mini_statement(){
 
 
 		}
-
-
 	}
+
+}
 
 	return 0;
 	}else{
@@ -189,8 +196,12 @@ int balance_inquiry(){
 	int print_flag, print_response;
 	cJSON * merchant_inqry= cJSON_CreateObject();
 	cJSON * merchant_inqry_obj= cJSON_CreateObject();
-	ret = kb_getStringtwo(PASS_IN ,NUM_IN ,  1, 20, pin,holder, NULL, "Enter PIN", "","Balance Inquiry", 0);
-	if(strcmp(pin, myLoginPosUser->pin)==0){
+	ret = kb_getStringtwo(PASS_IN ,NUM_IN ,  0, 20, pin,holder, NULL, "Enter PIN", "","Balance Inquiry", 0);
+
+	if(ret == -1)
+		return 0 ;
+
+		if(strcmp(pin, myLoginPosUser->pin)==0){
 	get_date_and_receipt (1,  &transactionDate ,&date,  &transactionID);
 		strcpy(txnDate ,transactionDate);
 		strcpy(transID ,transactionID);
@@ -207,7 +218,12 @@ int balance_inquiry(){
 
 	if(send_gprs_request("storeBalRequest", merchant_inqry_obj ,my_endpoint->store_get_balance ,&response ,  1)){
 
-		if(strcmp(cJSON_Print(cJSON_GetObjectItem(response,"status")) , "true")==0){
+		char  * status   = cJSON_Print(cJSON_GetObjectItem(response,"status"));
+		printf("Status : %s\n" , status);
+		if(status != (char*) NULL){
+
+
+		if(strcmp(status, "true")==0){
 			cJSON * walletsresp  = cJSON_GetObjectItem(response , "resultDesc" );
 
 			if(cJSON_GetArraySize(walletsresp) > 0){
@@ -216,7 +232,7 @@ int balance_inquiry(){
 
 			print_receipt("Balance", walletsresp,&print_flag, &print_response);
 
-		}else if(strcmp(cJSON_Print(cJSON_GetObjectItem(response,"status")) , "false")==0){
+		}else if(strcmp(status , "false")==0){
 
 
 			printf("\n Balance Response JSONArray:  %s\n" , cJSON_Print(response));
@@ -230,7 +246,7 @@ int balance_inquiry(){
 
 
 		}
-
+	 }
 	}
 	return 0;
 
@@ -263,7 +279,9 @@ int roll_up_transfer(){
 	cJSON * roll_up_request_obj= cJSON_CreateObject();
 	char ammount[30];
 	char crdacc[20];
-	ret = kb_getStringtwo(PASS_IN ,NUM_IN ,  1, 20, pin,holder1, NULL, "Enter PIN", "","Roll Up Request", 0);
+	ret = kb_getStringtwo(PASS_IN ,NUM_IN ,  0, 20, pin,holder1, NULL, "Enter PIN", "","Roll Up Request", 0);
+	if(ret == -1)
+		return 0 ;
 	if(strcmp(pin, myLoginPosUser->pin)==0){
 	char holder[30];
 	char crdacc[20];
