@@ -110,7 +110,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/jsonfiles}&quot;"/>
 									<listOptionValue builtIn="false" value="/home/linux/sdk/include"/>
 									<listOptionValue builtIn="false" value="/opt/compiler/glibc-oabi-toolchain-arm-generic/include"/>
-									<listOptionValue builtIn="false" value="/home/linux/sdk/fribidi/include"/>
+									<listOptionValue builtIn="false" value="/home/linux/sdk/include/fribidi"/>
 									<listOptionValue builtIn="false" value="/home/linux/sdk/include/directfb"/>
 									<listOptionValue builtIn="false" value="/opt/compiler/glibc-oabi-toolchain-arm-generic/arm-unknown-linux-gnu/sys-root/usr/include"/>
 								</option>

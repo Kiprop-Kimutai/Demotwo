@@ -324,7 +324,8 @@ struct string {
 
 void init_string(struct string *s) {
   s->len = 0;
-  s->ptr = malloc(s->len+1);
+  //s->ptr = malloc(s->len+1);
+  s->ptr = malloc(20*sizeof(char));
   if (s->ptr == NULL) {
     fprintf(stderr, "malloc() failed\n");
     exit(EXIT_FAILURE);
@@ -383,7 +384,7 @@ int start_ppp_session(char * requestType, char * request ,  int operation , char
 	    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &s);
 
 		//printf("Thus :  %s\n" , &res);
-		res = curl_easy_setopt(curl, CURLOPT_TIMEOUT, 20L);
+		res = curl_easy_setopt(curl, CURLOPT_TIMEOUT, 40L);
 
 		res  = curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
 		res = curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
@@ -396,151 +397,42 @@ int start_ppp_session(char * requestType, char * request ,  int operation , char
 
 		//token_received = 0 ;
 		res = curl_easy_perform(curl);
-		   printf("Returned Ster : %s\n", s.ptr);
+		printf("%d\n",res);
+
+	/*	   printf("Returned Ster : %s\n", s.ptr);
 		   resp_str =  malloc(strlen(s.ptr) +5);
 		   strcpy(resp_str , s.ptr);
 		   * response = resp_str;
-		    free(s.ptr);
+		    free(s.ptr);*/
 
 		curl_easy_cleanup(curl);
 		//disable_timer = 0;
-		if(res!= CURLE_OK)
+		if(res == CURLE_OK)
 		{
 /*			out_fd = fopen("error.txt", "w");
 			fclose(out_fd);*/
-			return CURL_FAILED_POST;
+			 printf("Returned Ster : %s\n", s.ptr);
+			 resp_str =  malloc(strlen(s.ptr) +5);
+			 strcpy(resp_str , s.ptr);
+			 *response = resp_str;
+			 free(s.ptr);
+			printf("CURL RESPONSE:::%d\n",CURL_SUCCESS);
+			return CURL_SUCCESS;
+
+
+
 		}
 		else
 		{
 	/*		fclose(out_fd);
 			fclose(head_fd);*/
 
-			printf("CURL RESPONSE:::%d\n",CURL_SUCCESS);
-			return CURL_SUCCESS;
-		}
-
-	}
-	else
-		return CURL_FAILED_SETUP;
-}
-/*
-
-int start_ppp_session(char * requestType, char * request ,  int operation , char * url) {
-	CURL *curl;
-	CURLcode res;
-	char filename[100];
-	FILE *out_fd = (FILE *) 0;
-	FILE *head_fd = (FILE *) 0;
-	struct curl_slist *headers = NULL;
-
-
-	//if(endpoint == ENDPOINT_TRANSACTION)
-
-
-	headers = curl_slist_append(headers, "Accept: application/json");
-	headers = curl_slist_append(headers, "Content-Type: application/json");
-
-	curl = curl_easy_init();
-	if (curl) {
-		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-		sprintf(filename, "%s%s.txt", "", requestType);
-		out_fd = fopen(filename, "w");
-		head_fd = fopen("header.txt", "w"); //open for read and write
-		res = curl_easy_setopt(curl, CURLOPT_FILE, out_fd);
-		res = curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
-
-		printf("%s\n", url);
-
-		res = curl_easy_setopt(curl, CURLOPT_URL, url);
-		res = curl_easy_setopt(curl, CURLOPT_POSTFIELDS,request);
-		res = curl_easy_setopt(curl, CURLOPT_WRITEHEADER, head_fd);
-
-		//token_received = 0 ;
-		res = curl_easy_perform(curl);
-		curl_easy_cleanup(curl);
-		//disable_timer = 0;
-		if(res!= CURLE_OK)
-		{
-			out_fd = fopen("error.txt", "w");
-			fclose(out_fd);
 			return CURL_FAILED_POST;
-		}
-		else
-		{
-			fclose(out_fd);
-			fclose(head_fd);
 
-			printf("CURL RESPONSE:::%d\n",CURL_SUCCESS);
-			return CURL_SUCCESS;
 		}
 
 	}
 	else
 		return CURL_FAILED_SETUP;
 }
-*/
-/*
-
-char * getDataFromServer (char * requestType , cJSON * request ,   int operation ,  char * endpoint)
-{
-	char filename[100];
-	char * response;
-	char  url[200];
-	int resp;
-	char *  file_string;
-
-	sprintf(filename , "%s.txt" , requestType);
-
-	sprintf(url , "http://%s:%s%s",myConfigurations->IpAddress,myConfigurations->portNumber,endpoint);
-
-	printf("%s\n",cJSON_Print(request));
-
-	resp = start_ppp_session(requestType, cJSON_Print(request) , operation , url);
-
-
-
-	if(resp == CURL_SUCCESS)
-	{
-
-		char filelast[100];
-
-		FILE* body_file ;
-		body_file = fopen(filename, "r"); //open for read and write
-		printf("FILE NAME ALEX : %s\n",filename);
-		if (body_file == NULL) {
-			return "";
-
-		}
-		file_string  = malloc(10000);
-		//memset(file_string,0,sizeof(file_string));
-		if (fgets(file_string, 10000, body_file) != NULL) {
-			printf("RETURNED :  \n%s\n\n", file_string);
-			fclose(body_file);
-			sprintf(filelast,"rm %s",filename);
-			system(filelast);
-
-
-			if(jcheck(file_string))
-			{
-
-				return file_string;
-			}
-			else
-			{
-				free(file_string);
-				message_display_function(1,"","Network Error", "Invalid or no data received from server. Please check connection and try again", (char *)NULL);
-				kb_getkey();
-			}
-		}
-
-	}
-	else if(resp == CURL_FAILED_POST)
-	{
-		//process_response_on_fail(requestType);
-		message_display_function(1,"","Network Error", "Server connection failed. Please check connection and try again", (char *)NULL);
-		kb_getkey();
-	}
-
-	return 0;
-}
-*/
+//Response

@@ -1896,13 +1896,14 @@ int post_pos_offline_transactions (void)
 		{
 			if(i == 0)
 			{
-				new_transaction = malloc(strlen(sql_data[i]) + 1);
+				new_transaction = malloc(strlen(sql_data[i]) *(sizeof(char)+2));
+				memset(new_transaction,0,sizeof(new_transaction));
 				strcpy(new_transaction , sql_data[i]);
 
 			}
 			else
 			{
-				new_transaction = realloc(new_transaction,strlen(new_transaction) + strlen(sql_data[i])+1);
+				new_transaction = realloc(new_transaction,strlen(new_transaction) + (strlen(sql_data[i])*(sizeof(char)+2)));
 				strcat(new_transaction ,"#");
 				strcat(new_transaction , sql_data[i]);
 			}
@@ -1913,6 +1914,7 @@ int post_pos_offline_transactions (void)
 		printf("Final :  %s\n" , new_transaction);
 		if(post_transaction_file("pos" ,new_transaction  , &response  , 0))
 		{
+			if(response!=NULL){
 			printf("Response :  %s\n" , cJSON_Print(response) );
 
 			//Process the response -  fetch transaction Id and delete it from the local database
@@ -1974,11 +1976,14 @@ int post_pos_offline_transactions (void)
 				{
 
 
-					char str[100];
+					//char str[100];
+					char str[1000];
 					char *  txId = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(array_item  , "originalTransId"))) ;
-					sql_str = realloc(sql_str , strlen(sql_str)+strlen(txId)+ 5);
-
+					sql_str = realloc(sql_str , strlen(sql_str)+(strlen(txId)* 5));
+					//str = malloc(20*response_array_size);
+					//memset(str,0,sizeof(str));
 					if(found_transaction){
+						//str = realloc(str,strlen(str)+strlen(txId)+5);
 						sprintf(str ,", '%s' " , txId);
 						strcat(sql_str ,str );
 					}
@@ -2006,6 +2011,7 @@ int post_pos_offline_transactions (void)
 
 			}
 			free(sql_str);
+		}
 
 		}
 
@@ -2014,3 +2020,6 @@ int post_pos_offline_transactions (void)
 
 	return 0 ;
 }
+
+//Returned Ster
+//Tx
