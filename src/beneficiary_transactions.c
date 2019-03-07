@@ -1914,14 +1914,14 @@ int post_pos_offline_transactions (void)
 		printf("Final :  %s\n" , new_transaction);
 		if(post_transaction_file("pos" ,new_transaction  , &response  , 0))
 		{
-			if(response!=NULL){
-			printf("Response :  %s\n" , cJSON_Print(response) );
+			if(response!= (cJSON *)NULL){
+				printf("Response :  %s\n" , cJSON_Print(response) );
 
-			//Process the response -  fetch transaction Id and delete it from the local database
-			//We need now to  update the database with what Klemo  accepted
-			//So  from the Json feedback  below , fetch the originalTransId and delete it from db DB: database.db table transaction_table
+				//Process the response -  fetch transaction Id and delete it from the local database
+				//We need now to  update the database with what Klemo  accepted
+				//So  from the Json feedback  below , fetch the originalTransId and delete it from db DB: database.db table transaction_table
 
-			/*			{
+				/*			{
 			  "benTxnResult": [
 			    {
 			      "originalTransId": "2002",
@@ -1939,79 +1939,89 @@ int post_pos_offline_transactions (void)
 			    }
 			  ]
 			}*/
-			cJSON *  response_array = cJSON_GetObjectItem(response , "benTxnResult") ;
-			int response_array_size = cJSON_GetArraySize(response_array);
-			int  i;
-			char *  sql_str ;
-			int found_transaction = 0;
-			if(response_array_size)
-			{
-				//Innitialize prepared statement
-				sql_str =malloc(80);
-				strcpy(sql_str, "BEGIN TRANSACTION ; delete from transaction_table where transId IN  (");
+				cJSON *  response_array = cJSON_GetObjectItem(response , "benTxnResult") ;
+				if(response_array != (cJSON *)NULL )
+				{
 
-			}
-			for (i= 0;  i <response_array_size ; i++){
-				cJSON * array_item  = cJSON_GetArrayItem(response_array , i);
-				int save  = 0;
-				if(strcmp(cJSON_Print(cJSON_GetObjectItem(array_item  , "status")) , "true") == 0)
-				{
-					save = 1;
-				}
-				else
-				{
-					if(strcmp(get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(array_item  , "resultDesc"))) , "Duplicate Message Rejected") == 0)
+
+					int response_array_size = cJSON_GetArraySize(response_array);
+					int  i;
+					char *  sql_str ;
+					int found_transaction = 0;
+					if(response_array_size)
 					{
-						save = 1;
+						//Innitialize prepared statement
+						sql_str =malloc(80);
+						strcpy(sql_str, "BEGIN TRANSACTION ; delete from transaction_table where transId IN  (");
 
 					}
-					else
+					for (i= 0;  i <response_array_size ; i++){
+						cJSON * array_item  = cJSON_GetArrayItem(response_array , i);
+						int save  = 0;
+						if(strcmp(cJSON_Print(cJSON_GetObjectItem(array_item  , "status")) , "true") == 0)
+						{
+							save = 1;
+						}
+						else
+						{
+							if(strcmp(get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(array_item  , "resultDesc"))) , "Duplicate Message Rejected") == 0)
+							{
+								save = 1;
+
+							}
+							else
+							{
+								//need to  be checked by  admin for reason of failure.
+
+							}
+						}
+
+						if(save)
+						{
+
+
+							//char str[100];
+							char str[1000];
+							char *  txId = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(array_item  , "originalTransId"))) ;
+							sql_str = realloc(sql_str , strlen(sql_str)+(strlen(txId)* 5));
+							//str = malloc(20*response_array_size);
+							//memset(str,0,sizeof(str));
+							if(found_transaction){
+								//str = realloc(str,strlen(str)+strlen(txId)+5);
+								sprintf(str ,", '%s' " , txId);
+								strcat(sql_str ,str );
+							}
+							else{
+								sprintf(str ," '%s' " , txId);
+								strcat(sql_str ,str );
+
+							}
+							printf("Tx : %s\n" , str);
+
+							found_transaction++;
+
+							save = 0;
+						}
+					}
+					printf("Sql  String :  %s \n" ,  sql_str);
+					if(found_transaction)
 					{
-						//need to  be checked by  admin for reason of failure.
+						sql_str = realloc(sql_str , strlen(sql_str)+30);
+
+						strcat(sql_str,"); END TRANSACTION;");
+
+						sqlite_database_read_write_operation(sql_str,"database.db");
+						printf("Finished\n");
 
 					}
+					free(sql_str);
 				}
-
-				if(save)
 				{
-
-
-					//char str[100];
-					char str[1000];
-					char *  txId = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(array_item  , "originalTransId"))) ;
-					sql_str = realloc(sql_str , strlen(sql_str)+(strlen(txId)* 5));
-					//str = malloc(20*response_array_size);
-					//memset(str,0,sizeof(str));
-					if(found_transaction){
-						//str = realloc(str,strlen(str)+strlen(txId)+5);
-						sprintf(str ,", '%s' " , txId);
-						strcat(sql_str ,str );
-					}
-					else{
-						sprintf(str ," '%s' " , txId);
-						strcat(sql_str ,str );
-
-					}
-					printf("Tx : %s\n" , str);
-
-					found_transaction++;
-
-					save = 0;
+					/*message_display_function(1,  "" , "Error Posting Transactions" ,  "Bad response from server.  Please contact  admin." ,  (char *)NULL);
+				kb_getkey();*/
+					printf("Invalid response from server\n");
 				}
 			}
-			printf("Sql  String :  %s \n" ,  sql_str);
-			if(found_transaction)
-			{
-				sql_str = realloc(sql_str , strlen(sql_str)+30);
-
-				strcat(sql_str,"); END TRANSACTION;");
-
-				sqlite_database_read_write_operation(sql_str,"database.db");
-				printf("Finished\n");
-
-			}
-			free(sql_str);
-		}
 
 		}
 
