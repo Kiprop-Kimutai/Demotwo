@@ -327,6 +327,7 @@ int personalizecard(char *personaldetails,unsigned char *fp  ,  char  * balances
 				else
 				{
 					message_display_function(1,"","Card Error", "Please tap the original card and press enter.", (char *)NULL);
+					mif_close(fd);
 					kb_getkey();
 				}
 			}
