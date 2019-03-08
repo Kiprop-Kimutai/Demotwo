@@ -269,12 +269,15 @@ int personalizecard(char *personaldetails,unsigned char *fp  ,  char  * balances
 						x = createbeneficiaryapplication(fd,keyno,app0,authkey);
 						if(x==0){
 
-							createbiodatafile(fd,keyno,app0,authkey,personaldetails);
-							sleep(1);
-							createtransactionfile(fd,keyno,app0,authkey ,  balances);
-							sleep(1);
-							createfpfile(fd,keyno,app0,authkey,fp);
-							sleep(1);
+							int  writeops;
+							writeops = createbiodatafile(fd,keyno,app0,authkey,personaldetails);
+							//sleep(1);
+							writeops = createtransactionfile(fd,keyno,app0,authkey ,  balances);
+
+							//sleep(1);
+							writeops =createfpfile(fd,keyno,app0,authkey,fp);
+
+							//sleep(1);
 
 							printf("personalize card result %d\n",x);
 							message_display_function(1,"","card personalization success", "please  remove card", (char *)NULL);
@@ -831,6 +834,7 @@ int cardoperations(int operation,char *data , char ** personal_details ,char ** 
 							*transaction_file = final_transactions;
 							printf("\n1: %s\n , " , data_p_details);
 							printf("2 :%s\n , " , *transaction_file);
+							printf("3 :%s\n , " , *transaction_file +50);
 							desfire_deactive(fd);
 							mif_close(fd);
 							return readops;
@@ -848,6 +852,12 @@ int cardoperations(int operation,char *data , char ** personal_details ,char ** 
 							{
 								writeops = writefile(fd,keyno,app0,benapp2.AID,authkey,final_string,input_personal_details);
 								printf("card update result ...%d\n",writeops);
+
+/*								while(writeops == -1){
+									message_display_function(1,  "" , "Error Writing card" ,  "The POS could not complete write data to  card. Please press enter, tap and hold until successful." , (char *) NULL);
+									kb_getkey();
+									writeops = writefile(fd,keyno,app0,benapp2.AID,authkey,final_string,input_personal_details);
+								}*/
 								desfire_deactive(fd);
 								mif_close(fd);
 								return writeops;
@@ -857,6 +867,9 @@ int cardoperations(int operation,char *data , char ** personal_details ,char ** 
 							{
 								message_display_function(1,"","card error", "Wrong card presented. Please place the original  card and try  again", (char *)NULL);
 								kb_getkey();
+								desfire_deactive(fd);
+								mif_close(fd);
+								return -1;
 								//printf("Wrong card presented\n");
 								//Wrong card
 							}
@@ -886,8 +899,10 @@ int cardoperations(int operation,char *data , char ** personal_details ,char ** 
 					message_display_function(1,"","card error", "Card authentication failed", (char *)NULL);
 					kb_getkey();
 					lcd_clean();
+					desfire_deactive(fd);
 					mif_close(fd);
-					return 0;
+					return -1;
+					//return errno
 					break;
 				}
 				break;

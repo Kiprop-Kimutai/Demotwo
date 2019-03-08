@@ -263,20 +263,6 @@ void do_beneficiary_transaction( int option){
 	char sql_transaction[800];
 	char new_transaction[800];
 
-	//char  * transaction_file = "{\"balances\":[{\"wallet\":\"WFP\",\"wallet\":\"100\",\"balance\":3000},{\"wallet\":\"IOM\",\"wallet\":\"200\",\"balance\":1000}],\"transactions\":{\"benTxn\":\"BT-122865212*82671220*111*098765789876*72355289383*6000*123432567*101#BT-122865212*82671220*111*098765789876*72355289383*6000*123432567*101#BT-122865212*82671220*111*098765789876*72355289383*6000*123432567*101#BT-122865212*82671220*111*098765789876*72355289383*6000*123432567*101#BT-122865212*82671220*111*098765789876*72355289383*6000*123432567*101#BT-122865212*82671220*111*098765789876*72355289383*6000*123432567*101#BT-122865212*82671220*111*098765789876*72355289383*6000*123432567*101#BT-122865212*82671220*111*098765789876*72355289383*6000*123432567*101#BT-122865212*82671220*111*098765789876*72355289383*6000*123432567*101#BT-122865212*82671220*111*098765789876*72355289383*6000*123432567*101\"}}";
-
-	/*	char * beneficiary_details = "{"
-			"\"BenRegistration\":{"
-			"\"firstname\":	\"Kiptoo\","
-			"\"lastname\":	\"Alex\","
-			"\"iccid\":\"8cg4382017583718\","
-			"\"middlename\":	\"K\","
-			"\"dob\":	\"12134652\","
-			"\"docType\":	\"National ID\","
-			"\"docNumber\":	\"123465\""
-			"}"
-			"}";*/
-
 	//Convert  strings to  Jsons and define Jsons
 
 	char * personal_details ;
@@ -337,8 +323,6 @@ void do_beneficiary_transaction( int option){
 		if(fplib_test(1 ))
 		{
 			//if fingerprint verification successful
-			//Start
-
 
 			balance_information  = cJSON_GetObjectItem(transaction_json , "balances");
 
@@ -378,7 +362,7 @@ void do_beneficiary_transaction( int option){
 			while (selected>=0){
 
 				selected= lcd_menu("Please select the program", wallet_id, i, selected);
-				printf("optioned on %d\n", option);
+				printf("Option on %d\n", option);
 				printf("Selected on %d\n", selected);
 				if(selected > -1 && selected < i )
 				{
@@ -441,24 +425,6 @@ void do_beneficiary_transaction( int option){
 								kb_getkey();
 								return;
 							}
-							/*******************************************************************************************************/
-							/*if(option == 0 && selected ==0)
-						{
-							cJSON_AddStringToObject(txToPosted,"transOperation",customer_operations->BUY_GOODS_WFP_ACCOUNT);
-							strcpy(transType ,customer_operations->BUY_GOODS_WFP_ACCOUNT );
-						}
-						else if(option == 0 && selected == 1)
-						{
-							cJSON_AddStringToObject(txToPosted,"transOperation",customer_operations->ORGANIZATION_ACCOUNT_BUY_GOODS);
-							strcpy(transType ,customer_operations->ORGANIZATION_ACCOUNT_BUY_GOODS);
-						}
-						if(option == 1 && selected ==0)
-						{
-							cJSON_AddStringToObject(txToPosted,"transOperation",customer_operations->ORGANIZATION_ACCOUNT_CASH_OUT);
-							strcpy(transType ,customer_operations->ORGANIZATION_ACCOUNT_CASH_OUT);
-						}*/
-
-							/*******************************************************************************************************/
 							if(option == 1 && selected == 1)
 							{
 								cJSON_AddStringToObject(txToPosted,"transOperation",NULL);
@@ -480,8 +446,7 @@ void do_beneficiary_transaction( int option){
 							cJSON_AddStringToObject(txToPosted,"date",receieved_unformatedDate);
 							cJSON_AddStringToObject(txToPosted,"authMode","101");
 							cJSON_AddStringToObject(txToPosted,"userId",myLoginPosUser->username);
-							printf("The Json :  %s\n", cJSON_Print(final_transaction));
-							printf("sql_transaction : %s\n" , transID);
+
 
 							/*						" CREATE TABLE transaction_table("
 								"transId   	TEXT PRIMARY KEY	 ,"
@@ -511,7 +476,7 @@ void do_beneficiary_transaction( int option){
 							//111*transId
 							//#%s*%s*transOperation*debiticcid*crediticcid*amount*date*authModeexisting_transaction  existing_transaction
 							existing_transaction = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(transaction_json , "transactions")));
-
+							//existing_transaction = "";
 
 							sprintf(new_transaction , "%s*%s*%s*%s*%s*%s*%s*%s*%.2f*%.2f*%s*%s#%s" ,transID,pos_serial_number,transType , card_number,myMerchantUser->agentid, getCharacters,receieved_unformatedDate,wallet_id[selected] ,(wallet_amount[selected]+atof(getCharacters)),wallet_amount[selected] ,wallet_currency[selected],myLoginPosUser->username, existing_transaction);
 							printf("New Transaction : %s\n",  new_transaction);
@@ -585,6 +550,13 @@ void do_beneficiary_transaction( int option){
 								//writefile(int fd,uint8_t keyno,char MF[3],char APP[3],char authkey,char transactiondata,char* personaldetails)
 								returned  = cardoperations(2,"", &tx ,&tx,fingerprint , "" ,  final_data_to_be_written , read_card_number , &new_read_card_number);
 
+								while(returned  != 1)
+								{
+									message_display_function(1,  "" , "Error Writing card" ,  "The POS could not complete write data to  card. Please press enter, tap and hold until successful." , (char *) NULL);
+									kb_getkey();
+									returned  = cardoperations(2,"", &tx ,&tx,fingerprint , "" ,  final_data_to_be_written , read_card_number , &new_read_card_number);
+
+								}
 								if(returned){
 									sprintf(update_sql , "update  transaction_table set cardUpdated = 1  where transId = '%s' ;" ,transID );
 									sqlite_database_read_write_operation(update_sql ,"database.db");
@@ -648,8 +620,10 @@ void do_beneficiary_transaction( int option){
 	}
 	else
 	{
+
 		message_display_function(1,"","Card Error", "Error reading card. Please try  again", (char *)NULL);
 		kb_getkey();
+
 	}
 }
 
@@ -1323,24 +1297,25 @@ void print_beneficairy_card_balances( void){
 
 		char  * date, * unformatedDate, * tx_id;
 		get_date_and_receipt( 0 , &date ,&unformatedDate,  &tx_id);
+		printf("transaction_json  :  %s" ,cJSON_Print(transaction_json) );
 		card_balance_information_json  = cJSON_GetObjectItem(transaction_json , "balances");
-		existing_transaction = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(transaction_json , "transactions")));
-
-		if(cJSON_GetArraySize(card_balance_information_json) > 0)
+		if(card_balance_information_json != (cJSON *)NULL)
 		{
-			print_receipt("BALANCE ENQUIRY RECEIPT" , card_balance_information_json ,   &printflag ,   &print_complete) ;
+			existing_transaction = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(transaction_json , "transactions")));
 
+			if(cJSON_GetArraySize(card_balance_information_json) > 0)
+			{
+				print_receipt("BALANCE ENQUIRY RECEIPT" , card_balance_information_json ,   &printflag ,   &print_complete) ;
+				balances_found_on_card = 1;
 
-			/*			message_display_function(1, "" , "Card Balances" , "Balances found" , (char *)NULL);
-			kb_getkey();*/
-			balances_found_on_card = 1;
-
+			}
+			else
+			{
+				message_display_function(1, "" , "Card Balances" , "The tapped card has no vouchers. Please update the card online and try  again" , (char *)NULL);
+				kb_getkey();
+			}
 		}
-		else
-		{
-			message_display_function(1, "" , "Card Balances" , "The tapped card has no vouchers. Please update the card online and try  again" , (char *)NULL);
-			kb_getkey();
-		}
+
 
 
 	}
@@ -1833,15 +1808,26 @@ int verify_card_and_read_data(  cJSON ** transaction_file , cJSON ** beneficiary
 	if(returned == 1){
 
 		char * temp =  malloc(strlen(p_details)+2);
+		char * temp2 =  malloc(strlen(tx_file)+2);
 		strcpy(temp ,p_details );
+		strcpy(temp2 ,tx_file );
 		if(fplib_test(1 ))
 		{
 			//*cardno = "12335663232";
 			//printf("p_details : %s \n" , p_details);
-			*beneficiary_details=  cJSON_Parse(temp);
-			*transaction_file   = cJSON_Parse(tx_file);
-			printf(cJSON_Print(*beneficiary_details));
-			return 1;
+
+			if(jcheck(temp))
+			{
+				*beneficiary_details=  cJSON_Parse(temp);
+				if(jcheck(temp2))
+				{
+					*transaction_file   = cJSON_Parse(temp2);
+					printf(cJSON_Print(*beneficiary_details));
+					return 1;
+				}
+
+			}
+
 		}
 	}
 	return 0;
