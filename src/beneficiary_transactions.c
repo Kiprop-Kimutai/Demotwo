@@ -164,7 +164,7 @@ void register_beneficiary(void){
 
 	returned  = cardoperations(3,"", &personal_details ,&transaction_file,fingerprint ,  "" ,  "" ,"" , &new_read_card_number);
 
-	if(returned){
+	if(returned  ){
 		strcpy(read_card_number , new_read_card_number );
 		printf("NNread_card_number :  %s\n ", read_card_number);
 
@@ -179,16 +179,20 @@ void register_beneficiary(void){
 
 
 		//ret =  cardoperations(1 , )
+		/*char * returned_request_id,req_id[10];
+		get_request_id(1, &returned_request_id);
+		strcpy(req_id, returned_request_id);*/
 		get_date_and_receipt(0 , &date ,&unformatedDate , &receipt_no);
 		//get_request_id(0 , &returned_request_id);
-		cJSON_AddStringToObject(txToPosted,"iccid",read_card_number);
+			cJSON_AddStringToObject(txToPosted,"iccid",read_card_number);
+			cJSON_AddStringToObject(txToPosted,"cardIdentifier",getCharacters);
 		cJSON_AddStringToObject(txToPosted,"transId",receipt_no);
 		//cJSON_AddStringToObject(txToPosted,"requestId",returned_request_id);
-		cJSON_AddStringToObject(txToPosted,"requestId","6482482");
+		cJSON_AddStringToObject(txToPosted,"requestId","343434");
 		cJSON_AddStringToObject(txToPosted,"date",unformatedDate );
 		cJSON_AddStringToObject(txToPosted,"terminalId",pos_serial_number);
-		cJSON_AddStringToObject(txToPosted,"authMode","112");
-		cJSON_AddStringToObject(txToPosted,"cardIdentifier",getCharacters);
+		cJSON_AddStringToObject(txToPosted,"authMode",my_authmodes->fingerprint);
+
 		cJSON_AddStringToObject(txToPosted,"userId",myLoginPosUser->username);
 
 		//Personal  File

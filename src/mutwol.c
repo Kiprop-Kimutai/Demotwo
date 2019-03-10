@@ -271,13 +271,13 @@ int personalizecard(char *personaldetails,unsigned char *fp  ,  char  * balances
 
 							int  writeops;
 							writeops = createbiodatafile(fd,keyno,app0,authkey,personaldetails);
-							//sleep(1);
+							sleep(1);
 							writeops = createtransactionfile(fd,keyno,app0,authkey ,  balances);
 
-							//sleep(1);
-							writeops =createfpfile(fd,keyno,app0,authkey,fp);
+							sleep(1);
+							writeops =(fd,keyno,app0,authkey,fp);
 
-							//sleep(1);
+							sleep(1);
 
 							printf("personalize card result %d\n",x);
 							message_display_function(1,"","card personalization success", "please  remove card", (char *)NULL);
