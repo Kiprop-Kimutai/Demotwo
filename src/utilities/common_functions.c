@@ -546,3 +546,35 @@ double getdecimalvalueforhex(char i,int position){
 
 }
 
+
+void pretty_printf(char  * str ,  int print_length)
+{
+	if(print_length  > 0 )
+	{
+		int i;
+		for(i = 0 ;  i< (strlen(str)/print_length) ;  i++)
+		{
+			printf ("%.*s\n", print_length, str +  (print_length*i));
+		}
+		if((strlen(str)%print_length) !=0)
+		{
+			printf ("%.*s\n", print_length, str +  (print_length*i));
+		}
+	}
+}
+
+
+int number_length(int number){
+  //1
+
+  int totalDigits = 0;
+
+  //3
+  while(number!=0){
+    //4
+	  number = number/10;
+    totalDigits ++;
+  }
+  //5
+  return totalDigits;
+}

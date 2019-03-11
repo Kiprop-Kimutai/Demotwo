@@ -1350,3 +1350,49 @@ int message_display_getdate( char * day , char * month){
 }
 
 
+ int confirm_screen(char  * header ,  cJSON * object)
+ {
+	 int y  , i;
+	 defined_x = 100;
+	 int key;
+	 while(1)
+	 {
+		 message_display_function(1,"", header," ", (char *)NULL);
+
+
+		 for( i =0 ;  i <cJSON_GetArraySize(object)  ; i ++ )
+		 {
+			 cJSON * array_object =  cJSON_GetArrayItem(object  , i );
+			 y = get_y_position();
+			 lcd_printf(ALG_LEFT ,"%s", get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(array_object , "key"))));
+			 lcd_printf_ex(ALG_LEFT_DEF ,y ,": %s",get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(array_object , "value"))));
+		 }
+
+		 lcd_printf(ALG_LEFT ,"");
+		 lcd_printf(ALG_CENTER ,"_____________________________________");
+		 y = get_y_position();
+		 defined_x = 150;
+
+		 lcd_set_font_color(COLOR_BLUE);
+		 lcd_printf(ALG_CENTER ,"%s" , "Cancel to exit      :     Enter to confirm");
+
+		 lcd_flip();
+		 lcd_set_font_color(COLOR_BLACK);
+
+		 key = kb_getkey();
+		 printf("Key  :  %d\n" ,key ) ;
+		 if(key == DIKS_ENTER  || key==DIKS_ESCAPE){
+			break;
+		 }
+	 }
+	// key = kb_getkey();
+	 if(key == DIKS_ENTER){
+		 return 1;
+
+	 }else if(key==DIKS_CANCEL)
+	 {
+		 return 0;
+	 }
+	 return  0 ;
+
+ }

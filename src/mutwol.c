@@ -833,8 +833,7 @@ int cardoperations(int operation,char *data , char ** personal_details ,char ** 
 							final_transactions  = strtok(t_details , "~");
 							*transaction_file = final_transactions;
 							printf("\n1: %s\n , " , data_p_details);
-							printf("2 :%s\n , " , *transaction_file);
-							printf("3 :%s\n , " , *transaction_file +50);
+							pretty_printf(final_transactions ,  100);
 							desfire_deactive(fd);
 							mif_close(fd);
 							return readops;

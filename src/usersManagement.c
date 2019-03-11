@@ -56,11 +56,11 @@ char insertsql[2000];
 void manage_users_menu(void )
 {
 	int selected = 0;
-	char user_managent_menu[][100] = {/*"Request POS Users", */ "Create POS User" ,  "Edit POS User" , /* "Manage User Privilages" ,*//*"Change User Status",*/  "Exit"};
+	char user_managent_menu[][100] = { "Create POS User" ,  "Edit POS User"  /* , "Manage User Privilages" ,"Change User Status" */ };
 	//const char  user_managent_menu[][100] = {"POS Device Configuration","POS User Account Operation", "Privileges Setup", "Exit"};
 	while(1)
 	{
-		switch(lcd_menu("POS User Management", user_managent_menu, 3,selected))
+		switch(lcd_menu("POS User Management", user_managent_menu, sizeof(user_managent_menu)/100,selected))
 		{
 		/*case 0:
 			request_operators();
@@ -71,13 +71,13 @@ void manage_users_menu(void )
 		case 1:
 			edit_user_details();
 			break;
-		/*case 2:
-			manage_user_privilages();
-			break;*/
-	/*	case 3:
-			edit_user_status();
-			break;*/
 		case 2:
+			manage_user_privilages();
+			break;
+		case 3:
+			edit_user_status();
+			break;
+		case -1:
 			return;
 			break;
 		}

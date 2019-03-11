@@ -132,10 +132,8 @@ int main(int argc, char *argv[])
 {
 	int selected = 0;
 	int retval = 0;
-	char  main_menu[][100] = {"Beneficiary Transactions","Merchant  Transactions","POS/User Management","Exit"};
-	char * date_t;
-	char * receipt_t;
-	char * sqlstmt;
+	char  main_menu[][100] = {"Beneficiary Transactions","Merchant  Transactions","POS/User Management","Logout"};
+
 
 	final_create_all_tables();
 
@@ -203,13 +201,14 @@ char *  data_to_be_written = "{\"balances\":[{\"walletName\":\"WFP\",\"walletId\
 				err = pthread_create(&(tid), NULL, &threader, NULL);
 				while (login_successful) {
 
-					switch(lcd_menu("Safaricom Value Agency", main_menu,4,selected))
+					switch(lcd_menu("Safaricom Value Agency", main_menu,sizeof(main_menu)/100,selected))
 					{
 					case 0:
 
 						beneficiary_transactions();
 						break;
 					case 1:
+
 						merchant_transactions();
 						break;
 					case 2:

@@ -31,10 +31,10 @@ void device_management(void )
 {
 	int selected = 0;
 	//char user_managent_menu[][100] = {"Request POS Users",  "Change Password" ,  "Block User" ,  "Delete User" ,  "Exit"};
-	const char  device_managment_menu[][100] = {"POS Device Configuration","POS User Account Operation", "Exit"};
+	char  device_managment_menu[][100] = {"POS Device Configuration","POS User Account Operation"};
 	while(1)
 	{
-		switch(lcd_menu("POS User Management", device_managment_menu, 3 ,selected))
+		switch(lcd_menu("POS User Management", device_managment_menu, sizeof(device_managment_menu)/100 ,selected))
 		{
 		case 0:
 			pos_device_configuration(-1);
@@ -42,7 +42,7 @@ void device_management(void )
 		case 1:
 			manage_users_menu();
 			break;
-		case 2 :
+		case -1 :
 			return;
 			break;
 		}
@@ -56,8 +56,8 @@ void pos_device_configuration(int type){
 	int ret_val;
 	const char menu[][100] = { "Server IP Address   ", "Server port number  ",
 			"Network APN username", "Network APN password",
-			"Network ppp Timeout " , "Turn Online On/Off" , "Get Operator Details"};
-	const char menu_on_off[][100] = { "Online Mode  ", "Offline Mode "};
+			"Network ppp Timeout " , "Turn Online On/Off"  };
+	const char menu_on_off[][100] = { "Online Mode  ", "Offline Mode " };
 	char getCharacters[40],  getCharacters1[40];
 	char name[100],  name1[100];
 	if(type == -1)
@@ -272,7 +272,14 @@ void pos_device_configuration(int type){
 			fag_start_ppp_session = 1;
 			flag_online = 0;
 			//login_successful = 0 ;
-			power_on_modem_device(myConfigurations->apn_username,myConfigurations->apn_password,myConfigurations->ppp_timeout);
+			message_display_function(1,"","Network Configuration  ", "GPRS service starting .  Please wait ...", (char *)NULL);
+
+			power_on_modem_device(myConfigurations->apn_username,myConfigurations->apn_password,atoi(myConfigurations->ppp_timeout));
+			ret_val = ppp_check("/var/mux1");
+			if (0 == ret_val) {
+				flag_online = 1;
+				return ;
+			}
 			if(flag_online)
 			{
 				message_display_function(1,"","Network Mode  ", "The POS shall operate in online mode . Please login again", (char *)NULL);
@@ -297,9 +304,9 @@ void pos_device_configuration(int type){
 		}
 	}
 	break;
-	case 6:
+/*	case 6:
 		request_operators();
-		break;
+		break;*/
 	default:
 		break;
 

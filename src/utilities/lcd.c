@@ -497,7 +497,7 @@ void screen_header(void){
 	main_surface->SetFont(main_surface, font_16);
 }
 
-int lcd_menu(const char * pszTitle,   char menu[][100], unsigned int count, int select){
+int lcd_menu(char * pszTitle,  char menu[][100], unsigned int count, int select){
 //int lcd_menu(const char * pszTitle,  const char menu[][100],  int count, int select){
 	int retval = -1;
 

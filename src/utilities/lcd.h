@@ -58,7 +58,7 @@ void lcd_flip(void);
 void define_y_position(int x);
 int get_y_position(void);
 //int lcd_menu(const char * pszTitle, const char menu[][100],  int count, int select);
-int lcd_menu(const char * pszTitle,   char menu[][100], unsigned int count, int select);
+int lcd_menu( char * pszTitle,   char menu[][100], unsigned int count, int select);
 int  kb_hit(void);
 int  kb_getkey(void);
 int flag_new_line;

@@ -142,6 +142,16 @@ if(display_errors_messages)
 						kb_getkey();
 					}
 				}
+			}else
+			{
+
+			//free(file_string);
+			if(display_errors_messages){
+			message_display_function(1,"","Server Error", "No response from server. Contact administrator.\n Press any key to continue", (char *)NULL);
+			kb_getkey();
+			}
+
+
 			}
 		}
 
