@@ -152,9 +152,9 @@ int mini_statement(){
 
 					if(cJSON_GetArraySize(walletsresp) > 0){
 						printf("\n Balance Response JSONArray:  %s\n" , cJSON_Print(walletsresp));
-						defined_x = 100;
+						/*defined_x = 100;
 						message_display_function(1,"", "MiniStatement  Details"," ", (char *)NULL);
-
+*/
 						//showministatement("Mini Statement", walletsresp,sizeof(cJSON_GetArraySize(walletsresp)) / 100, selected );
 						/*
 						for(i =0; i<cJSON_GetArraySize(walletsresp); i++){
@@ -181,7 +181,7 @@ int mini_statement(){
 							//	message_display_function(1,"","Balance",cJSON_Print(cJSON_GetObjectItem(balance_array , "balance")), (char *) NULL);
 						}*/
 
-						kb_getkey();
+						//kb_getkey();
 
 					}
 

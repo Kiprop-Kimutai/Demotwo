@@ -273,10 +273,8 @@ int personalizecard(char *personaldetails,unsigned char *fp  ,  char  * balances
 							writeops = createbiodatafile(fd,keyno,app0,authkey,personaldetails);
 							sleep(1);
 							writeops = createtransactionfile(fd,keyno,app0,authkey ,  balances);
-
 							sleep(1);
-							writeops =(fd,keyno,app0,authkey,fp);
-
+							writeops =createfpfile(fd,keyno,app0,authkey,fp);
 							sleep(1);
 
 							printf("personalize card result %d\n",x);
@@ -314,7 +312,7 @@ int personalizecard(char *personaldetails,unsigned char *fp  ,  char  * balances
 					}
 					else{
 						//authentication failed
-						printf("personalize card failed result %d\n",authstatus);
+						printf("personalize card failed result %d corresponding to errno %d\n",authstatus,errno);
 						sleep(3);
 						message_display_function(1,"","card error", "authentication failed", (char *)NULL);
 						sleep(1);
@@ -821,6 +819,7 @@ int cardoperations(int operation,char *data , char ** personal_details ,char ** 
 
 							char * final_transactions;
 							readops=  readfile(fd,keyno,app0,benapp2.AID,authkey, &p_details ,&t_details,fingerprint);
+							if(readops>=0){
 							printf("card read result::%d\n",readops);
 							//peronal_details =
 							printf("\n1: %s\n , " , p_details);
@@ -836,6 +835,7 @@ int cardoperations(int operation,char *data , char ** personal_details ,char ** 
 							pretty_printf(final_transactions ,  100);
 							desfire_deactive(fd);
 							mif_close(fd);
+							}
 							return readops;
 							break;
 						}
@@ -957,6 +957,7 @@ int readfile(int fd,uint8_t keyno,char MF[3],char APP[3],char *authkey,char ** p
 	printf("select MF result %d corresponding to errno %d\n",ret,errno);
 	authstatus = desfire_authenticate(fd,keyno,authkey);
 	printf("Auth status %d optionally corresponding to errno %d\n",authstatus,errno);
+	if(authstatus>=0){
 	ret = desfire_select_application(fd,APP);
 	if(ret >=0){
 		printf("app selected successfully\n");
@@ -1022,6 +1023,23 @@ int readfile(int fd,uint8_t keyno,char MF[3],char APP[3],char *authkey,char ** p
 		desfire_deactive(fd);
 		mif_close(fd);
 		return -1;
+	}
+	}
+	else{
+		if(authstatus<0 && errno ==62 ){
+		message_display_function(0, "","Card Error","card contact  period is insufficient. Please try  again" ,  (char *)NULL );
+		kb_getkey();
+		desfire_deactive(fd);
+		mif_close(fd);
+		return -1;
+		}
+		else{
+			message_display_function(0, "","Card Error","Please try  again" ,  (char *)NULL );
+			kb_getkey();
+			desfire_deactive(fd);
+			mif_close(fd);
+			return -1;
+		}
 	}
 }
 

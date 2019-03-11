@@ -283,10 +283,10 @@ void do_beneficiary_transaction( int option){
 	returned  = cardoperations(1,"", &personal_details ,&transaction_file,fingerprint ,  "" ,  "" ,"" , &new_read_card_number);
 
 	//cardoperations(2,"", &personal_details ,&transaction_file,fingerprint ,  "" ,  "{\"balances\":[{\"wallet\":\"M-PESA Account\",\"currency\":\"SSP\",\"balance\":5077},{\"wallet\":\"WFP Beneficiary  Account\",\"currency\":\"SSP\",\"balance\":11747}],\"transactions\":\"BT-82348819-190310121634*82348819*100*2110000076114338*000006*50*20190310*M-PESA Account*5127.00*5077.00*SSP*b\"}" , new_read_card_number , &new_read_card_number);
-
-	strcpy(read_card_number , new_read_card_number );
-	printf("New C Number    %s\n"  ,  read_card_number);
 	if(returned > 0){
+
+		strcpy(read_card_number , new_read_card_number );
+		printf("New C Number    %s\n"  ,  read_card_number);
 		//char wallet_name[10][100];
 		char  wallet_currency[10][50];
 		char  wallet_id[10][100];
