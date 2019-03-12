@@ -278,7 +278,7 @@ int create_agent_details()
 	//Setting user ID
 	do
 	{
-		strcpy(name, "Enter agent id");
+		strcpy(name, "Agent account Id");
 		strcpy(name1, "");
 		ret = kb_getStringtwo(NUM_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"User Management", 1);
 		if(ret !=-1)
@@ -303,7 +303,7 @@ int create_agent_details()
 	do
 	{
 
-		strcpy(name, "Enter Merchant Id");
+		strcpy(name, "Merchant account Id");
 		strcpy(name1, "");
 		ret = kb_getStringtwo(NUM_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"User Management", 1);
 
@@ -429,11 +429,6 @@ int create_pos_users() {
 		printf("#### VAlue of myPosUser->username: %s\n",myPosUser->username);
 		ret = kb_getStringtwo(ALPHA_IN ,ALPHA_IN ,  1, 16, getCharacters,getCharacters1, NULL, name, name1,"User Management", 1);
 
-		if(kb_getkey() == DIKS_ESCAPE)
-				{
-					return 0;
-				}
-		printf("#### VAlue of ret: %d\n",ret);
 
 		if(ret !=-1){
 			change_made =1;
@@ -961,7 +956,7 @@ login_successful = 0;
 	else
 	{
 		sqlstmt = malloc(700);
-		sprintf(sqlstmt , "select *   from operator where username =  '%s' and pin = '%s';" ,  uname,  pword);
+		sprintf(sqlstmt , "select *   from operator where upper(username) =  upper('%s') and pin = '%s';" ,  uname,  pword);
 		read_database(sqlstmt,"operator");
 		free(sqlstmt);
 		if(sql_data_count)

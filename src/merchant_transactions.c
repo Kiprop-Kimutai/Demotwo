@@ -154,7 +154,7 @@ int mini_statement(){
 						printf("\n Balance Response JSONArray:  %s\n" , cJSON_Print(walletsresp));
 						/*defined_x = 100;
 						message_display_function(1,"", "MiniStatement  Details"," ", (char *)NULL);
-*/
+						 */
 						//showministatement("Mini Statement", walletsresp,sizeof(cJSON_GetArraySize(walletsresp)) / 100, selected );
 						/*
 						for(i =0; i<cJSON_GetArraySize(walletsresp); i++){
@@ -236,6 +236,7 @@ int balance_inquiry(){
 	strcpy(req_id, returned_request_id);
 	char  txnDate[50], transID[100];
 	int print_flag, print_response;
+	cJSON *  confirm_tx_json  =  cJSON_CreateArray();
 	cJSON * merchant_inqry= cJSON_CreateObject();
 	cJSON * merchant_inqry_obj= cJSON_CreateObject();
 	ret = kb_getStringtwo(PASS_IN ,NUM_IN ,  0, 20, pin,holder, NULL, "Enter PIN", "","Balance Inquiry", 0);
@@ -287,6 +288,25 @@ int balance_inquiry(){
 							char  balance1[50];
 							sprintf(balance1,"%.2f" ,balance);
 
+
+							int  u ;
+							for (u  = 0  ;  u  < 2 ;  u ++)
+							{
+								cJSON * array_item  =  cJSON_CreateObject();
+
+								if(u == 0)
+								{
+									cJSON_AddStringToObject(array_item ,  "key" , "Account" );
+									cJSON_AddStringToObject(array_item ,  "value" , card_wallet_id);
+								}
+								if ( u ==1)
+								{
+									cJSON_AddStringToObject(array_item ,  "key" , "Amount" );
+									cJSON_AddStringToObject(array_item ,  "value" , balance1 );
+								}
+								cJSON_AddItemToArray( confirm_tx_json , array_item);
+							}
+							/*
 							y = get_y_position();
 							lcd_printf(ALG_LEFT ,"%s", "Account");
 							lcd_printf_ex(ALG_LEFT_DEF ,y ,": %s",card_wallet_id);
@@ -299,8 +319,16 @@ int balance_inquiry(){
 
 						kb_getkey();
 
+					}*/}
+							if(confirm_screen("Store Balance" , confirm_tx_json))
+							{
+
+								print_receipt("Balance", walletsresp,&print_flag, &print_response);
+
+							}
+
+
 					}
-					print_receipt("Balance", walletsresp,&print_flag, &print_response);
 
 				}else if(strcmp(status , "false")==0){
 
