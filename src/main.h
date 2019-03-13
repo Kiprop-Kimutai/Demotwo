@@ -27,6 +27,6 @@ operatorDetails CurrentOperator;
 char datam[100];
 void printfConfigs(void);
 
-
+void display_gprs_start_option(int feedback);
 
 #endif /* MAIN_H_ */

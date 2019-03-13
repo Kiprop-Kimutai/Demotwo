@@ -422,7 +422,7 @@ int roll_up_transfer(){
 		cJSON_AddStringToObject(roll_up_request ,"requestId" ,req_id);
 
 		cJSON_AddItemToObject(roll_up_request_obj, "storeTxn" , roll_up_request);
-		//printf("\n Roll up request jSON :  %s\n" , cJSON_Print(roll_up_request_obj));
+		printf("\n Roll up request jSON :  %s\n" , cJSON_Print(roll_up_request_obj));
 
 		/*		defined_x = 100;
 		message_display_function(1,"", "Transaction Details"," ", (char *)NULL);
@@ -496,8 +496,10 @@ int roll_up_transfer(){
 
 						printf("\n Roll Up  Response JSONArray:  %s\n" , cJSON_Print(response));
 
-						errmessage =  cJSON_Print(cJSON_GetObjectItem(response,"message"));
+						errmessage =  cJSON_Print(cJSON_GetObjectItem(response,"resultDesc"));
 
+
+						remove_all_chars(errmessage, '"');
 
 						message_display_function(1,"","Roll Up Error",errmessage, (char *) NULL);
 						kb_getkey();
@@ -514,4 +516,6 @@ int roll_up_transfer(){
 		kb_getkey();
 		return 0;
 	}
+
 }
+

@@ -56,7 +56,7 @@ void pos_device_configuration(int type){
 	int ret_val;
 	const char menu[][100] = { "Server IP Address   ", "Server port number  ",
 			"Network APN username", "Network APN password",
-			"Network ppp Timeout " , "Turn Online On/Off"  };
+			"Network ppp Timeout " , "Turn Online On/Off", "About"  };
 	const char menu_on_off[][100] = { "Online Mode  ", "Offline Mode " };
 	char getCharacters[40],  getCharacters1[40];
 	char name[100],  name1[100];
@@ -304,9 +304,15 @@ void pos_device_configuration(int type){
 		}
 	}
 	break;
-/*	case 6:
-		request_operators();
-		break;*/
+	case 6:
+			lcd_clean();
+			screen_header();
+			lcd_printf(ALG_CENTER, "HIBAH Value Agency");
+			lcd_printf(ALG_CENTER, "Version 1.0.0\n Realese date : 13th March, 2018");
+			lcd_flip();
+			kb_getkey();
+			type = 2;
+			break;
 	default:
 		break;
 
@@ -645,14 +651,14 @@ void create_master_operator(){
 	kb_getkey();
 
 	sql=malloc(200);
-/*
+	/*
 	strcpy(myMerchantUser->name, "");
 	strcpy(myMerchantUser->pin, "1");
 	strcpy(myMerchantUser->idnumber, "24720604");	//username|pin|merchantid|idnumber|agentid|userlevel
 	strcpy(myMerchantUser->merchantid, "10");
 	strcpy(myMerchantUser->agentid, "20");
 	strcpy(myMerchantUser->userlevel, "-1");
-*/
+	 */
 
 	//username|pin|merchantid|idnumber|agentid|userlevel
 	sprintf(sql , "insert into operator (username,name, pin, idnumber,active, userlevel ) values ('%s', 'Default User','%s', '%s', '1', '%s' );","a","1","","-1");

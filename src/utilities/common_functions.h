@@ -37,7 +37,7 @@ char *trim(char *s);
 //int funt_get_mac_address(void );
 void get_current_time(void );
 char * getdate_mine(void );
-
+void remove_all_chars(char* str, char c);
 
 char** str_split(char* a_str, const char a_delim);
 char ** get_pos_network_data(char * command , int * x);

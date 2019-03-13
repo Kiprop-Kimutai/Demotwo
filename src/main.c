@@ -142,12 +142,21 @@ int main(int argc, char *argv[])
 	lcd_set_bk_color(COLOR_WITE);
 	lcd_set_font_color(COLOR_BLACK);
 
+
+	message_display_function(1,"","Initializing ","",(char *)NULL);
+	lcd_printf(ALG_LEFT,"");
+	lcd_printf(ALG_CENTER,"Loading HIBAH POS ... ");
+	lcd_printf(ALG_CENTER,"Version XPOS : 1.0.0");
+	lcd_printf(ALG_CENTER,"Release Date : 13TH Mar 2019");
+	lcd_flip();
 	read_config();
 	/*	sys_get_sn(serial_num,100);
 	printf("Serial_Number = %s\n", serial_num);*/
 	fag_start_ppp_session = 0;
 
-
+	retval= power_on_modem_device(myConfigurations->apn_username, myConfigurations->apn_password, myConfigurations->ppp_timeout);
+	display_gprs_start_option(retval);
+	final_create_all_tables();
 	lcd_init(&argc, &argv);
 	lcd_set_bk_color(COLOR_WITE);
 	lcd_set_font_color(COLOR_BLACK);
@@ -201,7 +210,7 @@ char *  data_to_be_written = "{\"balances\":[{\"walletName\":\"WFP\",\"walletId\
 				err = pthread_create(&(tid), NULL, &threader, NULL);
 				while (login_successful) {
 
-					switch(lcd_menu("Safaricom Value Agency", main_menu,sizeof(main_menu)/100,selected))
+					switch(lcd_menu("HIBAH Value Agency", main_menu,sizeof(main_menu)/100,selected))
 					{
 					case 0:
 
@@ -240,4 +249,34 @@ void printfConfigs(void){
 			break;
 		}
 	}
+}
+void display_gprs_start_option(int feedback)
+{
+
+	if(feedback == GPRS_SUCCESS)
+	{
+
+		message_display_function(1, "", "GPRS Start Message", "GPRS connection established successfully", (char *)NULL);
+		flag_online = 1;
+	}
+	else
+		flag_online = 0;
+
+	if(feedback == GPRS_FAILED_TO_ATTACH_TO_NETWORK)
+	{
+		message_display_function(1, "", "GPRS Start Error", "Failed to attach to GPRS network. Please review your configuration and try again", (char *)NULL);
+	}
+	if(feedback == GPRS_FAILED_TO_START_DEVICE)
+	{
+		message_display_function(1, "", "GPRS Start Error", "Failed to start the GPRS Modem device. Please restart POS and try again", (char *)NULL);
+	}
+	if(feedback == GPRS_FAILED_TO_START_PPP)
+	{
+		message_display_function(1, "", "GPRS Start Error", "Failed to start PPP. Please select \"Online Mode\" from configuration to restart PPP", (char *)NULL);
+	}
+	if(feedback == GPRS_FAILED_TO_START_MODEL)
+	{
+		message_display_function(1, "", "GPRS Start Error", "Failed to start GPRS Model. Please select \"Online Mode\" from configuration to restart PPP", (char *)NULL);
+	}
+	kb_getkey();
 }
