@@ -20,8 +20,8 @@
 #define DONT_HAVE_FRIBIDI_UNICODE_VERSION_H
 #define FRIBIDI_USE_GLIB 0
 #define FRIBIDI_SIZEOF_INT
-#include <config.h>
-#include <fribidi-bidi.h>
+#include <fribidi/config.h>
+#include <fribidi/fribidi-bidi.h>
 #include "stdint.h"
 #include "stddef.h"
 

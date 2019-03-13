@@ -761,6 +761,7 @@ int cardoperations(int operation,char *data , char ** personal_details ,char ** 
 			if(pollresult == 0){
 				printf("card found\n\n");
 
+				beep(2000 ,  200);
 				strcpy(temp_uid , processcarduid(uid));
 				*card_uid_to_be_obtained = temp_uid;
 
@@ -772,6 +773,7 @@ int cardoperations(int operation,char *data , char ** personal_details ,char ** 
 				printf(" desfire_select_application : %d\n" ,  ret );
 				if(ret <0)
 				{
+					beep(2000 ,  200);
 					message_display_function(1,"","Card Error", "Invalid card status. Please retry", (char *)NULL);
 					kb_getkey();
 					desfire_deactive(fd);
@@ -791,12 +793,15 @@ int cardoperations(int operation,char *data , char ** personal_details ,char ** 
 						if(operation == 3)
 						{
 							//Means card isnt personalized and can be used.
+							beep(2000 ,  200);
 							desfire_deactive(fd);
 							mif_close(fd);
 							return 1;
 						}
+						beep(2000 ,  200);
 						message_display_function(1,"","Card Error", "The card is not personalized or the contact time is too short. Please try again  ", (char *)NULL);
 						kb_getkey();
+
 						desfire_deactive(fd);
 						mif_close(fd);
 						return -1;
@@ -804,6 +809,7 @@ int cardoperations(int operation,char *data , char ** personal_details ,char ** 
 					if(operation == 3)
 					{
 						//Means card is personalized and cant be used.
+						beep(2000 ,  200);
 						message_display_function(1,"","Card Error", "The card is personalized and cannot be reused. Please pick another card and try again  ", (char *)NULL);
 						kb_getkey();
 						desfire_deactive(fd);
@@ -817,7 +823,7 @@ int cardoperations(int operation,char *data , char ** personal_details ,char ** 
 						case 1:
 						{
 
-							char * final_transactions;
+							char * final_transactions , *tx_returned;
 							readops=  readfile(fd,keyno,app0,benapp2.AID,authkey, &p_details ,&t_details,fingerprint);
 							if(readops>=0){
 							printf("card read result::%d\n",readops);
@@ -830,9 +836,12 @@ int cardoperations(int operation,char *data , char ** personal_details ,char ** 
 							//strcpy(t_details );
 							printf("out :%s\n , " , t_details);
 							final_transactions  = strtok(t_details , "~");
-							*transaction_file = final_transactions;
+							tx_returned  =  malloc(strlen(final_transactions) + 2);
+							strcpy(tx_returned , final_transactions);
+							*transaction_file = tx_returned;
 							printf("\n1: %s\n , " , data_p_details);
-							pretty_printf(final_transactions ,  100);
+							pretty_printf(tx_returned ,  100);
+							beep(2000 ,  200);
 							desfire_deactive(fd);
 							mif_close(fd);
 							}
@@ -857,6 +866,7 @@ int cardoperations(int operation,char *data , char ** personal_details ,char ** 
 									kb_getkey();
 									writeops = writefile(fd,keyno,app0,benapp2.AID,authkey,final_string,input_personal_details);
 								}*/
+								beep(2000 ,  200);
 								desfire_deactive(fd);
 								mif_close(fd);
 								return writeops;
@@ -864,8 +874,10 @@ int cardoperations(int operation,char *data , char ** personal_details ,char ** 
 							}
 							else
 							{
+								beep(2000 ,  200);
 								message_display_function(1,"","card error", "Wrong card presented. Please place the original  card and try  again", (char *)NULL);
 								kb_getkey();
+
 								desfire_deactive(fd);
 								mif_close(fd);
 								return -1;
@@ -875,6 +887,7 @@ int cardoperations(int operation,char *data , char ** personal_details ,char ** 
 							break;
 						}
 						default:
+							beep(2000 ,  200);
 							desfire_deactive(fd);
 							mif_close(fd);
 							return -2;
@@ -885,6 +898,7 @@ int cardoperations(int operation,char *data , char ** personal_details ,char ** 
 					}
 					else{
 						//printf personal details file not found
+						beep(2000 ,  200);
 						message_display_function(1,"","card error", "The card attached is not an issued card", (char *)NULL);
 						kb_getkey();
 						desfire_deactive(fd);
@@ -895,6 +909,7 @@ int cardoperations(int operation,char *data , char ** personal_details ,char ** 
 				else{
 					//authentication failed
 					printf("personalize card failed result %d %d \n",authstatus , errno);
+					beep(2000 ,  200);
 					message_display_function(1,"","card error", "Card authentication failed", (char *)NULL);
 					kb_getkey();
 					lcd_clean();
@@ -910,6 +925,7 @@ int cardoperations(int operation,char *data , char ** personal_details ,char ** 
 			//sleep(1);
 			if(timeout>500){
 				printf("Timeout achieved\n");
+				beep(2000 ,  200);
 				message_display_function(1,"","NFC card not found", "", (char *)NULL);
 				sleep(2);
 				lcd_clean();
@@ -923,6 +939,7 @@ int cardoperations(int operation,char *data , char ** personal_details ,char ** 
 	}
 	else{
 		printf("open iccid failed with status %d corresponding to error %d\n",fd,errno);
+		beep(2000 ,  200);
 		message_display_function(1,"","Card Reader Failed", "Please try again.", (char *)NULL);
 		kb_getkey();
 		desfire_deactive(fd);

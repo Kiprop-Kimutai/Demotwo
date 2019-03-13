@@ -164,6 +164,8 @@ void register_beneficiary(void){
 		strcpy(read_card_number , new_read_card_number );
 		printf("NNread_card_number :  %s\n ", read_card_number);
 
+		if(fplib_test(0  ))
+		{
 		strcpy( name , "Please enter Beneficairy Card Identifier" );
 
 
@@ -212,8 +214,7 @@ void register_beneficiary(void){
 				cJSON_AddStringToObject(create_new_obj , "transactions" ,"" );
 				printf("Value  to  card:  %s\n" , cJSON_Print(create_new_obj));
 
-				if(fplib_test(0  ))
-				{
+
 
 					char * transact_string;
 					transact_string   = cJSON_Print(create_new_obj);
@@ -221,7 +222,7 @@ void register_beneficiary(void){
 					cJSON_Minify(string);
 					printf(">>>>>>>JSON %s\n", string);
 					personalizecard(string,fp_response ,  transact_string , read_card_number );
-				}
+				//}
 				/*			else
 			{
 				return;
@@ -234,6 +235,7 @@ void register_beneficiary(void){
 				kb_getkey();
 			}
 		}
+	}
 	}
 }
 
@@ -294,8 +296,13 @@ void do_beneficiary_transaction( int option){
 		double  wallet_amount[10];
 		cJSON *  new_wallet = cJSON_CreateArray();
 
+		pretty_printf(transaction_file ,  100);
 		//cJSON * new_txs = cJSON_CreateObject();
 		int i= 0 ,  w=0;
+		char  *  transaction_file2 = malloc(strlen (transaction_file) + 2);
+		strcpy(transaction_file2  , transaction_file);
+	//	printf("The : %s\n" ,  transaction_file);
+		pretty_printf(transaction_file ,  100);
 
 		personal_details_string =  malloc(strlen(personal_details)+ 2);
 		strcpy(personal_details_string  ,personal_details );
@@ -307,14 +314,14 @@ void do_beneficiary_transaction( int option){
 			kb_getkey();
 			return ;
 		}
-		if(!jcheck(transaction_file))
+		if(!jcheck(transaction_file2))
 		{
 			message_display_function(1, "","Transaction  Error","The card transaction file is incorrectly formated or the card contact  period is insufficient. Please try  again" ,  (char *)NULL );
 			kb_getkey();
 			return ;
 		}
 		json_beneficiary_data =  cJSON_Parse(personal_details_string);
-		transaction_json  = cJSON_Parse(transaction_file);
+		transaction_json  = cJSON_Parse(transaction_file2);
 
 		free(personal_details_string);
 		//json_beneficiary_data  = cJSON_GetObjectItem(json_beneficary_details , "BenRegistration");
