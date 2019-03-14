@@ -13,4 +13,5 @@ int cardoperations(int operation,char *data ,char ** personal_details ,char ** t
 char * readcarduid(void);
 char *processcarduid(char *uid);
 int testnfc(void);
+char  gbl_str[2000];
 #endif /* SRC1_MUTWOL_H_ */

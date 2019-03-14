@@ -552,6 +552,12 @@ void pretty_printf(char  * str ,  int print_length)
 	if(print_length  > 0 )
 	{
 		int i;
+		char *  paint =  malloc(print_length+3);
+		strcpy(paint, "");
+		for(i = 0 ;  i< print_length ;  i++)
+			strcat(paint , "-");
+		//strcat(paint , "\0");
+		printf("%s\n" , paint);
 		for(i = 0 ;  i< (strlen(str)/print_length) ;  i++)
 		{
 			printf ("%.*s\n", print_length, str +  (print_length*i));
@@ -560,6 +566,8 @@ void pretty_printf(char  * str ,  int print_length)
 		{
 			printf ("%.*s\n", print_length, str +  (print_length*i));
 		}
+		printf("%s\n", paint);
+		free(paint);
 	}
 }
 

@@ -823,24 +823,31 @@ int cardoperations(int operation,char *data , char ** personal_details ,char ** 
 						case 1:
 						{
 
-							char * final_transactions , *tx_returned;
+							char * final_transactions , tx_returned[1510];
 							readops=  readfile(fd,keyno,app0,benapp2.AID,authkey, &p_details ,&t_details,fingerprint);
 							if(readops>=0){
 							printf("card read result::%d\n",readops);
 							//peronal_details =
+
 							printf("\n1: %s\n , " , p_details);
 							strcpy(data_p_details   ,p_details);
 
 							*personal_details = data_p_details;
-							//final_transactions =  malloc(strlen(t_details));
-							//strcpy(t_details );
-							printf("out :%s\n , " , t_details);
-							final_transactions  = strtok(t_details , "~");
-							tx_returned  =  malloc(strlen(final_transactions) + 2);
-							strcpy(tx_returned , final_transactions);
-							*transaction_file = tx_returned;
-							printf("\n1: %s\n , " , data_p_details);
-							pretty_printf(tx_returned ,  100);
+							printf("\n2:  , \n" );
+							//pretty_printf(gbl_str ,  100);
+							final_transactions =  malloc(strlen(t_details)+ 2);
+							strcpy(final_transactions , t_details );
+							//kb_getkey();
+							//pretty_printf(tx_returned ,  100);
+							//kb_getkey();
+							//tx_returned  =  malloc(strlen(t_details) + 2);
+							*transaction_file  = my_strtok(gbl_str ,"~" );
+							//final_transactions  = strtok(tx_returned , "~");
+							//strcpy(tx_returned , final_transactions);
+
+							//*transaction_file = final_transactions;
+							//printf("\n1: %s\n , " , data_p_details);
+							pretty_printf(*transaction_file ,  100);
 							beep(2000 ,  200);
 							desfire_deactive(fd);
 							mif_close(fd);
@@ -1001,6 +1008,8 @@ int readfile(int fd,uint8_t keyno,char MF[3],char APP[3],char *authkey,char ** p
 		if(ret >= 0){
 			printf("data out ...\n");
 			printf("transactions out : %s\n",txndetails);
+			//pretty_printf(txndetails ,  100);
+			strcpy(gbl_str ,txndetails );
 			*transaction_file = txndetails;
 			printf("<==========done============>\n");
 		}

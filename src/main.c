@@ -62,6 +62,9 @@ void* threader(void *arg)
 	time_t start, current;
 	time_t start_for_flag_update, current_for_flag_update;
 
+	int retval= power_on_modem_device(myConfigurations->apn_username, myConfigurations->apn_password, myConfigurations->ppp_timeout);
+	if(retval == GPRS_SUCCESS)
+		flag_online =1 ;
 
 	start = time(NULL);
 	start_for_flag_update = time(NULL);
@@ -150,44 +153,15 @@ int main(int argc, char *argv[])
 	lcd_printf(ALG_CENTER,"Release Date : 13TH Mar 2019");
 	lcd_flip();
 	read_config();
-	/*	sys_get_sn(serial_num,100);
-	printf("Serial_Number = %s\n", serial_num);*/
 	fag_start_ppp_session = 0;
 
-	retval= power_on_modem_device(myConfigurations->apn_username, myConfigurations->apn_password, myConfigurations->ppp_timeout);
-	display_gprs_start_option(retval);
+
 	final_create_all_tables();
 	lcd_init(&argc, &argv);
 	lcd_set_bk_color(COLOR_WITE);
 	lcd_set_font_color(COLOR_BLACK);
 
-	//fetch_beneficary_balance();
-	//testnfc();
-
-	//Start
-
-
-
-
-
-
-/*
-char *tx ;
-unsigned char*  fingerprint;
-char *  data_to_be_written = "{\"balances\":[{\"walletName\":\"WFP\",\"walletId\":\"100\",\"currency\":\"Ksh\",\"walletBalance\":9000},{\"walletName\":\"IOM\",\"walletId\":\"200\",\"currency\":\"Ksh\",\"walletBalance\":2000}],\"transactions\":\"BT-82399633-181230113807*82399633*111*27990864512*100*0*2018-12-30 11:38:07*100*0.00#BT-82399633-181230012753*82399633*111*27990864512*crediticcid*0*2018-12-30 01:27:53*100*0.00#\"}\0"; cardoperations(2,"", &tx ,&tx,&fingerprint , "" ,  data_to_be_written ,  "card_number");
-
-*/
-
-
-
-
-
-	//End
-	flag_online = 1;
-	//printf("%s %s\n",date_t, receipt_t  );
 	sys_get_sn(pos_serial_number,40);
-	//readcarduid();
-	//testnfc();
 
 	initialize_params();
 	//system("echo 'dogoodnotevil' | su -c 'cp *  /media/usb1/files/'");
@@ -201,38 +175,38 @@ char *  data_to_be_written = "{\"balances\":[{\"walletName\":\"WFP\",\"walletId\
 		printf("\n login_successful is %d and su_ligin_successful is %d", login_successful, su_login_successful);
 
 
-			//login_successful = 1;;
-			if(login_successful){
-				pthread_t tid;
-				int err;
+		//login_successful = 1;;
+		if(login_successful){
+			pthread_t tid;
+			int err;
 
 
-				err = pthread_create(&(tid), NULL, &threader, NULL);
-				while (login_successful) {
+			err = pthread_create(&(tid), NULL, &threader, NULL);
+			while (login_successful) {
 
-					switch(lcd_menu("HIBAH Value Agency", main_menu,sizeof(main_menu)/100,selected))
-					{
-					case 0:
+				switch(lcd_menu("HIBAH Value Agency", main_menu,sizeof(main_menu)/100,selected))
+				{
+				case 0:
 
-						beneficiary_transactions();
-						break;
-					case 1:
+					beneficiary_transactions();
+					break;
+				case 1:
 
-						merchant_transactions();
-						break;
-					case 2:
-						device_management();
-						break;
-					case 3:
-						goto LOGIN;
-						break;
-					}
+					merchant_transactions();
+					break;
+				case 2:
+					device_management();
+					break;
+				case 3:
+					goto LOGIN;
+					break;
 				}
+			}
 
-			}
-			else{
-				goto LOGIN;
-			}
+		}
+		else{
+			goto LOGIN;
+		}
 
 		//}
 
