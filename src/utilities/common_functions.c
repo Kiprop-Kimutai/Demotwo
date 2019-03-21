@@ -597,3 +597,38 @@ while (*pr)
     }
 *pw = '\0';
 }
+
+
+const char * get_date_from_string(char * date) {
+static char date_string[30];
+
+	int hh, mm;
+	float ss;
+	time_t time_value;
+
+	   int year = 0, month = 0, day = 0, hour = 0, min = 0, sec =0 ;
+
+	   if (sscanf(date, "%4d%2d%2d%2d%2d%2d", &year, &month, &day, &hour, &min, &sec) == 6)
+	   {
+		   struct tm breakdown = {0};
+		         breakdown.tm_year = year - 1900; /* years since 1900 */
+		         breakdown.tm_mon = month - 1;
+		         breakdown.tm_mday = day;
+		         breakdown.tm_hour = hour;
+		         breakdown.tm_min = min;
+
+			time_value = mktime(&breakdown);
+			if (time_value == -1) {
+			    printf ("unable to make time\n");
+			}
+			else {
+
+			  sprintf(date_string, "%4d/%2d/%2d %2d:%2d:%2d",breakdown.tm_year, breakdown.tm_mon, breakdown.tm_mday, breakdown.tm_hour, breakdown.tm_min, breakdown.tm_sec);
+			  strftime(date_string, sizeof(date_string), "%Y-%m-%d %H:%M:%S", &breakdown);
+			  puts(date_string);
+			}
+
+
+	   }
+return date_string;
+}

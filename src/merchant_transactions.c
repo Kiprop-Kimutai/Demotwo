@@ -7,7 +7,7 @@
  */
 
 
-#include <cJSON.h>
+#include "utilities/cJSON.h"
 #include <stdlib.h>
 #include "utilities/send_online_request.h"
 #include "utilities/keyboart.h"
@@ -91,6 +91,8 @@ int mini_statement(){
 	char * TransactionStatus;
 	char * ReceiptNumber;
 	int i;
+	int key;
+	char buffer[50];
 	char holder[30];
 	char  main_menu[][100] = {"Organization Account","WFP Organization Account"};
 	char walletName[50];
@@ -152,55 +154,84 @@ int mini_statement(){
 
 					if(cJSON_GetArraySize(walletsresp) > 0){
 						printf("\n Balance Response JSONArray:  %s\n" , cJSON_Print(walletsresp));
-						/*defined_x = 100;
-						message_display_function(1,"", "MiniStatement  Details"," ", (char *)NULL);
-						 */
-						//showministatement("Mini Statement", walletsresp,sizeof(cJSON_GetArraySize(walletsresp)) / 100, selected );
-						/*
-						for(i =0; i<cJSON_GetArraySize(walletsresp); i++){
-
-
+						i=0;
+						while( i<cJSON_GetArraySize(walletsresp)){
 
 							cJSON * ministatement_array = cJSON_GetArrayItem(walletsresp,i);
-						    Amount = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(ministatement_array , "Amount")));
+							Amount = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(ministatement_array , "Amount")));
 							ReceiptNumber = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(ministatement_array , "ReceiptNumber")));
 							TransactionStatus = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(ministatement_array , "TransactionStatus")));
 							Currency = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(ministatement_array , "Currency")));
 							Details = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(ministatement_array , "Details")));
+							/*		printf("=================================\n");
+							printf("Transaction : %d\n",i+1);
+							printf("=================================\n");
+							printf("Amount : %s\n",Amount);
+							printf("ReceiptNumber : %s\n",ReceiptNumber);
+							printf("TransactionStatus : %s\n",TransactionStatus);
+							printf("Currency : %s\n",Currency);
+							printf("Details : %s\n",Details);
+							printf("=================================\n");*/
 
-							showministatement("Mini Statement", walletsresp,sizeof(cJSON_GetArraySize(walletsresp)) / 100, selected );
+							defined_x = 100;
+							sprintf(buffer, "MiniStatement txn: %d/%d", i+1, cJSON_GetArraySize(walletsresp));
+							message_display_function(0,"", buffer," ", (char *)NULL);
+							y = get_y_position();
+							lcd_printf(ALG_LEFT ,"%s", "Amount");
+							lcd_printf_ex(ALG_LEFT_DEF ,y ,"   : %s",Amount);
+							y = get_y_position();
+							lcd_printf(ALG_LEFT ,"%s", "Receipt No.");
+							lcd_printf_ex(ALG_LEFT_DEF ,y ,"   :  %s",ReceiptNumber);
+							y = get_y_position();
+							lcd_printf(ALG_LEFT ,"%s", "Status");
+							lcd_printf_ex(ALG_LEFT_DEF ,y ,"   :  %s",TransactionStatus);
+							y = get_y_position();
+							lcd_printf(ALG_LEFT ,"%s", "Currency");
+							lcd_printf_ex(ALG_LEFT_DEF ,y ,"   : %s",Currency);
+							y = get_y_position();
+							lcd_printf(ALG_LEFT ,"%s", "Details");
+							lcd_printf_ex(ALG_LEFT_DEF ,y ,"   : %s",Details);
+							lcd_printf(ALG_CENTER ,"");
+							y = get_y_position();
+							defined_x = 150;
+							lcd_set_font_color(COLOR_BLUE);
+							lcd_printf(ALG_CENTER , "CANCEL to Exit                ENTER to Print");
+							lcd_flip();
+							lcd_set_font_color(COLOR_BLACK);
+							 key = kb_getkey();
+							if(key == DIKS_ENTER){
+								print_receipt("Mini statement", walletsresp,&print_flag, &print_complete);
+								return 0;
+							}
+							else if(key==DIKS_CURSOR_UP)
+							{
+								lcd_clean();
+								if(i+1>1)
+									i--;
+							}
+							else if(key==DIKS_CURSOR_DOWN)
+							{
+								lcd_clean();
+								if(i+1<cJSON_GetArraySize(walletsresp))
+									i++;
+							}
+							else if(key==DIKS_ESCAPE)
+								return 0;
 
+							else
+							{
 
-								y = get_y_position();
-										lcd_printf(ALG_LEFT ,"%s", "ReceiptNumber");
-										lcd_printf_ex(ALG_LEFT_DEF ,y ,": %s",ReceiptNumber);
-										y = get_y_position();
-										lcd_printf(ALG_LEFT ,"%s", "Details");
-										lcd_printf_ex(ALG_LEFT_DEF ,y ,": %s",Details);
-
-							//	message_display_function(1,"","Balance",cJSON_Print(cJSON_GetObjectItem(balance_array , "balance")), (char *) NULL);
-						}*/
-
-						//kb_getkey();
+							}
+						}
 
 					}
-
-
-
-
-					print_receipt("Mini statement", walletsresp,&print_flag, &print_complete);
-
-
-
-
-
 				}else if(strcmp(status, "false")==0){
 
 
 					printf("\n Mini Statement Response JSONArray:  %s\n" , cJSON_Print(response));
 
 					errmessage =  cJSON_Print(cJSON_GetObjectItem(response,"resultDesc"));
-
+					remove_all_chars(errmessage, '"');
 
 					message_display_function(1,"","Mini Statement  Error",errmessage, (char *) NULL);
 					kb_getkey();
@@ -222,9 +253,10 @@ int mini_statement(){
 
 int balance_inquiry(){
 	char * date;
-	int y = 0;
+	char  * status ;
 	int ret , i ;
-
+	int  u ;
+	char  balance1[50];
 	char *transactionDate ,  *transactionID ;
 	cJSON  * response ;
 	char pin[20];
@@ -234,7 +266,9 @@ int balance_inquiry(){
 	char * returned_request_id,req_id[20];
 	get_request_id(1, &returned_request_id);
 	strcpy(req_id, returned_request_id);
-	char  txnDate[50], transID[100];
+
+	char transID[100];
+	char txnDate[100];
 	int print_flag, print_response;
 	cJSON *  confirm_tx_json  =  cJSON_CreateArray();
 	cJSON * merchant_inqry= cJSON_CreateObject();
@@ -263,7 +297,7 @@ int balance_inquiry(){
 
 			printf("Response : \n");
 			//if(response!=(cJSON *)NULL){
-			char  * status   = cJSON_Print(cJSON_GetObjectItem(response,"status"));
+			status   = cJSON_Print(cJSON_GetObjectItem(response,"status"));
 
 
 			if(status != (char*) NULL){
@@ -285,11 +319,8 @@ int balance_inquiry(){
 							balance = atof(cJSON_Print(cJSON_GetObjectItem(balance_array , "balance")));
 							card_wallet_id = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(balance_array , "wallet")));
 							currency = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(balance_array , "currency")));
-							char  balance1[50];
+
 							sprintf(balance1,"%.2f" ,balance);
-
-
-							int  u ;
 							for (u  = 0  ;  u  < 2 ;  u ++)
 							{
 								cJSON * array_item  =  cJSON_CreateObject();
@@ -306,26 +337,13 @@ int balance_inquiry(){
 								}
 								cJSON_AddItemToArray( confirm_tx_json , array_item);
 							}
-							/*
-							y = get_y_position();
-							lcd_printf(ALG_LEFT ,"%s", "Account");
-							lcd_printf_ex(ALG_LEFT_DEF ,y ,": %s",card_wallet_id);
-							y = get_y_position();
-							lcd_printf(ALG_LEFT ,"%s", "Balance");
-							lcd_printf_ex(ALG_LEFT_DEF ,y ,": %s",balance1);
-							lcd_flip();
-							//	message_display_function(1,"","Balance",cJSON_Print(cJSON_GetObjectItem(balance_array , "balance")), (char *) NULL);
 						}
+						if(confirm_screen("Store Balance" , confirm_tx_json))
+						{
 
-						kb_getkey();
+							print_receipt("Balance", walletsresp,&print_flag, &print_response);
 
-					}*/}
-							if(confirm_screen("Store Balance" , confirm_tx_json))
-							{
-
-								print_receipt("Balance", walletsresp,&print_flag, &print_response);
-
-							}
+						}
 
 
 					}
@@ -357,6 +375,7 @@ int balance_inquiry(){
 		kb_getkey();
 		return 0;
 	}
+	return 0;
 
 }
 
@@ -369,18 +388,20 @@ int roll_up_transfer(){
 	//**************************************
 	int  ret, selected;
 	char  main_menu[][100] = {"Default Account","WFP_Account"};
-	int y = 0 , key;
+	int  key;
 
 	char  txnDate[50],*transactionDate ,  *transactionID ,  transID[100];
 	int print_complete , print_flag;
 	cJSON  * response ;
 	char pin[30];
+	cJSON *  confirm_tx_json;
 	char * date;
+	int  u;
 	char holder1[20];
 	cJSON * roll_up_request= cJSON_CreateObject();
 	cJSON * roll_up_request_obj= cJSON_CreateObject();
 	char ammount[30];
-	char crdacc[20];
+	//char crdacc[20];
 	ret = kb_getStringtwo(PASS_IN ,NUM_IN ,  0, 20, pin,holder1, NULL, "Enter PIN", "","Roll Up Request", 0);
 	if(ret == -1)
 		return 0 ;
@@ -424,30 +445,9 @@ int roll_up_transfer(){
 		cJSON_AddItemToObject(roll_up_request_obj, "storeTxn" , roll_up_request);
 		printf("\n Roll up request jSON :  %s\n" , cJSON_Print(roll_up_request_obj));
 
-		/*		defined_x = 100;
-		message_display_function(1,"", "Transaction Details"," ", (char *)NULL);
-		y = get_y_position();
-		lcd_printf(ALG_LEFT ,"%s", "Account");
-		lcd_printf_ex(ALG_LEFT_DEF ,y ,": %s",crdacc);
-		y = get_y_position();
-		lcd_printf(ALG_LEFT ,"%s", "Amount");
-		lcd_printf_ex(ALG_LEFT_DEF ,y ,": %s",ammount);
 
+		confirm_tx_json  =  cJSON_CreateArray();
 
-		lcd_printf(ALG_LEFT ,"");
-		lcd_printf(ALG_CENTER ,"_____________________________________");
-		y = get_y_position();
-		defined_x = 150;
-
-		lcd_set_font_color(COLOR_BLUE);
-		lcd_printf(ALG_CENTER ,"%s" , "Cancel to exit      :     Enter to confirm");
-
-		lcd_flip();
-		lcd_set_font_color(COLOR_BLACK);
-
-		key = kb_getkey();*/
-		cJSON *  confirm_tx_json  =  cJSON_CreateArray();
-		int  u ;
 		for (u  = 0  ;  u  < 2 ;  u ++)
 		{
 			cJSON * array_item  =  cJSON_CreateObject();
@@ -480,8 +480,8 @@ int roll_up_transfer(){
 
 						if(cJSON_GetArraySize(walletsresp) > 0){
 
-							//showministatement();
-							printf("\n Balance Response JSONArray:  %s\n" , cJSON_Print(walletsresp));
+							cJSON_AddNumberToObject(walletsresp ,"ammount" ,atoi(ammount));
+							printf("\n Roll Up Response:  %s\n" , cJSON_Print(walletsresp));
 							print_receipt("Roll Up Transfer", walletsresp,&print_flag, &print_complete);
 
 						}
@@ -501,7 +501,7 @@ int roll_up_transfer(){
 
 						remove_all_chars(errmessage, '"');
 
-						message_display_function(1,"","Roll Up Error",errmessage, (char *) NULL);
+						message_display_function(1,"","Transaction Error",errmessage, (char *) NULL);
 						kb_getkey();
 
 
@@ -516,6 +516,6 @@ int roll_up_transfer(){
 		kb_getkey();
 		return 0;
 	}
-
+	return 0;
 }
 

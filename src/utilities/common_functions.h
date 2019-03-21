@@ -55,5 +55,6 @@ double getdecimalvalueforhex(char i,int position);
 char *hextodecimalconverter(char *hexstring);
 void pretty_printf(char  * str ,  int print_length);
 int number_length(int number);
+const char * get_date_from_string(char * date);
 
 #endif /* SRC_UTILITIES_COMMON_FUNCTIONS_H_ */

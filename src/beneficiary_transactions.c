@@ -37,7 +37,7 @@ void register_beneficiary(void);
  */
 void do_beneficiary_transaction( int option);
 void beneficiary_card_operation_functions(void );
-void edit_beneficiary_details(void);
+//void edit_beneficiary_details(void);
 void fetch_beneficary_balance( void);
 void fetch_beneficary_balances( void);
 void fetch_beneficary_mini_statement( void);
@@ -308,7 +308,7 @@ void do_beneficiary_transaction( int option){
 		int i= 0 ,  w=0;
 		char  *  transaction_file2 = malloc(strlen (transaction_file) + 2);
 		strcpy(transaction_file2  , transaction_file);
-		//	printf("The : %s\n" ,  transaction_file);
+			//printf("The : %s\n" ,  transaction_file);
 		pretty_printf(transaction_file ,  100);
 
 		personal_details_string =  malloc(strlen(personal_details)+ 2);

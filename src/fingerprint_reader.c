@@ -151,7 +151,7 @@ int fplib_test(int option )
 		printf("Failed : SG_DEV_FDU04 \n");
 
 		err = SGFPM_Init(hsgfplib,SG_DEV_FDU04);
-		err = SGFPM_OpenDevice(hsgfplib,SG_DEV_AUTO);
+		err = SGFPM_OpenDevice(hsgfplib,0);
 		if(err != SGFDX_ERROR_NONE)
 		{
 			printf("Failed : SG_DEV_FDU04 \n");
@@ -390,7 +390,7 @@ int fplib_test(int option )
 
 						lcd_set_font_color(COLOR_BLUE);
 						//Alex
-						lcd_printf_ex(ALG_RIGHT, y , "authentication_success");
+						//lcd_printf_ex(ALG_RIGHT, y , "authentication_success");
 						//JAck
 						//kb_getkey();
 						lcd_flip();

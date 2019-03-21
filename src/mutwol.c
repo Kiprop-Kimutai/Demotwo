@@ -920,6 +920,7 @@ int cardoperations(int operation,char *data , char ** personal_details ,char ** 
 					message_display_function(1,"","card error", "Card authentication failed", (char *)NULL);
 					kb_getkey();
 					lcd_clean();
+					authstatus=0;
 					desfire_deactive(fd);
 					mif_close(fd);
 					return -1;

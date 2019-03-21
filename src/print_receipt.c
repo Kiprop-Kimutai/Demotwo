@@ -79,6 +79,7 @@ int print_receipt(char * type_of_receipt , cJSON * transaction ,   int * printfl
 	int reprint = 0;
 	int ifd = -1;
 	int key = 0;
+	char  dates[30];
 	int retval = 0;
 	char Recipt[100];
 	int i;
@@ -241,7 +242,7 @@ int print_receipt(char * type_of_receipt , cJSON * transaction ,   int * printfl
 
 
 		}
-		printf("tunaanza kitu 1\n");
+
 
 		if(strcmp(type_of_receipt ,"CARD BALANCE RECEIPT") == 0)
 		{
@@ -418,6 +419,8 @@ int print_receipt(char * type_of_receipt , cJSON * transaction ,   int * printfl
 				char * initiatedTime = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(balance_array , "InitiatedTime")));
 				char * details = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(balance_array , "Details")));
 
+				strcpy(dates,get_date_from_string(initiatedTime));
+				//printf("XXXXXXXXXXXXXXXXXXXXXXX : %s\n", dates);
 
 				printf ("%d: receiptNumber : %s transactionStatus : %s currency : %s amount: %s initiatedTime: %s details : %s\n" , i+1 , receiptNumber, transactionStatus, currency, amount,initiatedTime, details );
 
@@ -442,7 +445,7 @@ int print_receipt(char * type_of_receipt , cJSON * transaction ,   int * printfl
 					y += height + 1;
 
 					surface->DrawString(surface, "InitiatedTime ", -1, rectangle_x, y, DSTF_TOPLEFT);
-					surface->DrawString(surface,initiatedTime, -1, rectangle_x+135, y, DSTF_TOPLEFT);
+					surface->DrawString(surface,dates, -1, rectangle_x+135, y, DSTF_TOPLEFT);
 					y += height + 1;
 
 					surface->DrawString(surface, "details ", -1, rectangle_x, y, DSTF_TOPLEFT);
@@ -459,20 +462,22 @@ int print_receipt(char * type_of_receipt , cJSON * transaction ,   int * printfl
 
 
 		if(strcmp(type_of_receipt, "Balance")==0){
+			char * date[100];
 			surface->SetFont(surface, font_24);
 			font_24->GetHeight(font_24, &height);
 		for (i  = 0; i<cJSON_GetArraySize(transaction); i++)
 					{
 
 						double balance;
-						cJSON * balance_array = cJSON_GetArrayItem(transaction,i);
+						cJSON * balance_array;
+						char * card_wallet_id ;
+						char * currency;
+						 balance_array = cJSON_GetArrayItem(transaction,i);
 						balance = atof(cJSON_Print(cJSON_GetObjectItem(balance_array , "balance")));
-						char * card_wallet_id = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(balance_array , "wallet")));
-						char * currency = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(balance_array , "currency")));
+						card_wallet_id = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(balance_array , "wallet")));
+						currency = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(balance_array , "currency")));
 
 						printf ("%d: card_wallet : %s currency : %s balance : %1f\n" , i+1 , card_wallet_id, currency, balance);
-
-						printf("Tunaenda Tx sasa\n");
 						surface->DrawString(surface,"--------------------------------------------------------", -1, rectangle_x, y, DSTF_TOPLEFT);
 														y += height + 1;
 							surface->DrawString(surface,"wallet_name: ", -1, rectangle_x, y, DSTF_TOPLEFT);
@@ -507,52 +512,65 @@ int print_receipt(char * type_of_receipt , cJSON * transaction ,   int * printfl
 								char * initiatedTime = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(balance_array , "InitiatedTime")));
 								char * details = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(balance_array , "Details")));
 
-
-								printf ("%d: receiptNumber : %s transactionStatus : %s currency : %s amount: %s initiatedTime: %s details : %s\n" , i+1 , receiptNumber, transactionStatus, currency, amount,initiatedTime, details );
+								 strcpy(dates,get_date_from_string(initiatedTime));
+								// printf("XXXXXXXXXXXXXXXXXXXXXXX : %s\n", dates);
+								//printf ("%d: receiptNumber : %s transactionStatus : %s currency : %s amount: %s initiatedTime: %s details : %s\n" , i+1 , receiptNumber, transactionStatus, currency, amount, dates, details );
 
 
 								surface->DrawString(surface,"--------------------------------------------------------", -1, rectangle_x, y, DSTF_TOPLEFT);
 																				y += height + 1;	//surface->DrawString(surface,"==========================", -1,rectangle_x+135, y, DSTF_TOPLEFT);
 									y += height + 1;
 									surface->DrawString(surface,"ReceiptNo: ", -1, rectangle_x, y, DSTF_TOPLEFT);
-									surface->DrawString(surface, receiptNumber, -1,rectangle_x+135, y, DSTF_TOPLEFT);
+									surface->DrawString(surface, receiptNumber, -1,rectangle_x+125, y, DSTF_TOPLEFT);
 									y += height + 1;
 								/*	char  balance1[50];
 									sprintf(balance1,"%.2f" ,balance);*/
-									surface->DrawString(surface, "TxnStatus ", -1, rectangle_x, y, DSTF_TOPLEFT);
-									surface->DrawString(surface,transactionStatus, -1, rectangle_x+135, y, DSTF_TOPLEFT);
+									surface->DrawString(surface, "Status ", -1, rectangle_x, y, DSTF_TOPLEFT);
+									surface->DrawString(surface,transactionStatus, -1, rectangle_x+125, y, DSTF_TOPLEFT);
 									y += height + 1;
 
 									surface->DrawString(surface, "Currency ", -1, rectangle_x, y, DSTF_TOPLEFT);
-									surface->DrawString(surface,currency, -1, rectangle_x+135, y, DSTF_TOPLEFT);
+									surface->DrawString(surface,currency, -1, rectangle_x+125, y, DSTF_TOPLEFT);
 									y += height + 1;
 									surface->DrawString(surface,"Amount: ", -1, rectangle_x, y, DSTF_TOPLEFT);
-									surface->DrawString(surface, amount, -1,rectangle_x+135, y, DSTF_TOPLEFT);
+									surface->DrawString(surface, amount, -1,rectangle_x+125, y, DSTF_TOPLEFT);
 									y += height + 1;
 
-									surface->DrawString(surface, "InitiatedTime ", -1, rectangle_x, y, DSTF_TOPLEFT);
-									surface->DrawString(surface,initiatedTime, -1, rectangle_x+135, y, DSTF_TOPLEFT);
+									surface->DrawString(surface, "Time ", -1, rectangle_x, y, DSTF_TOPLEFT);
+									surface->DrawString(surface,dates, -1, rectangle_x+125, y, DSTF_TOPLEFT);
 									y += height + 1;
 
-									surface->DrawString(surface, "details ", -1, rectangle_x, y, DSTF_TOPLEFT);
-									surface->DrawString(surface,details, -1, rectangle_x+135, y, DSTF_TOPLEFT);
+									surface->DrawString(surface, "Details ", -1, rectangle_x, y, DSTF_TOPLEFT);
+									surface->DrawString(surface,details, -1, rectangle_x+125, y, DSTF_TOPLEFT);
 									y += height + 1;
 
 				  }
 
 		}
 		if(strcmp(type_of_receipt, "Roll Up Transfer")==0){
+			char * transId;
 
+
+			char * debitPartyName;
+			char * creditPartyName;
+			char * debitAccountBalance;
+			char * creditAccountCurrentBalance ;
+			char * finalizedTime;
+			char * transactionStatus;
 			surface->SetFont(surface, font_24);
 			font_24->GetHeight(font_24, &height);
 
-			char * transId = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(transaction , "transId")));
-			char * debitPartyName = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(transaction , "debitPartyName")));
-			char * creditPartyName = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(transaction , "creditPartyName")));
-			char * debitAccountBalance = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(transaction , "debitAccountBalance")));
-			char * creditAccountCurrentBalance = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(transaction , "creditAccountCurrentBalance")));
-			char * finalizedTime = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(transaction , "finalizedTime")));
-			char * transactionStatus = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(transaction , "transactionStatus")));
+			 transId = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(transaction , "transId")));
+			 debitPartyName = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(transaction , "debitPartyName")));
+			 creditPartyName = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(transaction , "creditPartyName")));
+			 debitAccountBalance = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(transaction , "debitAccountBalance")));
+			 creditAccountCurrentBalance = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(transaction , "creditAccountCurrentBalance")));
+			 finalizedTime = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(transaction , "finalizedTime")));
+			 transactionStatus = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(transaction , "transactionStatus")));
+
+			 strcpy(dates,get_date_from_string(finalizedTime));
+			// printf("XXXXXXXXXXXXXXXXXXXXXXX : %s\n", dates);
+
 			//char * details = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(balance_array , "Details")));
 			surface->DrawString(surface,"--------------------------------------------------------", -1, rectangle_x, y, DSTF_TOPLEFT);
 															y += height + 1;
@@ -573,9 +591,8 @@ int print_receipt(char * type_of_receipt , cJSON * transaction ,   int * printfl
 				y += height + 1;
 
 				surface->DrawString(surface, "finalizedTime ", -1, rectangle_x, y, DSTF_TOPLEFT);
-				surface->DrawString(surface,finalizedTime, -1, rectangle_x+170, y, DSTF_TOPLEFT);
+				surface->DrawString(surface,dates, -1, rectangle_x+170, y, DSTF_TOPLEFT);
 				y += height + 1;
-
 
 
 
@@ -587,16 +604,20 @@ int print_receipt(char * type_of_receipt , cJSON * transaction ,   int * printfl
 		surface->DrawString(surface, "-----------------------------------", -1,x, y, DSTF_TOPCENTER);
 		font_32->GetHeight(font_32, &height);
 		y += height -8;
-		printf("tunaanza kitu 2\n");
+
 
 		{
+
+			char  tmp_str[100];
 			surface->SetFont(surface, font_24);
 			surface->DrawString(surface,"Thank you for shopping with us "  , -1, x, y, DSTF_TOPCENTER);
 			font_24->GetHeight(font_24, &height);
 			y += height + 1;
+			sprintf (tmp_str , "Served by : %s" , myLoginPosUser->username  );
 
 
-			surface->DrawString(surface,"Powered by  Safaricom Ltd", -1, x, y, DSTF_TOPCENTER);
+
+			surface->DrawString(surface,tmp_str, -1, x, y, DSTF_TOPCENTER);
 			y += height + 1;
 
 
@@ -611,27 +632,12 @@ int print_receipt(char * type_of_receipt , cJSON * transaction ,   int * printfl
 
 
 
-		printf("tunaanza kitu 3\n");
 
-		/*
-		surface->SetFont(surface, font_32);
-		surface->DrawString(surface, "-----------------------------------", -1,x, y, DSTF_TOPCENTER);
-		font_32->GetHeight(font_32, &height);
-		y += height -8;
-
-		surface->SetFont(surface, font_24);
-		font_24->GetHeight(font_24, &height);
-		surface->DrawString(surface, "POWERED BY COMPULYNX", -1, x, y,DSTF_TOPCENTER);
-		y += height+1;
-		surface->DrawString(surface, "_________________________________", -1, x,y, DSTF_TOPCENTER);
-		 */
-
-		//strcpy(recptnum, "");
 
 
 
 	}
-	printf("tunaanza kitu sasa nje\n");
+
 	if (0 == retval) {
 
 		lcd_printf(ALG_LEFT, "Printing ....");
