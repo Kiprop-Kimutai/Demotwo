@@ -423,11 +423,16 @@ int roll_up_transfer(){
 		case 1:
 			strcpy(transoperation , merchant_operations->WFP_ROLL_UP);
 			break;
+		case -1:
+			return 0;
 
 		}
 		ret = kb_getStringtwo(NUM_IN ,NUM_IN ,  1, 20, crdacc,holder, NULL, "Merchant Account ID", "","Roll up Transfer", 0);
-
+		if(ret==-1)
+			return 0;
 		ret = kb_getStringtwo(NUM_IN ,NUM_IN ,  1, 20, ammount,holder, NULL, "Amount", "","Roll up Transfer", 0);
+		if(ret==-1)
+			return 0;
 		get_date_and_receipt (1,  &transactionDate ,&date,  &transactionID);
 		strcpy(txnDate ,transactionDate);
 		strcpy(transID ,transactionID);

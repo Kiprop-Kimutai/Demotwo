@@ -1369,7 +1369,9 @@ int message_display_getdate( char * day , char * month){
 		 }
 
 		 lcd_printf(ALG_LEFT ,"");
-		 lcd_printf(ALG_CENTER ,"_____________________________________");
+		 lcd_set_font_color(COLOR_RED);
+
+		 lcd_printf(ALG_CENTER ,"____________________________________________");
 		 y = get_y_position();
 		 defined_x = 150;
 

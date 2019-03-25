@@ -549,8 +549,8 @@ int print_receipt(char * type_of_receipt , cJSON * transaction ,   int * printfl
 		}
 		if(strcmp(type_of_receipt, "Roll Up Transfer")==0){
 			char * transId;
-
-
+			char ammount[10];
+			 int amount;
 			char * debitPartyName;
 			char * creditPartyName;
 			char * debitAccountBalance;
@@ -567,18 +567,17 @@ int print_receipt(char * type_of_receipt , cJSON * transaction ,   int * printfl
 			 creditAccountCurrentBalance = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(transaction , "creditAccountCurrentBalance")));
 			 finalizedTime = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(transaction , "finalizedTime")));
 			 transactionStatus = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(transaction , "transactionStatus")));
-
+			 amount = cJSON_GetObjectItem(transaction, "ammount")->valueint;
+			 // convert ammount to string [buf]
+			 sprintf(ammount, "%d", amount);
 			 strcpy(dates,get_date_from_string(finalizedTime));
-			// printf("XXXXXXXXXXXXXXXXXXXXXXX : %s\n", dates);
-
-			//char * details = get_string_from_jason_object(cJSON_Print(cJSON_GetObjectItem(balance_array , "Details")));
-			surface->DrawString(surface,"--------------------------------------------------------", -1, rectangle_x, y, DSTF_TOPLEFT);
+			 surface->DrawString(surface,"--------------------------------------------------------", -1, rectangle_x, y, DSTF_TOPLEFT);
 															y += height + 1;
-				surface->DrawString(surface,"transId: ", -1, rectangle_x, y, DSTF_TOPLEFT);
+				surface->DrawString(surface,"transId:", -1, rectangle_x, y, DSTF_TOPLEFT);
 				surface->DrawString(surface, transId, -1,rectangle_x+170, y, DSTF_TOPLEFT);
 				y += height + 1;
 
-				surface->DrawString(surface, "dbtPartyName ", -1, rectangle_x, y, DSTF_TOPLEFT);
+				surface->DrawString(surface, "dbtPartyName", -1, rectangle_x, y, DSTF_TOPLEFT);
 				surface->DrawString(surface,debitPartyName, -1, rectangle_x+170, y, DSTF_TOPLEFT);
 				y += height + 1;
 
@@ -586,15 +585,17 @@ int print_receipt(char * type_of_receipt , cJSON * transaction ,   int * printfl
 				surface->DrawString(surface,debitAccountBalance, -1, rectangle_x+170, y, DSTF_TOPLEFT);
 				y += height + 1;
 
-				surface->DrawString(surface,"crdAccBal: ", -1, rectangle_x, y, DSTF_TOPLEFT);
+				surface->DrawString(surface,"crdAccBal:", -1, rectangle_x, y, DSTF_TOPLEFT);
 				surface->DrawString(surface, creditAccountCurrentBalance, -1,rectangle_x+170, y, DSTF_TOPLEFT);
 				y += height + 1;
 
-				surface->DrawString(surface, "finalizedTime ", -1, rectangle_x, y, DSTF_TOPLEFT);
+				surface->DrawString(surface, "finalizedTime", -1, rectangle_x, y, DSTF_TOPLEFT);
 				surface->DrawString(surface,dates, -1, rectangle_x+170, y, DSTF_TOPLEFT);
 				y += height + 1;
 
-
+				surface->DrawString(surface, "ammount", -1, rectangle_x, y, DSTF_TOPLEFT);
+				surface->DrawString(surface,ammount, -1, rectangle_x+170, y, DSTF_TOPLEFT);
+				y += height + 1;
 
 		}
 
